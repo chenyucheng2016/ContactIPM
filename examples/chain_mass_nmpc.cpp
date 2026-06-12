@@ -18,10 +18,12 @@
 
 #include <cstdio>
 #include <cmath>
+#include <chrono>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 #include "nmpc/nmpc_solver_paper.hpp"
+#include "trajectory_dump.hpp"
 
 using namespace nmpc;
 
@@ -231,13 +233,17 @@ int main() {
 
     NMPCSolverPaper<NX, NU, NC, N> solver;
     PaperIPMParams pp;
-    pp.mu_init  = 10.0;  pp.mu_min = 1e-3;
+    pp.mu_init  = 10.0;
     pp.max_iters = 200;  pp.tol_primal=1e-3; pp.tol_compl=1e-2; pp.tol_ineq=1e-2;
     pp.kappa_eps = 5.0;  pp.max_same_mu = 15;
     pp.verbosity = 2;
     solver.configure(pp);
 
+    auto t_start = std::chrono::high_resolution_clock::now();
     Status st = solver.solve(prob);
+    auto t_end = std::chrono::high_resolution_clock::now();
+    double solve_ms = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+
     const auto& s = solver.last_stats();
 
     printf("\n=== SOLVE COMPLETE ===\n");
@@ -252,10 +258,16 @@ int main() {
     printf("Penalty weight: %.1f\n", s.penalty_weight);
     printf("Regularization: %.3e\n", s.regularization);
     printf("Cost: %.4f\n", s.cost);
+    printf("Solve time: %.3f ms\n", solve_ms);
     printf("First u* = [");
     for (int i = 0; i < NU; ++i)
         printf("%.3f%s", prob.stages[0].u[i], (i<NU-1)?", ":"");
     printf("]\n");
+
+    // Dump trajectory
+    print_trajectory_table(prob);
+    dump_trajectory_json(prob, "benchmarks/data/contactipm_chain_mass.json",
+                         "chain_mass", s.inner_iterations, s.cost, DT);
 
     return 0;
 }

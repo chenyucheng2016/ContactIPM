@@ -34,3 +34,14 @@ Makefile
 # OS files
 .DS_Store
 Thumbs.db
+
+# Benchmark generated files
+benchmarks/.venv/
+benchmarks/c_generated_code/
+benchmarks/__pycache__/
+benchmarks/data/
+benchmarks/figures/
+
+# Generated acados code at root level
+c_generated_code/
+*_ocp.json

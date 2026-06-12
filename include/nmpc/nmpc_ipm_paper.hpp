@@ -34,7 +34,7 @@ namespace nmpc {
 struct PaperIPMParams {
     // Barrier
     double mu_init       = 1.0;
-    double mu_min        = 1e-5;    // barrier parameter floor
+    double mu_min        = 5e-4;    // barrier parameter floor
 
     // Mehrotra predictor-corrector
     double centering     = 0.1;     // minimum σ ∈ (0,1)
@@ -44,6 +44,7 @@ struct PaperIPMParams {
     double tol_primal    = 1e-6;    // primal infeasibility tolerance
     double tol_compl     = 1e-6;    // complementarity tolerance (|s·λ − μ|)
     double tol_ineq      = 1e-8;    // inequality tolerance (allow small negative s/λ)
+    double tol_stat      = 0.5;     // stationarity tolerance (‖∇L‖∞ including costates)
 
     // Fraction-to-boundary
     double tau           = 0.999;    // tighter: 0.99 (was 0.995)
@@ -138,6 +139,14 @@ public:
     Status init(const PaperIPMParams& params = PaperIPMParams{}) {
         params_ = params;
         mu_     = params_.mu_init;
+
+        // Auto-derive stationarity tolerance from mu_min if not set
+        if (params_.tol_stat < 0.0) {
+            params_.tol_stat = 100.0 * params_.mu_min;
+            if (params_.verbosity >= 1)
+                printf("  [auto] tol_stat = %.1e  (100 * mu_min)\n", params_.tol_stat);
+        }
+
         return Status::SUCCESS;
     }
 
@@ -152,6 +161,7 @@ public:
         evaluate_model();          // ensure first KKT uses fresh data
         mu_ = params_.mu_init;
         cond_estimate_ = 1.0;
+        has_costates_ = false;
 
         // Initialize barrier strategy
         {
@@ -191,6 +201,7 @@ public:
         double alpha_p = 1.0, alpha_d = 1.0;
         int    ls_iters = 1;
         bool   accepted = false;
+        bool   ls_failed = false;  // line search failure flag
 
         for (iter = 0; iter < params_.max_iters; ++iter) {
 
@@ -210,10 +221,12 @@ public:
                 bool primal_ok  = (primal_inf_ <= params_.tol_primal);
                 bool compl_ok   = (compl_inf_  <= params_.tol_compl);
                 bool ineq_ok    = (ineq_viol_  >= -params_.tol_ineq);
-                printf("  [conv: primal_ok=%d(%.2e<=%.2e) compl_ok=%d(%.2e<=%.2e) ineq_ok=%d(%.2e>=-%.2e)]\n",
+                bool stat_ok    = (stat_inf_   <= params_.tol_stat);
+                printf("  [conv: primal_ok=%d(%.2e<=%.2e) compl_ok=%d(%.2e<=%.2e) ineq_ok=%d(%.2e>=-%.2e) stat_ok=%d(%.2e<=%.2e)]\n",
                        primal_ok, primal_inf_, params_.tol_primal,
                        compl_ok, compl_inf_, params_.tol_compl,
-                       ineq_ok, ineq_viol_, params_.tol_ineq);
+                       ineq_ok, ineq_viol_, params_.tol_ineq,
+                       stat_ok, stat_inf_, params_.tol_stat);
             }
 
             // 4. ── PREDICTOR: build LHS once, factorize ────────────
@@ -244,20 +257,15 @@ public:
                        min_pivot, max_pivot, worst_k, min_pN, flag);
             }
 
-            // ── Predictor RHS: affine (σ=0, no centering) ────────
-            // DISABLED: plain primal-dual, no Mehrotra predictor
-            // build_kkt_rhs(false);
-            // st = solve_kkt_rhs_and_forward();
-            // if (st != Status::SUCCESS) return st;
-            // save_predictor_step();
-            // sigma_ = compute_centering();
-            sigma_ = 0.1;  // fixed centering → monotone mu decrease
+            // ── Adaptive centering: σ based on convergence quality ────
+            sigma_ = compute_adaptive_sigma();
 
             // 5. ── CORRECTOR: reuse LHS, update RHS only ──────────
             build_kkt_rhs(true);
             st = solve_kkt_rhs_and_forward();
             if (st != Status::SUCCESS) return st;
             recover_inequality_steps(sigma_);
+            has_costates_ = true;  // costates now valid for stationarity check
 
             // ── Check linearized constraint residual BEFORE step ────────
             if (params_.verbosity >= 2 && iter <= 2) {
@@ -546,6 +554,7 @@ public:
                 if (params_.verbosity >= 1)
                     printf("  [LS fail: a=%.3e alam=%.2e ls=%d] step too tiny\n",
                            alpha, alpha_lambda_, ls_result.ls_iters);
+                ls_failed = true;
                 break;
             }
 
@@ -559,7 +568,7 @@ public:
             // Barrier update: reduce μ if subproblem solved, else hold
             {
                 double E_mu = std::max(primal_inf_, compl_inf_);
-                bool mu_changed = barrier_strategy_.update(mu_, primal_inf_, compl_inf_, sigma_);
+                bool mu_changed = barrier_strategy_.update(mu_, primal_inf_, compl_inf_, sigma_, stat_inf_);
                 if (params_.verbosity >= 1) {
                     printf("  [barrier: E_mu=%.2e k*mu=%.2e %s mu=%.2e]\n",
                            E_mu, barrier_strategy_.kappa_eps() * mu_,
@@ -600,20 +609,56 @@ public:
                                      : linear_kkt_res_.is_poor() ? 3
                                      : 2;
 
-        Status final_status = (iter < params_.max_iters) ? Status::SUCCESS : Status::MAX_ITERATIONS;
+        Status final_status;
+        if (iter < params_.max_iters && !ls_failed) {
+            final_status = Status::SUCCESS;
+        } else if (ls_failed) {
+            final_status = Status::LINE_SEARCH_FAILURE;
+        } else {
+            final_status = Status::MAX_ITERATIONS;
+        }
 
         if (params_.verbosity >= 1) {
             printf("\n=== SOLVE COMPLETE ===\n");
             printf("Status:          %s\n", status_string(final_status));
             printf("Iterations:      %d\n", iter);
             printf("Final mu:        %.3e\n", mu_);
-            printf("Primal inf:      %.3e  (tol=%.1e)\n", primal_inf_, params_.tol_primal);
-            printf("Dual inf:        %.3e\n", stat_inf_);
-            printf("Complementarity: %.3e  (tol=%.1e)\n", compl_inf_, params_.tol_compl);
-            printf("Ineq viol:       %.3e  (tol=%.1e)\n", ineq_viol_, params_.tol_ineq);
+            printf("Primal inf:      %.3e  (tol=%.1e)  %s\n", primal_inf_, params_.tol_primal,
+                   primal_inf_ <= params_.tol_primal ? "OK" : "FAIL");
+            printf("Stationarity:    %.3e  (tol=%.1e)  %s\n", stat_inf_, params_.tol_stat,
+                   stat_inf_ <= params_.tol_stat ? "OK" : "FAIL");
+            printf("Complementarity: %.3e  (tol=%.1e)  %s\n", compl_inf_, params_.tol_compl,
+                   compl_inf_ <= params_.tol_compl ? "OK" : "FAIL");
+            printf("Ineq viol:       %.3e  (tol=%.1e)  %s\n", ineq_viol_, params_.tol_ineq,
+                   ineq_viol_ >= -params_.tol_ineq ? "OK" : "FAIL");
             printf("SOC steps:       %d\n", out_stats.soc_steps);
             printf("Regularization:  %.1e\n", reg_used_);
             printf("Cost:            %.4f\n", compute_objective());
+
+            // Convergence diagnosis
+            bool p_ok = primal_inf_ <= params_.tol_primal;
+            bool s_ok = stat_inf_   <= params_.tol_stat;
+            bool c_ok = compl_inf_  <= params_.tol_compl;
+            bool i_ok = ineq_viol_  >= -params_.tol_ineq;
+            if (!(p_ok && s_ok && c_ok && i_ok)) {
+                printf("\n── Convergence Diagnosis --\n");
+                if (!s_ok) {
+                    printf("  * STATIONARITY not satisfied: ||nabla L||_inf=%.3e >> tol=%.1e  (worst node k=%d)\n",
+                                  stat_inf_, params_.tol_stat, stat_worst_node_);
+                    printf("    component breakdown at node %d:\n", stat_worst_node_);
+                    printf("      |grad_x|=%.2e  |grad_u|=%.2e  (cost gradient)\n",
+                           stat_breakdown_[0], stat_breakdown_[1]);
+                    printf("      |Cx^T·λ|=%.2e  |Cu^T·λ|=%.2e  (constraint dual)\n",
+                           stat_breakdown_[2], stat_breakdown_[3]);
+                    printf("      |costate_x|=%.2e  |costate_u|=%.2e  (dynamics costate)\n",
+                           stat_breakdown_[4], stat_breakdown_[5]);
+                }
+                if (!p_ok) printf("  * PRIMAL FEASIBILITY not satisfied: %.3e >> tol=%.1e\n",
+                                  primal_inf_, params_.tol_primal);
+                if (!c_ok) printf("  * COMPLEMENTARITY not satisfied: %.3e >> tol=%.1e\n",
+                                  compl_inf_, params_.tol_compl);
+                if (!i_ok) printf("  * INEQUALITY violated: %.3e\n", ineq_viol_);
+            }
 
             // ── Linear KKT solution quality ─────────────────────
             printf("\n── Linear KKT Solve Quality ──\n");
@@ -760,8 +805,12 @@ private:
         dyn_defect_ = 0.0;  // nonlinear dynamics defect only
         cons_viol_  = 0.0;  // constraint violation only
         stat_inf_   = 0.0;
+        stat_worst_node_ = -1;
         compl_inf_  = 0.0;
         ineq_viol_  = 0.0;  // most-negative s or λ (0 if all ≥ 0)
+
+        // Are Riccati costates available? (not on first iteration)
+        bool costates_valid = (riccati_ws_.p[N].norm_inf() > 0.0 || has_costates_);
 
         for (int k = 0; k <= N; ++k) {
             // ── 1. Primal feasibility ────────────────────────────
@@ -802,38 +851,79 @@ private:
                 if (s[k].lambda[j] < ineq_viol_)  ineq_viol_ = s[k].lambda[j];
             }
 
-            // ── 4. Stationarity: Lagrangian gradient ─────────────
-            // ∇_z L = ∇cost + C^T·λ  (dynamics dual ν is implicit in Riccati,
-            // verified by the fact that the Riccati solve satisfies the
-            // dynamics KKT exactly)
-            double stat_x = s[k].qx.norm_inf();
-            double stat_u = (k < N) ? s[k].qu.norm_inf() : 0.0;
-            if (prob_->constraints) {
-                // Add C^T·λ to cost gradient for full Lagrangian gradient
-                for (int j = 0; j < NC; ++j) {
-                    double lj = s[k].lambda[j];
-                    for (int i = 0; i < NX; ++i) {
-                        double contrib = s[k].Cx(j, i) * lj;
-                        // Recompute stationarity: ∇_x cost + Cx^T·λ
+            // ── 4. Stationarity: full Lagrangian gradient ─────────
+            // Full KKT stationarity:
+            //   ∇_x L = qx + Cx^T·λ + A^T·ν_{k+1} - ν_k = 0
+            //   ∇_u L = qu + Cu^T·λ + B^T·ν_{k+1}         = 0
+            // where ν_k = Riccati costate p[k].
+            //
+            // WITHOUT costate terms (old code), we only check
+            //   ∇cost + C^T·λ, which is NOT the full stationarity.
+            {
+                Vec<NX> lag_x = s[k].qx;
+                Vec<NU> lag_u;
+                if (k < N) lag_u = s[k].qu; else lag_u.zero();
+
+                // Track component magnitudes for diagnostics
+                double grad_x_inf = lag_x.norm_inf();
+                double grad_u_inf = lag_u.norm_inf();
+
+                // Add inequality constraint dual: C^T·λ
+                Vec<NX> ct_lam_x; ct_lam_x.zero();
+                Vec<NU> ct_lam_u; ct_lam_u.zero();
+                if (prob_->constraints) {
+                    for (int j = 0; j < NC; ++j) {
+                        double lj = s[k].lambda[j];
+                        for (int i = 0; i < NX; ++i)
+                            ct_lam_x[i] += s[k].Cx(j, i) * lj;
+                        if (k < N)
+                            for (int i = 0; i < NU; ++i)
+                                ct_lam_u[i] += s[k].Cu(j, i) * lj;
                     }
                 }
-                // Actually, s[k].qx is just ∇cost — we need ∇cost + C^T·λ.
-                // Compute stationarity as norm of (qx + Cx^T·λ).
-                stat_x = 0.0; stat_u = 0.0;
-                Vec<NX> lag_x; Vec<NU> lag_u;
-                lag_x = s[k].qx;
-                if (k < N) lag_u = s[k].qu; else lag_u.zero();
-                for (int j = 0; j < NC; ++j) {
-                    double lj = s[k].lambda[j];
-                    for (int i = 0; i < NX; ++i) lag_x[i] += s[k].Cx(j, i) * lj;
-                    if (k < N)
-                        for (int i = 0; i < NU; ++i) lag_u[i] += s[k].Cu(j, i) * lj;
+                double clam_x_inf = ct_lam_x.norm_inf();
+                double clam_u_inf = ct_lam_u.norm_inf();
+                for (int i = 0; i < NX; ++i) lag_x[i] += ct_lam_x[i];
+                for (int i = 0; i < NU; ++i) lag_u[i] += ct_lam_u[i];
+
+                // Add dynamics costate terms: A^T·ν_{k+1} - ν_k
+                Vec<NX> cos_x; cos_x.zero();
+                Vec<NU> cos_u; cos_u.zero();
+                if (costates_valid) {
+                    if (k < N) {
+                        // +A_k^T · p[k+1]
+                        for (int i = 0; i < NX; ++i)
+                            for (int m = 0; m < NX; ++m)
+                                cos_x[i] += s[k].A(m, i) * riccati_ws_.p[k+1][m];
+                        // +B_k^T · p[k+1]
+                        for (int i = 0; i < NU; ++i)
+                            for (int m = 0; m < NX; ++m)
+                                cos_u[i] += s[k].B(m, i) * riccati_ws_.p[k+1][m];
+                    }
+                    // -ν_k = -p[k]
+                    for (int i = 0; i < NX; ++i)
+                        cos_x[i] -= riccati_ws_.p[k][i];
                 }
-                stat_x = lag_x.norm_inf();
-                stat_u = lag_u.norm_inf();
+                double cos_x_inf = cos_x.norm_inf();
+                double cos_u_inf = cos_u.norm_inf();
+                for (int i = 0; i < NX; ++i) lag_x[i] += cos_x[i];
+                for (int i = 0; i < NU; ++i) lag_u[i] += cos_u[i];
+
+                double stat_x_full = lag_x.norm_inf();
+                double stat_u_full = lag_u.norm_inf();
+                double stat = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
+                if (stat > stat_inf_) {
+                    stat_inf_ = stat;
+                    // Save component breakdown for worst node
+                    stat_breakdown_[0] = grad_x_inf;  // |∇l_x|∞
+                    stat_breakdown_[1] = grad_u_inf;  // |∇l_u|∞
+                    stat_breakdown_[2] = clam_x_inf;  // |Cx^T·λ|∞
+                    stat_breakdown_[3] = clam_u_inf;  // |Cu^T·λ|∞
+                    stat_breakdown_[4] = cos_x_inf;   // |costate_x|∞
+                    stat_breakdown_[5] = cos_u_inf;   // |costate_u|∞
+                    stat_worst_node_ = k;
+                }
             }
-            double stat = (stat_x > stat_u) ? stat_x : stat_u;
-            if (stat > stat_inf_) stat_inf_ = stat;
         }
     }
 
@@ -841,7 +931,8 @@ private:
         bool primal_ok  = (primal_inf_ <= params_.tol_primal);
         bool compl_ok   = (compl_inf_  <= params_.tol_compl);
         bool ineq_ok    = (ineq_viol_  >= -params_.tol_ineq);
-        bool converged  = primal_ok && compl_ok && ineq_ok;
+        bool stat_ok    = (stat_inf_   <= params_.tol_stat);
+        bool converged  = primal_ok && compl_ok && ineq_ok && stat_ok;
         return converged;
     }
 
@@ -1212,11 +1303,8 @@ private:
                     double gj = s[k].d[j] + sj;  // constraint infeasibility: g+s = d+s
                     double centering = (sigma_ * mu_ + lj * gj) / sj;
 
-                    // Centering correction (Mehrotra): subtract Δs_aff·Δλ_aff/s
-                    if (corrector) {
-                        // DISABLED: no cross-term for plain primal-dual
-                        // centering -= ds_aff_[k][j] * dlambda_aff_[k][j] / sj;
-                    }
+                    // Mehrotra cross-term disabled (MPC off)
+                    // if (corrector) centering -= ds_aff*dlambda_aff/sj;
 
                     for (int i = 0; i < NX; ++i)
                         qx_work_[k][i] += s[k].Cx(j, i) * centering;
@@ -1317,6 +1405,36 @@ private:
     //  σ = (μ_aff / μ)^3, where μ_aff = (s+α·Δs_aff)^T·(λ+α·Δλ_aff)/NC
     // ═════════════════════════════════════════════════════════════════════
 
+    // ═════════════════════════════════════════════════════════════════
+    //  Adaptive centering: σ ∈ [σ_min, σ_max] based on convergence.
+    //  When primal_inf or stationarity is high → σ → σ_max (slow μ reduce)
+    //  When both are small                     → σ → σ_min (fast μ reduce)
+    // ═════════════════════════════════════════════════════════════════
+
+    double compute_adaptive_sigma() {
+        constexpr double sigma_min = 0.3;
+        constexpr double sigma_max = 0.8;
+
+        // Use the worst of primal infeasibility and stationarity
+        double worst = std::max(primal_inf_, stat_inf_);
+
+        // Map log10(worst) to [0, 1]:
+        //   worst = 1.0   → log10 = 0   → t = 0/4 = 0.0   (not converged)
+        //   worst = 1e-4  → log10 = -4  → t = 4/4 = 1.0   (well converged)
+        double log_worst = std::log10(std::max(worst, 1e-16));
+        double t = std::clamp(-log_worst / 4.0, 0.0, 1.0);
+
+        // progress=0 (bad convergence) → σ = σ_max
+        // progress=1 (good convergence) → σ = σ_min
+        double sigma = sigma_max - (sigma_max - sigma_min) * t;
+        return sigma;
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    //  Compute Mehrotra centering parameter σ
+    //  σ = (μ_aff / μ)^3, where μ_aff = (s+α·Δs_aff)^T·(λ+α·Δλ_aff)/NC
+    // ═════════════════════════════════════════════════════════════════
+
     double compute_centering() {
         // Compute affine complementarity after step
         double alpha_aff = fraction_to_boundary_affine();
@@ -1386,8 +1504,6 @@ private:
 
                 if (s[k].s[j] > 1e-14) {
                     dlambda_[k][j] = (sigma * mu_ - s[k].s[j] * s[k].lambda[j]
-                                      // DISABLED: no cross-term for plain primal-dual
-                                      // - ds_aff_[k][j] * dlambda_aff_[k][j]
                                       - s[k].lambda[j] * ds_[k][j]) / s[k].s[j];
                 } else {
                     dlambda_[k][j] = 0.0;
@@ -1686,14 +1802,17 @@ private:
 
         // ── Dump stats line (verbosity-gated) ────────────────────
         if (params_.verbosity >= 1) {
+            double cur_cost = compute_objective();
             printf("[iter %3d] mu=%.2e sig=%.3f | "
-                   "prim=%.2e(dyn=%.1e cons=%.1e) dual=%.2e compl=%.2e ineq=%.2e | "
+                   "prim=%.2e(dyn=%.1e cons=%.1e) stat=%.2e compl=%.2e ineq=%.2e | "
                    "ap=%.3f ad=%.3f | cond=%.1e | reg=%.1e | "
+                   "cost=%.4e | "
                    "linKKT=%.2e(%s)\n",
                    iter, mu_, sigma,
                    primal_inf_, dyn_defect_, cons_viol_, stat_inf_, compl_inf_, ineq_viol_,
                    alpha_p, alpha_d,
                    condH, reg_used_,
+                   cur_cost,
                    linear_kkt_res_.max_rel_res, linear_kkt_res_.quality_label());
             if (params_.verbosity >= 2) {
                 printf("  [diag] s=[%.2e,%.2e] lam=[%.2e,%.2e] "
@@ -2238,8 +2357,11 @@ private:
     double dyn_defect_      = 0.0;  // max |f(x,u) - x_{k+1}| (nonlinear dynamics defect)
     double cons_viol_       = 0.0;  // max |g(x,u) + s| (constraint violation)
     double stat_inf_        = 0.0;  // stationarity: ‖∇L(z,λ,ν)‖∞  (NOT dual feasibility!)
+    double stat_breakdown_[6] = {};  // [grad_x, grad_u, Cx^T·λ, Cu^T·λ, costate_x, costate_u]
+    int    stat_worst_node_  = -1;  // node k where stationarity is worst
     double compl_inf_       = 0.0;  // complementarity: |s_j·λ_j − μ|
     double ineq_viol_       = 0.0;  // inequality: most-negative s_j or λ_j (≥0 = OK)
+    bool   has_costates_    = false; // Riccati costates available (false until first solve)
 
     // Adaptive regularization: condition estimate from previous iteration
     double cond_estimate_   = 1.0;
