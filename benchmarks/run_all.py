@@ -16,11 +16,12 @@ BENCHMARKS = [
     ('Chain Mass', 'acados_chain_mass.py'),
 ]
 
-# ContactIPM results (from running the C++ examples — update after timing)
+# ContactIPM results (from running the C++ examples — min of 5 runs)
+# acados results from C API (benchmarks/c_generated_code/main_*.exe — min of 5 runs)
 CONTACTIPM_RESULTS = {
-    'Pendulum':   {'iters': '4',  'cost': '7.36', 'prim_inf': '6.76e-09', 'status': 'Success', 'time_ms': '0.57', 'u0': '15.112'},
-    'Quadrotor':  {'iters': '81', 'cost': '23.56', 'prim_inf': '1.96e-01', 'status': 'Success', 'time_ms': '0.59', 'u0': 'see C++'},
-    'Chain Mass': {'iters': '24', 'cost': '388.84', 'prim_inf': '9.99e-04', 'status': 'Success', 'time_ms': '4.28', 'u0': 'see C++'},
+    'Pendulum':   {'iters': '14', 'cost': '7.36',  'prim_inf': '5.61e-09', 'status': 'Success', 'time_ms': '3.0',  'u0': '15.111'},
+    'Quadrotor':  {'iters': '21', 'cost': '23.27', 'prim_inf': '1.22e-05', 'status': 'Success', 'time_ms': '4.1',  'u0': '[9.81, 0.37]'},
+    'Chain Mass': {'iters': '42', 'cost': '388.84','prim_inf': '2.35e-04', 'status': 'Success', 'time_ms': '5.8',  'u0': '[-5, -5, -5]'},
 }
 
 
@@ -35,7 +36,7 @@ def parse_output(output):
         elif line.startswith('Solve time:'):
             m = re.search(r'([\d.]+)', line.split(':')[1])
             if m: result['time_ms'] = m.group(1)
-        elif line.startswith('Cost:'):
+        elif line.startswith('Total:'):
             m = re.search(r'([\d.eE+\-]+)', line.split(':')[1])
             if m: result['cost'] = m.group(1)
         elif 'Max cons viol:' in line:
@@ -110,11 +111,10 @@ def print_table(acados_results):
 
     print("=" * 82)
     print("  Notes:")
-    print("  - ContactIPM: Mehrotra predictor-corrector IPM + Riccati KKT (single-pass)")
-    print("  - acados: SQP outer loop + HPIPM QP solver + ERK4 integrator")
+    print("  - ContactIPM: Mehrotra predictor-corrector IPM + Riccati KKT (C++, min of 5 runs)")
+    print("  - acados: SQP + HPIPM via C API (min of 5 runs, no Python overhead)")
     print("  - Both solvers use identical x0, cost weights, constraints, and tolerances")
-    print("  - Initial guess: x0 propagated (pendulum/chain), RK4 forward sim (quadrotor)")
-    print("  - Single-epoch solve (no averaging)")
+    print("  - Single-epoch solve (no closed-loop simulation)")
     print("=" * 82)
 
 

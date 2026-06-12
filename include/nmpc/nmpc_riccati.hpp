@@ -40,6 +40,10 @@ struct RiccatiWorkspace {
     Mat<NX, NU> BtP;             // B^T P
     Mat<NU, NX> K_times_S;       // K^T S (temporary for P update)
 
+    // Per-stage cached values (stored in backward_lhs, reused in backward_rhs/compute_pk)
+    Mat<NX, NU> BtP_stages[HORIZON];
+    Mat<NU, NX> Qux_plus_BtPA_stages[HORIZON];
+
     // Forward pass
     Vec<NX> dx[HORIZON + 1];     // state step
     Vec<NU> du[HORIZON];         // control step
@@ -109,6 +113,10 @@ struct RiccatiSolver {
                     ws.Qux_plus_BtPA(r, c) = s.Qux(r, c) + sumPA;
                 }
 
+            // Cache BtP and Qux_plus_BtPA for this stage
+            ws.BtP_stages[k] = ws.BtP;
+            ws.Qux_plus_BtPA_stages[k] = ws.Qux_plus_BtPA;
+
             // Regularize & factorize S
             double min_diag = 1e100;
             for (int i = 0; i < NU; ++i)
@@ -163,15 +171,8 @@ struct RiccatiSolver {
             const Vec<NX>& p_next = ws.p[k + 1];
             const SymMat<NX>& P_next = ws.P[k + 1];
 
-            // Recompute BtP = B_k^T · P_{k+1} at this stage
-            // (ws.BtP only holds the value from backward_lhs stage k=0)
-            for (int r = 0; r < NU; ++r)
-                for (int c = 0; c < NX; ++c) {
-                    double sum = 0.0;
-                    for (int m = 0; m < NX; ++m)
-                        sum += s.B(m, r) * P_next(m, c);
-                    ws.BtP(r, c) = sum;
-                }
+            // Load cached BtP = B_k^T · P_{k+1} from backward_lhs
+            ws.BtP = ws.BtP_stages[k];
 
             // d = S^{-1} * (qu + B^T p_{k+1} + B^T P_{k+1} c)
             // Use the factorization stored from backward_lhs
@@ -297,20 +298,12 @@ private:
         }
 
         // p_k = qx + A^T (p_{k+1} + P_{k+1} * c) - Qup^T * d
-        // Recompute Qup = Qux + B^T P_{k+1} A at this stage
-        // (ws.Qux_plus_BtPA only holds the value from backward_lhs stage k=0)
+        // Use cached Qup = Qux + B^T P_{k+1} A from backward_lhs
+        const auto& Qup = ws.Qux_plus_BtPA_stages[k];
         for (int i = 0; i < NX; ++i) {
             double sub = 0.0;
             for (int m = 0; m < NU; ++m) {
-                // Qup(m, i) = Qux(m, i) + B^T P_{k+1} A
-                double qup = s.Qux(m, i);
-                for (int a = 0; a < NX; ++a) {
-                    double btp = 0.0;
-                    for (int b = 0; b < NX; ++b)
-                        btp += s.B(b, m) * ws.P[k + 1](b, a);
-                    qup += btp * s.A(a, i);
-                }
-                sub += qup * ws.d[k][m];
+                sub += Qup(m, i) * ws.d[k][m];
             }
             pk[i] -= sub;
         }

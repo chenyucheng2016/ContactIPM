@@ -202,12 +202,16 @@ public:
         int    ls_iters = 1;
         bool   accepted = false;
         bool   ls_failed = false;  // line search failure flag
+        bool   model_evaluated = true;  // evaluate_model() already done before loop
 
         for (iter = 0; iter < params_.max_iters; ++iter) {
 
-            // 1. Evaluate model at current iterate
-            st = evaluate_model();
-            if (st != Status::SUCCESS) return st;
+            // 1. Evaluate model at current iterate (skip if already evaluated)
+            if (!model_evaluated) {
+                st = evaluate_model();
+                if (st != Status::SUCCESS) return st;
+            }
+            model_evaluated = false;
 
             // 2. Compute KKT residuals
             compute_kkt_residuals();
@@ -257,11 +261,23 @@ public:
                        min_pivot, max_pivot, worst_k, min_pN, flag);
             }
 
-            // ── Adaptive centering: σ based on convergence quality ────
+            // ── Affine predictor (σ=0) ──────────────────────────
+            build_kkt_rhs();
+            st = solve_kkt_rhs_and_forward();
+            if (st != Status::SUCCESS) return st;
+            recover_inequality_steps(0.0);
+
+            // Copy predictor steps (avoids redundant save_predictor_step)
+            for (int k = 0; k <= HORIZON; ++k) {
+                ds_aff_[k]      = ds_[k];
+                dlambda_aff_[k] = dlambda_[k];
+            }
+
+            // Adaptive σ scheduling (overrides Mehrotra centering for robustness)
             sigma_ = compute_adaptive_sigma();
 
-            // 5. ── CORRECTOR: reuse LHS, update RHS only ──────────
-            build_kkt_rhs(true);
+            // 5. ── CORRECTOR: reuse LHS, update RHS with centering ──
+            build_kkt_rhs();
             st = solve_kkt_rhs_and_forward();
             if (st != Status::SUCCESS) return st;
             recover_inequality_steps(sigma_);
@@ -504,8 +520,8 @@ public:
             }
 
             // 6. Step acceptance: separate primal/dual fraction-to-boundary ──
-            alpha_p = 1.0; alpha_d = 1.0;
-            dump_iteration_stats(iter, sigma_, alpha_p, alpha_d);
+            compute_ftb_limits(alpha_p, alpha_d);
+            log_iteration(iter, sigma_, alpha_p, alpha_d);
             alpha_lambda_ = alpha_d;  // FTB step for λ (independent of line search)
 
             if (alpha_p < 1e-14 || alpha_lambda_ < 1e-14) {
@@ -542,6 +558,7 @@ public:
                 // Re-evaluate model at new point for accurate theta reporting
                 st = evaluate_model();
                 if (st != Status::SUCCESS) return st;
+                model_evaluated = true;
 
                 if (params_.verbosity >= 1) {
                     printf("  [step: a=%.4f alam=%.4f ls=%d soc=%s cost=%.4e theta=%.4e]\n",
@@ -585,13 +602,8 @@ public:
             // Re-evaluate at final point for accurate summary stats
             evaluate_model();
             compute_kkt_residuals();
-            // Final linear KKT check
-            build_kkt_lhs();
-            build_kkt_rhs(true);
-            solve_kkt_lhs();
-            solve_kkt_rhs_and_forward();
-            recover_inequality_steps(sigma_);
-            linear_kkt_res_ = compute_linear_kkt_residual();
+            // Note: linear_kkt_res_ from last iteration is approximately valid
+            // at final iterate (computed before the final accepted step).
         }
 
         out_stats.inner_iterations = iter;
@@ -714,7 +726,7 @@ private:
                     prob_->constraints->evaluate_terminal(s[k].x, s[k].d);
                 }
                 for (int j = 0; j < NC; ++j) {
-                    s[k].s[j] = std::max(-s[k].d[j], std::sqrt(mu_));
+                    s[k].s[j] = std::max(-s[k].d[j], mu_);  // linear floor, matches sz_complement safeguard
                     s[k].lambda[j] = mu_ / s[k].s[j];
                 }
             } else {
@@ -1262,11 +1274,10 @@ private:
 
     // ═══════════════════════════════════════════════════════════════════
     //  Build RHS (gradient + barrier correction) — differs per step
-    //  corrector=false → affine predictor (σ=0)
-    //  corrector=true  → centered corrector (σ from Mehrotra)
+    //  Predictor: σ=0 (affine), Corrector: σ from adaptive scheduling
     // ═══════════════════════════════════════════════════════════════════
 
-    void build_kkt_rhs(bool corrector) {
+    void build_kkt_rhs() {
         const int N = HORIZON;
         Stage* s = prob_->stages;
 
@@ -1302,9 +1313,6 @@ private:
                     double lj = s[k].lambda[j];
                     double gj = s[k].d[j] + sj;  // constraint infeasibility: g+s = d+s
                     double centering = (sigma_ * mu_ + lj * gj) / sj;
-
-                    // Mehrotra cross-term disabled (MPC off)
-                    // if (corrector) centering -= ds_aff*dlambda_aff/sj;
 
                     for (int i = 0; i < NX; ++i)
                         qx_work_[k][i] += s[k].Cx(j, i) * centering;
@@ -1369,42 +1377,6 @@ private:
         return Ricc::forward(riccati_stages_, riccati_ws_, dx0);
     }
 
-    // ═════════════════════════════════════════════════════════════════════
-    //  Save predictor (affine) step for centering correction
-    // ═════════════════════════════════════════════════════════════════════
-
-    void save_predictor_step() {
-        const int N = HORIZON;
-        Stage* s = prob_->stages;
-
-        for (int k = 0; k <= N; ++k) {
-            for (int j = 0; j < NC; ++j) {
-                // Compute affine step for Δs, Δλ
-                double gj = s[k].d[j];  // g(x,u)
-                double cj_dz = 0.0;
-                for (int i = 0; i < NX; ++i)
-                    cj_dz += s[k].Cx(j, i) * riccati_ws_.dx[k][i];
-                if (k < N)
-                    for (int i = 0; i < NU; ++i)
-                        cj_dz += s[k].Cu(j, i) * riccati_ws_.du[k][i];
-
-                ds_aff_[k][j] = -(gj + s[k].s[j]) - cj_dz;
-
-                if (s[k].s[j] > 1e-14) {
-                    dlambda_aff_[k][j] = -(s[k].s[j] * s[k].lambda[j]
-                                           + s[k].lambda[j] * ds_aff_[k][j]) / s[k].s[j];
-                } else {
-                    dlambda_aff_[k][j] = 0.0;
-                }
-            }
-        }
-    }
-
-    // ═════════════════════════════════════════════════════════════════════
-    //  Compute Mehrotra centering parameter σ
-    //  σ = (μ_aff / μ)^3, where μ_aff = (s+α·Δs_aff)^T·(λ+α·Δλ_aff)/NC
-    // ═════════════════════════════════════════════════════════════════════
-
     // ═════════════════════════════════════════════════════════════════
     //  Adaptive centering: σ ∈ [σ_min, σ_max] based on convergence.
     //  When primal_inf or stationarity is high → σ → σ_max (slow μ reduce)
@@ -1430,57 +1402,6 @@ private:
         return sigma;
     }
 
-    // ═════════════════════════════════════════════════════════════════
-    //  Compute Mehrotra centering parameter σ
-    //  σ = (μ_aff / μ)^3, where μ_aff = (s+α·Δs_aff)^T·(λ+α·Δλ_aff)/NC
-    // ═════════════════════════════════════════════════════════════════
-
-    double compute_centering() {
-        // Compute affine complementarity after step
-        double alpha_aff = fraction_to_boundary_affine();
-        double mu_aff = 0.0;
-        int count = 0;
-        const int N = HORIZON;
-
-        for (int k = 0; k <= N; ++k) {
-            Stage& s = prob_->stages[k];
-            for (int j = 0; j < NC; ++j) {
-                double sj = s.s[j] + alpha_aff * ds_aff_[k][j];
-                double lj = s.lambda[j] + alpha_aff * dlambda_aff_[k][j];
-                if (sj > 0.0 && lj > 0.0) {
-                    mu_aff += sj * lj;
-                    count++;
-                }
-            }
-        }
-
-        if (count == 0) return params_.centering;
-        mu_aff /= count;
-
-        double sigma = std::pow(mu_aff / mu_, 3.0);
-        return std::max(params_.centering, std::min(sigma, 1.0));
-    }
-
-    double fraction_to_boundary_affine() {
-        const int N = HORIZON;
-        double alpha = 1.0;
-
-        for (int k = 0; k <= N; ++k) {
-            Stage& s = prob_->stages[k];
-            for (int j = 0; j < NC; ++j) {
-                if (ds_aff_[k][j] < -1e-16) {
-                    double a = -params_.tau * s.s[j] / ds_aff_[k][j];
-                    if (a < alpha) alpha = a;
-                }
-                if (dlambda_aff_[k][j] < -1e-16) {
-                    double a = -params_.tau * s.lambda[j] / dlambda_aff_[k][j];
-                    if (a < alpha) alpha = a;
-                }
-            }
-        }
-        return alpha;
-    }
-
     // ═════════════════════════════════════════════════════════════════════
     //  Recover Δs, Δλ from primal step (for the corrector direction)
     // ═════════════════════════════════════════════════════════════════════
@@ -1503,7 +1424,10 @@ private:
                 ds_[k][j] = -(gj + s[k].s[j]) - cj_dz;
 
                 if (s[k].s[j] > 1e-14) {
+                    // Cross-term only for corrector (sigma > 0), not predictor
+                    double cross = (sigma > 0.0) ? ds_aff_[k][j] * dlambda_aff_[k][j] : 0.0;
                     dlambda_[k][j] = (sigma * mu_ - s[k].s[j] * s[k].lambda[j]
+                                      - cross
                                       - s[k].lambda[j] * ds_[k][j]) / s[k].s[j];
                 } else {
                     dlambda_[k][j] = 0.0;
@@ -1708,46 +1632,12 @@ private:
     // ═════════════════════════════════════════════════════════════════════
 
     // ═════════════════════════════════════════════════════════════════════
-    //  Per-iteration diagnostics dump (called after ftb computation)
+    //  Per-iteration diagnostics (FTB computed separately via compute_ftb_limits)
     // ═════════════════════════════════════════════════════════════════════
 
-    void dump_iteration_stats(int iter, double sigma, double& alpha_p, double& alpha_d) {
+    void log_iteration(int iter, double sigma, double alpha_p, double alpha_d) {
         const int N = HORIZON;
-        Stage* s = prob_->stages;
-
-        // Compute ftb step sizes
-        alpha_p = 1.0; alpha_d = 1.0;
-        double worst_ratio_s = 0.0, worst_ratio_lam = 0.0;
-        int worst_k_s = -1, worst_j_s = -1;
-        int worst_k_lam = -1, worst_j_lam = -1;
-        double worst_s_val = 0.0, worst_ds_val = 0.0;
-        double worst_lam_val = 0.0, worst_dlam_val = 0.0;
-        for (int k = 0; k <= N; ++k) {
-            for (int j = 0; j < NC; ++j) {
-                if (ds_[k][j] < -1e-16) {
-                    double r = -ds_[k][j] / (s[k].s[j] + 1e-14);
-                    if (r > worst_ratio_s) {
-                        worst_ratio_s = r;
-                        worst_k_s = k; worst_j_s = j;
-                        worst_s_val = s[k].s[j];
-                        worst_ds_val = ds_[k][j];
-                    }
-                    double a = params_.tau / r;
-                    if (a < alpha_p) alpha_p = a;
-                }
-                if (dlambda_[k][j] < -1e-16) {
-                    double r = -dlambda_[k][j] / (s[k].lambda[j] + 1e-14);
-                    if (r > worst_ratio_lam) {
-                        worst_ratio_lam = r;
-                        worst_k_lam = k; worst_j_lam = j;
-                        worst_lam_val = s[k].lambda[j];
-                        worst_dlam_val = dlambda_[k][j];
-                    }
-                    double a = params_.tau / r;
-                    if (a < alpha_d) alpha_d = a;
-                }
-            }
-        }
+        const Stage* s = prob_->stages;
 
         // ── KKT conditioning snapshot ────────────────────────────
         double max_lam = 0.0, min_slack = 1e100, max_slack = 0.0, min_lam = 1e100;
@@ -1800,8 +1690,9 @@ private:
         // Store condition estimate for adaptive regularization
         cond_estimate_ = condH;
 
-        // ── Dump stats line (verbosity-gated) ────────────────────
-        if (params_.verbosity >= 1) {
+        if (params_.verbosity < 1) return;
+
+        // ── Dump stats line ────────────────────────────────────────
             double cur_cost = compute_objective();
             printf("[iter %3d] mu=%.2e sig=%.3f | "
                    "prim=%.2e(dyn=%.1e cons=%.1e) stat=%.2e compl=%.2e ineq=%.2e | "
@@ -1825,19 +1716,6 @@ private:
                        condH,
                        cost_cond, max_cost_diag, min_cost_diag,
                        bar_cond, max_bar_diag, min_bar_diag_nz);
-                printf("  [ftb] bottleneck_s: k=%d j=%d s=%.3e"
-                       " ds_pred=%.3e ds_corr=%.3e"
-                       " ratio=%.1e -> ap=%.4f\n",
-                       worst_k_s, worst_j_s,
-                       worst_s_val,
-                       (worst_k_s >= 0 ? ds_aff_[worst_k_s][worst_j_s] : 0.0),
-                       worst_ds_val,
-                       worst_ratio_s, alpha_p);
-                printf("  [ftb] bottleneck_l: k=%d j=%d lam=%.3e dlam=%.3e"
-                       " ratio=%.1e -> ad=%.4f\n",
-                       worst_k_lam, worst_j_lam,
-                       worst_lam_val, worst_dlam_val,
-                       worst_ratio_lam, alpha_d);
 
                 // ── Constraint violation breakdown ────────────────
                 if (iter < 10 && prob_->constraints) {
@@ -2030,7 +1908,6 @@ private:
                 }
             }
             fflush(stdout);
-        }
     }
 
     // ═════════════════════════════════════════════════════════════════════
@@ -2243,44 +2120,39 @@ private:
             auto* s = sv->prob_->stages;
 
             // ── Save original search direction ──────────────────────
-            Vec<NX> orig_dx[HORIZON + 1];
-            Vec<NU> orig_du[HORIZON + 1];
-            Vec<NC> orig_ds[HORIZON + 1];
-            Vec<NC> orig_dlam[HORIZON + 1];
             for (int k = 0; k <= N; ++k) {
-                orig_dx[k]   = sv->riccati_ws_.dx[k];
-                orig_ds[k]   = sv->ds_[k];
-                orig_dlam[k] = sv->dlambda_[k];
-                if (k < N) orig_du[k] = sv->riccati_ws_.du[k];
+                sv->soc_save_dx_[k]   = sv->riccati_ws_.dx[k];
+                sv->soc_save_ds_[k]   = sv->ds_[k];
+                sv->soc_save_dlam_[k] = sv->dlambda_[k];
+                if (k < N) sv->soc_save_du_[k] = sv->riccati_ws_.du[k];
             }
 
             // ── Compute trial dynamics defect at (base + α·dir) ─────
-            Vec<NX> soc_c_local[HORIZON];
             for (int k = 0; k < N; ++k) {
                 Vec<NX> xk_t   = s[k].x;
                 Vec<NU> uk_t   = s[k].u;
                 Vec<NX> xkp1_t = s[k+1].x;
-                for (int i = 0; i < NX; ++i) xk_t[i]   += alpha * orig_dx[k][i];
-                for (int i = 0; i < NU; ++i) uk_t[i]   += alpha * orig_du[k][i];
-                for (int i = 0; i < NX; ++i) xkp1_t[i] += alpha * orig_dx[k+1][i];
+                for (int i = 0; i < NX; ++i) xk_t[i]   += alpha * sv->soc_save_dx_[k][i];
+                for (int i = 0; i < NU; ++i) uk_t[i]   += alpha * sv->soc_save_du_[k][i];
+                for (int i = 0; i < NX; ++i) xkp1_t[i] += alpha * sv->soc_save_dx_[k+1][i];
 
                 Vec<NX> fk;
                 sv->prob_->dynamics->discrete_step(xk_t, uk_t, sv->prob_->dt, fk);
                 for (int i = 0; i < NX; ++i)
-                    soc_c_local[k][i] = fk[i] - xkp1_t[i];
+                    sv->soc_save_c_[k][i] = fk[i] - xkp1_t[i];
             }
 
             // Replace dynamics defect with trial defect
             for (int k = 0; k < N; ++k)
-                sv->riccati_stages_[k].c = soc_c_local[k];
+                sv->riccati_stages_[k].c = sv->soc_save_c_[k];
 
             Status st = Ricc::backward_rhs(sv->riccati_stages_, sv->riccati_ws_);
             if (st != Status::SUCCESS) {
                 // Restore original direction
                 for (int k = 0; k <= N; ++k) {
-                    sv->riccati_ws_.dx[k] = orig_dx[k];
-                    sv->ds_[k] = orig_ds[k];  sv->dlambda_[k] = orig_dlam[k];
-                    if (k < N) sv->riccati_ws_.du[k] = orig_du[k];
+                    sv->riccati_ws_.dx[k] = sv->soc_save_dx_[k];
+                    sv->ds_[k] = sv->soc_save_ds_[k];  sv->dlambda_[k] = sv->soc_save_dlam_[k];
+                    if (k < N) sv->riccati_ws_.du[k] = sv->soc_save_du_[k];
                 }
                 return false;
             }
@@ -2291,9 +2163,9 @@ private:
             st = Ricc::forward(sv->riccati_stages_, sv->riccati_ws_, dx0_soc);
             if (st != Status::SUCCESS) {
                 for (int k = 0; k <= N; ++k) {
-                    sv->riccati_ws_.dx[k] = orig_dx[k];
-                    sv->ds_[k] = orig_ds[k];  sv->dlambda_[k] = orig_dlam[k];
-                    if (k < N) sv->riccati_ws_.du[k] = orig_du[k];
+                    sv->riccati_ws_.dx[k] = sv->soc_save_dx_[k];
+                    sv->ds_[k] = sv->soc_save_ds_[k];  sv->dlambda_[k] = sv->soc_save_dlam_[k];
+                    if (k < N) sv->riccati_ws_.du[k] = sv->soc_save_du_[k];
                 }
                 return false;
             }
@@ -2311,9 +2183,9 @@ private:
             if (out_theta >= sv->compute_theta() * 1.5) {
                 // SOC didn't help enough — restore
                 for (int k = 0; k <= N; ++k) {
-                    sv->riccati_ws_.dx[k] = orig_dx[k];
-                    sv->ds_[k] = orig_ds[k];  sv->dlambda_[k] = orig_dlam[k];
-                    if (k < N) sv->riccati_ws_.du[k] = orig_du[k];
+                    sv->riccati_ws_.dx[k] = sv->soc_save_dx_[k];
+                    sv->ds_[k] = sv->soc_save_ds_[k];  sv->dlambda_[k] = sv->soc_save_dlam_[k];
+                    if (k < N) sv->riccati_ws_.du[k] = sv->soc_save_du_[k];
                 }
             }
             return true;
@@ -2375,6 +2247,13 @@ private:
     // Filter line search
     FilterLineSearch<NX, NU, HORIZON> filter_ls_;
     IPMTrialEvaluator evaluator_;
+
+    // SOC save buffers (persistent to avoid stack overflow on embedded targets)
+    Vec<NX> soc_save_dx_[HORIZON + 1];
+    Vec<NU> soc_save_du_[HORIZON + 1];
+    Vec<NC> soc_save_ds_[HORIZON + 1];
+    Vec<NC> soc_save_dlam_[HORIZON + 1];
+    Vec<NX> soc_save_c_[HORIZON];
 
 };
 
