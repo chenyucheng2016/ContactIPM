@@ -40,7 +40,6 @@ benchmarks/.venv/
 benchmarks/c_generated_code/
 benchmarks/__pycache__/
 benchmarks/data/
-benchmarks/figures/
 
 # Generated acados code at root level
 c_generated_code/

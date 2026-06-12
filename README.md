@@ -37,6 +37,12 @@ ContactIPM is a high-performance Nonlinear Model Predictive Control (NMPC) solve
 
 ContactIPM finds lower-cost solutions on all 3 benchmarks and is **6–8x faster** on the harder problems.
 
+### Trajectory Comparison
+
+**Chain Mass** — ContactIPM vs acados states, controls, and cost:
+
+![Chain Mass Comparison](benchmarks/figures/chain_mass_comparison.png)
+
 ### In Development
 
 - Mehrotra predictor-corrector (currently disabled; adaptive σ used instead)
