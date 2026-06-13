@@ -9,7 +9,8 @@ ContactIPM is a high-performance Nonlinear Model Predictive Control (NMPC) solve
 ### Key Features
 
 - **Primal-Dual IPM** — Single-loop solver with adaptive barrier parameter scheduling
-- **Adaptive Centering** — σ ∈ [0.3, 0.8] auto-tuned based on convergence quality (primal infeasibility & stationarity)
+- **Mehrotra Predictor-Corrector** — Adaptive centering via σ computed from complementarity products
+- **σ-Modulation Barrier Update** — Self-tuning μ reduction: σ^1.5 (easy), σ (normal), σ^0.5 (hard subproblems)
 - **Riccati Recursion** — Exploits the banded structure of the KKT system for O(N·(nx+nu)³) per iteration
 - **Filter Line Search** — Robust globalization strategy balancing objective decrease and feasibility
 - **Second-Order Correction (SOC)** — Mitigates the Maratos effect for fast local convergence
@@ -23,19 +24,19 @@ ContactIPM is a high-performance Nonlinear Model Predictive Control (NMPC) solve
 
 | Problem | Status | Iterations | Stationarity | Cost | Solve Time |
 |---------|--------|-----------|-------------|------|------------|
-| Pendulum (swing-up) | ✅ Success | 14 | 7.0e-4 | 7.36 | 1.8 ms |
-| Quadrotor (2D tracking) | ✅ Success | 21 | 6.8e-2 | 23.27 | 2.6 ms |
-| Chain Mass (nonlinear) | ✅ Success | 42 | 4.7e-1 | 388.84 | 7.0 ms |
+| Pendulum (swing-up) | ✅ Success | 11 | 7.0e-4 | 7.36 | 0.90 ms |
+| Quadrotor (2D tracking) | ✅ Success | 16 | 6.8e-2 | 23.27 | 1.33 ms |
+| Chain Mass (nonlinear) | ✅ Success | 29 | 4.7e-1 | 388.84 | 3.23 ms |
 
 ### Benchmark vs acados SQP+HPIPM
 
 | Problem | ContactIPM | acados | Speedup | Cost Diff |
 |---------|-----------|--------|---------|-----------|
-| Pendulum | 1.8 ms (14 iters) | 1.5 ms | 0.9x | **-2.66** (CIPM better) |
-| Quadrotor | 2.6 ms (21 iters) | 16.1 ms | **6.3x faster** | **-5.43** (CIPM better) |
-| Chain Mass | 7.0 ms (42 iters) | 58.3 ms | **8.4x faster** | **-20.57** (CIPM better) |
+| Pendulum | 0.90 ms (11 iters) | 1.01 ms (10 iters) | **1.1x faster** | **-2.68** (CIPM better) |
+| Quadrotor | 1.33 ms (16 iters) | 12.3 ms (75 iters) | **9.3x faster** | **-5.49** (CIPM better) |
+| Chain Mass | 3.23 ms (29 iters) | 40.5 ms (170 iters) | **12.5x faster** | **-20.57** (CIPM better) |
 
-ContactIPM finds lower-cost solutions on all 3 benchmarks and is **6–8x faster** on the harder problems.
+ContactIPM finds lower-cost solutions on all 3 benchmarks and is **1.1–12.5x faster** than acados.
 
 ### Trajectory Comparison
 
@@ -45,7 +46,6 @@ ContactIPM finds lower-cost solutions on all 3 benchmarks and is **6–8x faster
 
 ### In Development
 
-- Mehrotra predictor-corrector (currently disabled; adaptive σ used instead)
 - Contact dynamics modeling for quadruped robots
 - Hybrid system handling (stance/flight phase transitions)
 - Friction cone constraints
@@ -138,24 +138,38 @@ Key parameters in `nmpc::PaperIPMParams`:
 | `tol_compl` | 1e-6 | Complementarity tolerance |
 | `tol_stat` | 0.5 | Stationarity tolerance (‖∇L‖∞ including costates) |
 | `kappa_eps` | 10.0 | Barrier solved threshold: E_μ ≤ κ·μ |
+| `sigma_exp_easy` | 1.5 | σ exponent for easy subproblems (≤2 iters) |
+| `sigma_exp_normal` | 1.0 | σ exponent for normal subproblems (3 iters) |
+| `sigma_exp_hard` | 0.5 | σ exponent for hard subproblems (≥4 iters) |
+| `fast_threshold` | 2 | Iteration threshold for "easy" classification |
+| `slow_threshold` | 4 | Iteration threshold for "hard" classification |
 | `max_same_mu` | 30 | Force μ reduction after N iterations |
 | `tau` | 0.999 | Fraction-to-boundary parameter |
 | `max_iters` | 100 | Maximum Newton iterations |
 | `verbosity` | 1 | Log level (0=silent, 1=summary, 2=per-iter, 3=debug) |
 
-### Adaptive Centering (σ)
+### Adaptive Centering (Mehrotra Predictor-Corrector)
 
-The solver uses an adaptive centering parameter instead of fixed σ or Mehrotra predictor-corrector:
+The solver uses the Mehrotra predictor-corrector approach to compute the centering parameter σ:
+
+1. **Affine predictor**: Solve KKT with σ=0 to get affine step (Δx_aff, Δs_aff, Δλ_aff)
+2. **Compute adaptive σ**: σ = (μ_aff/μ)^ω where μ_aff is the complementarity after affine step
+3. **Corrector solve**: Solve KKT with σ>0 centering term and cross-term correction
+
+### σ-Modulation Barrier Update
+
+Instead of fixed κ parameters, μ reduction uses difficulty-aware exponents on σ:
 
 ```
-σ = σ_max − (σ_max − σ_min) · t
+μ_new = max(σ^exponent · μ, μ_min)
 
-where t = clamp(−log₁₀(max(primal_inf, stat_inf)) / 4, 0, 1)
-      σ_min = 0.3  (fast μ reduction when well converged)
-      σ_max = 0.8  (slow μ reduction when far from solution)
+where exponent =
+    1.5  if solved in ≤2 Newton iterations  (easy subproblem)
+    1.0  if solved in  3 iterations         (normal)
+    0.5  if solved in ≥4 iterations         (hard subproblem)
 ```
 
-This ensures μ is reduced slowly when stationarity or infeasibility is high, and aggressively when both are small.
+This is self-tuning: σ already encodes complementarity quality, so modulating its exponent preserves robustness while adapting speed.
 
 ## Architecture
 
@@ -164,10 +178,10 @@ ContactIPM/
 ├── include/nmpc/
 │   ├── nmpc_core.hpp              # Core types (Vec, Mat, Stage)
 │   ├── nmpc_problem.hpp           # Problem definition interface
-│   ├── nmpc_ipm_paper.hpp         # Main IPM solver (adaptive σ)
+│   ├── nmpc_ipm_paper.hpp         # Main IPM solver (Mehrotra + σ-modulation)
 │   ├── nmpc_riccati.hpp           # Riccati KKT solver
 │   ├── nmpc_filter_ls.hpp         # Filter line search
-│   ├── nmpc_barrier_manager.hpp   # Barrier update strategy + stationarity gate
+│   ├── nmpc_barrier_manager.hpp   # σ-modulation barrier update strategy
 │   ├── nmpc_hessian_approx.hpp    # Gauss-Newton Hessian approximation
 │   └── nmpc_kkt_diag.hpp          # KKT residual diagnostics
 ├── examples/
@@ -176,22 +190,21 @@ ContactIPM/
 │   ├── chain_mass_nmpc.cpp        # Chain mass benchmark
 │   └── trajectory_dump.hpp        # JSON trajectory export utility
 ├── benchmarks/
-│   ├── acados_pendulum.py         # acados baseline: pendulum
-│   ├── acados_quadrotor.py        # acados baseline: quadrotor
-│   ├── acados_chain_mass.py       # acados baseline: chain mass
-│   ├── compare_trajectories.py    # Trajectory comparison & plotting
-│   ├── run_all.py                 # Master benchmark runner
-│   └── trajectory_dump.py         # acados trajectory JSON export
-└── tests/                         # Unit tests (7 tests)
+│   ├── run_all.py                 # Master benchmark runner (C++ executables)
+│   ├── acados_pendulum.c          # acados baseline: pendulum (C API)
+│   ├── acados_quadrotor_2d.c      # acados baseline: quadrotor (C API)
+│   └── acados_chain_mass.c        # acados baseline: chain mass (C API)
+└── tests/                         # Unit tests
 ```
 
 ## Algorithm Overview
 
 1. **Newton direction**: Solve linearized KKT via Riccati recursion (block elimination of slacks/duals → reduced banded system → backward Riccati sweep + forward substitution)
-2. **Adaptive centering**: Compute σ from convergence quality to set barrier centering term σ·μ
-3. **Filter line search**: Accept/reject steps via IPOPT-style filter (tradeoff between objective decrease and constraint violation)
-4. **SOC**: Second-order correction to overcome the Maratos effect near active constraints
-5. **Barrier update**: Reduce μ when E_μ = max(primal, compl) ≤ κ·μ AND stationarity is reasonable (stationarity gate)
+2. **Mehrotra predictor-corrector**: Compute σ from complementarity products to set barrier centering term σ·μ
+3. **σ-modulation barrier update**: Reduce μ via σ^exponent, where exponent adapts to subproblem difficulty (1.5 for easy, 1.0 for normal, 0.5 for hard)
+4. **Filter line search**: Accept/reject steps via IPOPT-style filter (tradeoff between objective decrease and constraint violation)
+5. **SOC**: Second-order correction to overcome the Maratos effect near active constraints
+6. **Barrier update**: Reduce μ when E_μ = max(primal, compl) ≤ κ·μ AND stationarity is reasonable (stationarity gate)
 
 ## References
 

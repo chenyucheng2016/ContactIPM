@@ -61,9 +61,13 @@ struct PaperIPMParams {
     double m_safe          = 0.5;    // enforce lambda_j * s_j >= m_safe * mu
 
 
-    // === Barrier Update ===
+    // === Barrier Update (σ-modulation) ===
     double kappa_eps       = 10.0;    // E_mu <= kappa_eps * mu → barrier solved
-    double kappa_mu        = 0.2;     // monotone reduction cap: mu_new >= kappa_mu * mu_old
+    double sigma_exp_easy   = 1.5;    // easy subproblems: σ^1.5 (more aggressive)
+    double sigma_exp_normal = 1.0;    // standard Mehrotra
+    double sigma_exp_hard   = 0.5;    // hard subproblems: σ^0.5 (conservative)
+    int    fast_threshold   = 2;      // ≤ this many iters → easy
+    int    slow_threshold   = 4;      // ≥ this many iters → hard
     int    max_same_mu     = 30;      // force mu reduction after this many iterations at same mu
 
     // Output
@@ -169,7 +173,11 @@ public:
             bup.mu_init     = params_.mu_init;
             bup.mu_min      = params_.mu_min;
             bup.kappa_eps   = params_.kappa_eps;
-            bup.kappa_mu    = params_.kappa_mu;
+            bup.sigma_exp_easy   = params_.sigma_exp_easy;
+            bup.sigma_exp_normal = params_.sigma_exp_normal;
+            bup.sigma_exp_hard   = params_.sigma_exp_hard;
+            bup.fast_threshold   = params_.fast_threshold;
+            bup.slow_threshold   = params_.slow_threshold;
             bup.max_same_mu = params_.max_same_mu;
             bup.m_safe      = params_.m_safe;
             bup.verbosity   = 0;  // solver loop handles logging
@@ -220,8 +228,7 @@ public:
             if (barrier_strategy_.at_minimum(mu_) && kkt_converged()) {
                 break;
             }
-
-            if (params_.verbosity >= 3 && barrier_strategy_.at_minimum(mu_)) {
+            if (barrier_strategy_.at_minimum(mu_) && params_.verbosity >= 3) {
                 bool primal_ok  = (primal_inf_ <= params_.tol_primal);
                 bool compl_ok   = (compl_inf_  <= params_.tol_compl);
                 bool ineq_ok    = (ineq_viol_  >= -params_.tol_ineq);

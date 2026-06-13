@@ -1,15 +1,19 @@
 #pragma once
 /**
  * @file    nmpc_barrier_manager.hpp
- * @brief   Barrier update strategy — decides when to reduce μ.
+ * @brief   σ-modulation adaptive barrier update strategy.
  *
- * Core logic:
- *   1. Compute barrier error:  E_μ = max(primal_inf, compl_inf)
- *   2. If E_μ ≤ κ·μ  →  barrier subproblem solved  →  reduce μ
- *   3. Otherwise       →  not solved yet             →  hold μ fixed
+ * Instead of fixed κ parameters, μ reduction uses the Mehrotra centering
+ * parameter σ with an exponent modulated by subproblem difficulty:
  *
- * μ reduction uses Mehrotra/LOQO adaptive centering:
- *     μ_new = max(σ·μ, κ_μ·μ, μ_min)
+ *   Easy  (≤ fast_threshold iters):  σ_eff = σ^1.5   — more aggressive
+ *   Normal (between thresholds):     σ_eff = σ        — standard Mehrotra
+ *   Hard  (≥ slow_threshold iters):  σ_eff = σ^0.5   — more conservative
+ *
+ * This is self-tuning: σ already encodes complementarity quality, so
+ * modulating its exponent preserves robustness while adapting speed.
+ *
+ * μ reduction:  μ_new = max(σ_eff · μ, μ_min)
  *
  * Dependencies: nmpc_core.hpp only.
  */
@@ -30,15 +34,23 @@ struct BarrierUpdateParams {
     double mu_min      = 1e-5;     // barrier parameter floor
 
     double kappa_eps   = 10.0;     // E_μ ≤ κ·μ → barrier solved
-    double kappa_mu    = 0.2;      // monotone reduction cap: μ_new ≥ κ_μ·μ
     int    max_same_mu = 30;       // force reduction after N iters at same μ
 
-    double m_safe      = 0.0;      // complementarity safeguard: s·λ ≥ m_safe·μ
+    // σ-modulation exponents (difficulty-aware)
+    double sigma_exp_easy   = 1.5;  // easy subproblems: σ^1.5 (more aggressive)
+    double sigma_exp_normal = 1.0;  // standard Mehrotra
+    double sigma_exp_hard   = 0.5;  // hard subproblems: σ^0.5 (conservative)
+
+    // Classification thresholds (iterations at current μ)
+    int fast_threshold = 2;   // ≤ this → easy
+    int slow_threshold = 4;   // ≥ this → hard
+
+    double m_safe      = 0.0;  // complementarity safeguard: s·λ ≥ m_safe·μ
     int    verbosity   = 0;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  BarrierUpdateStrategy
+//  BarrierUpdateStrategy  (σ-modulation)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class BarrierUpdateStrategy {
@@ -48,41 +60,40 @@ public:
     void reset(const BarrierUpdateParams& p) {
         p_ = p;
         iters_at_mu_ = 0;
+        last_sigma_exp_ = p.sigma_exp_normal;
     }
 
     // ═══════════════════════════════════════════════════════════════════
     //  Convergence gate: is the overall problem solved?
-    //  (barrier at minimum AND KKT converged — caller checks KKT)
     // ═══════════════════════════════════════════════════════════════════
 
     bool at_minimum(double mu) const {
         return mu <= p_.mu_min;
     }
 
+    double last_sigma_exp() const { return last_sigma_exp_; }
+
     // ═══════════════════════════════════════════════════════════════════
-    //  Core update — call once after each accepted step.
+    //  Core update — call once after each accepted Newton step.
     //
-    //  Judges if barrier subproblem is solved:
-    //    E_μ = max(primal, compl) ≤ κ·μ   AND   stat_inf ≤ stat_gate
-    //  If solved (or forced after max_same_mu iters): reduce μ.
-    //  If not: keep μ fixed.
-    //
-    //  Returns true if μ was changed (caller should reset filter).
+    //  1. Check if barrier subproblem is solved (E_μ ≤ κ·μ, stat OK)
+    //  2. If not solved: hold μ fixed (return false)
+    //  3. If solved or forced:
+    //     a. Choose σ exponent based on iters_at_mu_
+    //     b. Compute σ_eff = σ^exponent
+    //     c. μ_new = max(σ_eff · μ, μ_min)
+    //     d. Return true (caller should reset filter)
     // ═══════════════════════════════════════════════════════════════════
 
     bool update(double& mu, double primal_inf, double compl_inf, double sigma,
                 double stat_inf = -1.0) {
-        double old_mu = mu;
         iters_at_mu_++;
 
         double E_mu = std::max(primal_inf, compl_inf);
         bool primal_compl_ok = (E_mu <= p_.kappa_eps * mu);
 
         // Stationarity gate: only reduce μ when stationarity is reasonable
-        // Use a generous gate (100 * mu) to avoid blocking progress entirely,
-        // but prevent μ reduction when stationarity is clearly diverging.
-        // Skip gate if stat_inf < 0 (caller didn't provide stationarity).
-        double stat_gate = 100.0 * mu + 2.0;  // allows stat ≤ 2.0 + 100μ
+        double stat_gate = 100.0 * mu + 2.0;
         bool stat_ok = (stat_inf < 0.0) || (stat_inf <= stat_gate);
 
         bool solved = (primal_compl_ok && stat_ok);
@@ -97,16 +108,40 @@ public:
             return false;
         }
 
-        // Barrier solved (or forced) — reduce μ
-        double mu_adaptive = std::max(sigma * mu, p_.mu_min);
-        double mu_monotone = std::max(p_.kappa_mu * mu, p_.mu_min);
-        mu = std::max(mu_adaptive, mu_monotone);
-        iters_at_mu_ = 0;
+        // ── Choose σ exponent based on difficulty ─────────────────────
+        double sigma_exp;
+        const char* difficulty;
 
-        if (p_.verbosity >= 2)
-            printf("  [barrier: %s E_mu=%.2e, k*mu=%.2e, stat=%.2e, sig*mu=%.2e, kap*mu=%.2e -> mu=%.3e]\n",
+        if (solved && iters_at_mu_ <= p_.fast_threshold) {
+            sigma_exp = p_.sigma_exp_easy;
+            difficulty = "easy";
+        } else if (!solved || iters_at_mu_ >= p_.slow_threshold) {
+            sigma_exp = p_.sigma_exp_hard;
+            difficulty = "hard";
+        } else {
+            sigma_exp = p_.sigma_exp_normal;
+            difficulty = "norm";
+        }
+
+        last_sigma_exp_ = sigma_exp;
+
+        // ── σ-modulated μ reduction ───────────────────────────────────
+        // σ_eff = σ^exponent, bounded below to prevent extreme reduction
+        double sigma_clamped = std::max(sigma, 1e-4);
+        double sigma_eff = std::pow(sigma_clamped, sigma_exp);
+        double mu_new = std::max(sigma_eff * mu, p_.mu_min);
+
+        // ── Logging ───────────────────────────────────────────────────
+        if (p_.verbosity >= 2) {
+            printf("  [barrier: %s E_mu=%.2e k*mu=%.2e stat=%.2e "
+                   "iters=%d %s σ=%.3f→σ_eff=%.3f -> mu=%.3e]\n",
                    solved ? "SOLVED" : "FORCE", E_mu, p_.kappa_eps * mu,
-                   stat_inf, mu_adaptive, mu_monotone, mu);
+                   stat_inf, iters_at_mu_, difficulty,
+                   sigma, sigma_eff, mu_new);
+        }
+
+        mu = mu_new;
+        iters_at_mu_ = 0;
         return true;
     }
 
@@ -121,7 +156,8 @@ public:
 
 private:
     BarrierUpdateParams p_;
-    int iters_at_mu_ = 0;
+    int    iters_at_mu_ = 0;
+    double last_sigma_exp_ = 1.0;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -132,7 +168,11 @@ struct BarrierParams {
     double mu_init       = 1.0;
     double mu_min        = 1e-5;
     double kappa_eps     = 10.0;
-    double kappa_mu      = 0.2;
+    double sigma_exp_easy   = 1.5;
+    double sigma_exp_normal = 1.0;
+    double sigma_exp_hard   = 0.5;
+    int    fast_threshold   = 2;
+    int    slow_threshold   = 4;
     int    max_same_mu   = 30;
 };
 
@@ -153,9 +193,17 @@ public:
         bool force_reduce = (iters_at_mu_ >= params_.max_same_mu);
 
         if (barrier_solved || force_reduce) {
-            double mu_adaptive = std::max(sigma * mu_, params_.mu_min);
-            double mu_monotone = std::max(params_.kappa_mu * mu_, params_.mu_min);
-            mu_ = std::max(mu_adaptive, mu_monotone);
+            double sigma_exp;
+            if (barrier_solved && iters_at_mu_ <= params_.fast_threshold)
+                sigma_exp = params_.sigma_exp_easy;
+            else if (!barrier_solved || iters_at_mu_ >= params_.slow_threshold)
+                sigma_exp = params_.sigma_exp_hard;
+            else
+                sigma_exp = params_.sigma_exp_normal;
+
+            double sigma_clamped = std::max(sigma, 1e-4);
+            double sigma_eff = std::pow(sigma_clamped, sigma_exp);
+            mu_ = std::max(sigma_eff * mu_, params_.mu_min);
             iters_at_mu_ = 0;
         }
         return mu_;
