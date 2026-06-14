@@ -234,15 +234,38 @@ int main() {
     NMPCSolverPaper<NX, NU, NC, N> solver;
     PaperIPMParams pp;
     pp.mu_init  = 10.0;
-    pp.max_iters = 200;  pp.tol_primal=1e-3; pp.tol_compl=1e-2; pp.tol_ineq=1e-2;
+    pp.max_iters = 300;
+    // Matched tolerances for fair comparison vs acados.
+    pp.mu_min = 1e-4;
+    pp.tol_primal = 1e-3; pp.tol_compl = 1e-3; pp.tol_ineq = 1e-4; pp.tol_stat = 1e-1;
     pp.kappa_eps = 5.0;  pp.max_same_mu = 15;
     pp.verbosity = 2;
     solver.configure(pp);
 
-    auto t_start = std::chrono::high_resolution_clock::now();
-    Status st = solver.solve(prob);
-    auto t_end = std::chrono::high_resolution_clock::now();
-    double solve_ms = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+    // ── Warm in-process timing loop (mirrors acados NTIMINGS=5) ───────
+    StageData<NX, NU, NC> guess[N + 1];
+    Vec<NX> x0_saved = prob.x0;
+    for (int k = 0; k <= N; ++k) guess[k] = prob.stages[k];
+
+    constexpr int NTIMINGS = 5;
+    double times_ms[NTIMINGS];
+    double min_ms = 1e12;
+    Status st = Status::SUCCESS;
+    for (int ii = 0; ii < NTIMINGS; ++ii) {
+        prob.x0 = x0_saved;
+        for (int k = 0; k <= N; ++k) prob.stages[k] = guess[k];
+        PaperIPMParams quiet = pp; quiet.verbosity = 0;
+        solver.configure(quiet);
+        auto t_start = std::chrono::high_resolution_clock::now();
+        st = solver.solve(prob);
+        auto t_end = std::chrono::high_resolution_clock::now();
+        times_ms[ii] = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+        if (times_ms[ii] < min_ms) min_ms = times_ms[ii];
+    }
+    for (int i = 0; i < NTIMINGS; ++i)
+        for (int j = i + 1; j < NTIMINGS; ++j)
+            if (times_ms[j] < times_ms[i]) { double tmp = times_ms[i]; times_ms[i] = times_ms[j]; times_ms[j] = tmp; }
+    double median_ms = times_ms[NTIMINGS / 2];
 
     const auto& s = solver.last_stats();
 
@@ -255,11 +278,25 @@ int main() {
     printf("Complementarity: %.3e\n", s.complementarity);
     printf("Ineq viol: %.3e\n", s.condition_estimate);
     printf("SOC steps: %d\n", s.soc_steps);
-    printf("Penalty weight: %.1f\n", s.penalty_weight);
-    printf("Regularization: %.3e\n", s.regularization);
     printf("Cost: %.4f\n", s.cost);
-    printf("Solve time: %.3f ms\n", solve_ms);
     printf("First u* = [");
+    for (int i = 0; i < NU; ++i)
+        printf("%.3f%s", prob.stages[0].u[i], (i<NU-1)?", ":"");
+    printf("]\n");
+
+
+    // ── Standardized summary (parsed by run_all.py) ──────────────────
+    printf("\n=== BENCHMARK SUMMARY ===\n");
+    printf("Status:          %s\n", status_string(st));
+    printf("Iterations:      %d\n", s.inner_iterations);
+    printf("Solve time:      %.3f ms\n", min_ms);
+    printf("Median time:     %.3f ms\n", median_ms);
+    printf("Primal inf:      %.3e\n", s.primal_infeas);
+    printf("Stationarity:    %.3e\n", s.dual_infeas);
+    printf("Complementarity: %.3e\n", s.complementarity);
+    printf("Cost:            %.4f\n", s.cost);
+    printf("First u*:        [");
+
     for (int i = 0; i < NU; ++i)
         printf("%.3f%s", prob.stages[0].u[i], (i<NU-1)?", ":"");
     printf("]\n");

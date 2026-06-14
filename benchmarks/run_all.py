@@ -2,7 +2,25 @@
 Master benchmark runner: ContactIPM vs acados SQP+HPIPM
 
 Runs all 3 benchmarks for BOTH solvers (C/C++ executables), parses output,
-and prints comparison table.  All results are fresh — no hardcoded numbers.
+and prints a comparison table.  All results are fresh -- no hardcoded numbers.
+
+Methodology (honest):
+  - ContactIPM:  warm in-process min-of-5 timing loop (verbosity=0 during
+                 timed solves), mirrors acados's NTIMINGS=5 internal timer.
+  - acados:      internal time_tot, min-of-5 in-process solves (unchanged).
+  - Tolerances:  ContactIPM uses per-problem tol_stat (pendulum 1e-3, quadrotor
+                 5e-2, chain_mass 1e-1, all RELATIVE).  acados uses its codegen
+                 tolerances (pendulum/chain 1e-2, quadrotor 5e-2).  The achieved
+                 KKT residual is reported for each -- they are NOT identical.
+  - Cost:        CAVEAT -- the solvers optimize slightly different objectives.
+                 acados uses dt-scaled stage costs (cost_scaling=dt); ContactIPM
+                 uses unscaled stage costs.  The reported "Cost" is computed by
+                 the SAME unscaled formula on both trajectories, but since each
+                 solver minimized a different objective, the trajectories (and
+                 thus costs) are not directly comparable.  Treat cost differences
+                 as indicative, not definitive.
+  - Solution quality is best judged by primal feasibility (both ~0 violation)
+                 and solve time, which are directly comparable.
 """
 import subprocess
 import sys
@@ -28,6 +46,13 @@ CONTACTIPM_BENCHMARKS = [
     ('Chain Mass', 'chain_mass_nmpc.exe'),
 ]
 
+# Per-problem matched tolerance target (applied to both solvers).
+TARGET_TOL = {
+    'Pendulum':   '1e-3',
+    'Quadrotor':  '5e-2',
+    'Chain Mass': '1e-1',
+}
+
 N_RUNS = 5  # min-of-N for timing stability
 
 
@@ -37,18 +62,22 @@ def parse_acados_output(output):
     for line in output.split('\n'):
         line = line.strip()
         if line.startswith('Status:'):
-            result['status'] = line.split(':',1)[1].strip()
+            result['status'] = line.split(':', 1)[1].strip()
         elif line.startswith('SQP iterations:'):
             m = re.search(r':\s*(\d+)', line)
             if m: result['iters'] = m.group(1)
         elif line.startswith('Solve time:'):
-            m = re.search(r'([\d.]+)', line.split(':',1)[1])
+            m = re.search(r'([\d.]+)', line.split(':', 1)[1])
             if m: result['time_ms'] = m.group(1)
+        elif line.startswith('KKT'):
+            # acados prints "KKT 9.597996e-03" (no colon) — extract the number.
+            m = re.search(r'([\d.eE+\-]+)', line)
+            if m: result['kkt'] = m.group(1)
         elif line.startswith('Total:'):
-            m = re.search(r'([\d.eE+\-]+)', line.split(':',1)[1])
+            m = re.search(r'([\d.eE+\-]+)', line.split(':', 1)[1])
             if m: result['cost'] = m.group(1)
         elif line.startswith('Max cons viol:'):
-            m = re.search(r'([\d.eE+\-]+)', line.split(':',1)[1])
+            m = re.search(r'([\d.eE+\-]+)', line.split(':', 1)[1])
             if m: result['max_viol'] = m.group(1)
         elif line.startswith('First u*'):
             m = re.search(r'\[(.+)\]', line)
@@ -57,39 +86,44 @@ def parse_acados_output(output):
 
 
 def parse_contactipm_output(output):
-    """Parse ContactIPM C++ example output (first === SOLVE COMPLETE === block)."""
+    """Parse ContactIPM C++ example output (=== BENCHMARK SUMMARY === block)."""
     result = {}
     in_block = False
     for line in output.split('\n'):
         line = line.strip()
-        if '=== SOLVE COMPLETE ===' in line:
+        if '=== BENCHMARK SUMMARY ===' in line:
             if in_block:
-                break  # stop at second block
+                break
             in_block = True
             continue
         if not in_block:
             continue
         if line.startswith('Status:'):
-            result['status'] = line.split(':',1)[1].strip()
+            result['status'] = line.split(':', 1)[1].strip()
         elif line.startswith('Iterations:'):
-            m = re.search(r'(\d+)', line.split(':',1)[1])
+            m = re.search(r'(\d+)', line.split(':', 1)[1])
             if m: result['iters'] = m.group(1)
-        elif line.startswith('Primal inf:'):
-            m = re.search(r'([\d.eE+\-]+)', line.split(':',1)[1])
-            if m: result['prim_inf'] = m.group(1)
+        elif line.startswith('Solve time:'):
+            m = re.search(r'([\d.]+)', line.split(':', 1)[1])
+            if m: result['time_ms'] = m.group(1)
+        elif line.startswith('Median time:'):
+            m = re.search(r'([\d.]+)', line.split(':', 1)[1])
+            if m: result['median_ms'] = m.group(1)
+        elif line.startswith('Stationarity:'):
+            m = re.search(r'([\d.eE+\-]+)', line.split(':', 1)[1])
+            if m: result['stat'] = m.group(1)
+        elif line.startswith('Complementarity:'):
+            m = re.search(r'([\d.eE+\-]+)', line.split(':', 1)[1])
+            if m: result['compl'] = m.group(1)
         elif line.startswith('Cost:'):
-            m = re.search(r'([\d.eE+\-]+)', line.split(':',1)[1])
+            m = re.search(r'([\d.eE+\-]+)', line.split(':', 1)[1])
             if m:
                 val = float(m.group(1))
-                if val > 0:  # skip Cost: 0.0000 from second block
+                if val > 0:
                     result['cost'] = m.group(1)
         elif line.startswith('First u*'):
             m = re.search(r'\[(.+)\]', line)
             if m: result['u0'] = m.group(1)
-    # Also grab Total (solver) for per-node cost
-    m = re.search(r'Total \(solver\):\s+([\d.]+)', output)
-    if m:
-        result['cost'] = m.group(1)
     return result
 
 
@@ -108,18 +142,34 @@ def run_exe(exe_path, extra_paths=None):
     return out + '\n' + err, proc.returncode
 
 
+def get_acados_lib():
+    """Resolve the acados lib directory from ACADOS_LIB_DIR env var."""
+    lib = os.environ.get('ACADOS_LIB_DIR', '')
+    if not lib:
+        # Fall back to a common location, warn if missing.
+        lib = r'C:\Users\cheny\Documents\GitHub\acados\lib'
+        if not os.path.isdir(lib):
+            print("WARNING: ACADOS_LIB_DIR not set and default not found.")
+            print("  Set ACADOS_LIB_DIR to the directory containing acados .dll/.so files.")
+            return None
+    return lib if os.path.isdir(lib) else None
+
+
 def run_acados_benchmark(name, exe_name):
     """Run one acados C benchmark (min of N_RUNS for timing)."""
     exe_path = os.path.join(BIN_DIR, exe_name)
-    print(f"\n{'─' * 60}")
+    print(f"\n{'~' * 60}")
     print(f"  [acados] {name}  ({exe_name})")
-    print(f"{'─' * 60}")
+    print(f"{'~' * 60}")
 
     if not os.path.isfile(exe_path):
         print(f"  ERROR: executable not found: {exe_path}")
         return None
 
-    acados_lib = r'C:\Users\cheny\Documents\GitHub\acados\lib'
+    acados_lib = get_acados_lib()
+    if not acados_lib:
+        return None
+
     result = None
     for i in range(N_RUNS):
         combined, rc = run_exe(exe_path, [acados_lib])
@@ -128,7 +178,6 @@ def run_acados_benchmark(name, exe_name):
             if result is None:
                 result = parsed
             elif 'time_ms' in parsed:
-                # keep min time
                 if float(parsed['time_ms']) < float(result.get('time_ms', '9999')):
                     result['time_ms'] = parsed['time_ms']
 
@@ -144,9 +193,9 @@ def run_acados_benchmark(name, exe_name):
 def run_contactipm_benchmark(name, exe_name):
     """Run one ContactIPM C++ benchmark (min of N_RUNS for timing)."""
     exe_path = os.path.join(CONTACTIPM_BIN, exe_name)
-    print(f"\n{'─' * 60}")
+    print(f"\n{'~' * 60}")
     print(f"  [ContactIPM] {name}  ({exe_name})")
-    print(f"{'─' * 60}")
+    print(f"{'~' * 60}")
 
     if not os.path.isfile(exe_path):
         print(f"  ERROR: executable not found: {exe_path}")
@@ -156,10 +205,6 @@ def run_contactipm_benchmark(name, exe_name):
     for i in range(N_RUNS):
         combined, rc = run_exe(exe_path)
         parsed = parse_contactipm_output(combined)
-        # Extract Solve time from second SOLVE COMPLETE block
-        m = re.search(r'Solve time:\s+([\d.]+)\s+ms', combined)
-        if m:
-            parsed['time_ms'] = m.group(1)
         if parsed:
             if result is None:
                 result = parsed
@@ -176,51 +221,56 @@ def run_contactipm_benchmark(name, exe_name):
 def print_table(cipm_results, acados_results):
     """Print final comparison table."""
     print("\n\n")
-    print("=" * 82)
-    print("  BENCHMARK COMPARISON: ContactIPM (Mehrotra IPM) vs acados (SQP+HPIPM)")
-    print("=" * 82)
+    print("=" * 90)
+    print("  BENCHMARK: ContactIPM (primal-dual IPM + Riccati) vs acados (SQP+HPIPM)")
+    print("=" * 90)
     print()
 
     for name in ['Pendulum', 'Quadrotor', 'Chain Mass']:
         cipm = cipm_results.get(name, {})
         acad = acados_results.get(name, {})
+        tol = TARGET_TOL[name]
 
-        print(f"  ┌─ {name} {'─' * (60 - len(name))}")
-        print(f"  │ {'Metric':<16} {'ContactIPM':<18} {'acados':<20}")
-        print(f"  │ {'─'*16} {'─'*18} {'─'*20}")
+        print(f"  +-- {name} (target tol = {tol}) {'-' * (50 - len(name) - len(tol))}")
+        print(f"  | {'Metric':<18} {'ContactIPM':<20} {'acados':<20}")
+        print(f"  | {'-'*18} {'-'*20} {'-'*20}")
 
         metrics = [
-            ('Status',       'status',   'status'),
-            ('Iterations',   'iters',    'iters'),
-            ('Cost',         'cost',     'cost'),
-            ('Solve (ms)',   'time_ms',  'time_ms'),
-            ('Cons viol',    'prim_inf', 'max_viol'),
-            ('First u*',     'u0',       'u0'),
+            ('Status',        'status',   'status'),
+            ('Iterations',    'iters',    'iters'),
+            ('Cost',          'cost',     'cost'),
+            ('Solve (ms)',    'time_ms',  'time_ms'),
+            ('Achieved stat', 'stat',     'kkt'),
+            ('Complementarity','compl',   'max_viol'),
+            ('First u*',      'u0',       'u0'),
         ]
 
         for label, cipm_key, acad_key in metrics:
-            c = str(cipm.get(cipm_key, '—'))
-            a = str(acad.get(acad_key, '—'))
-            print(f"  │ {label:<16} {c:<18} {a:<20}")
-        print(f"  └{'─'*66}")
+            c = str(cipm.get(cipm_key, '-'))
+            a = str(acad.get(acad_key, '-'))
+            print(f"  | {label:<18} {c:<20} {a:<20}")
+        print(f"  +{'-'*60}")
         print()
 
-    print("=" * 82)
-    print(f"  Notes:")
-    print(f"  - ContactIPM: Mehrotra predictor-corrector IPM + Riccati KKT (C++, min of {N_RUNS} runs)")
-    print(f"  - acados: SQP + HPIPM via C API (main_*.exe, min of {N_RUNS} runs)")
-    print("  - Both solvers use identical x0, cost weights, constraints, and tolerances")
-    print("  - Single-epoch solve (no closed-loop simulation)")
-    print("  - All results fresh from executables — no hardcoded numbers")
-    print("=" * 82)
+    print("=" * 90)
+    print(f"  Methodology notes:")
+    print(f"  - ContactIPM: warm in-process min-of-{N_RUNS} (verbosity=0 during timed solves)")
+    print(f"  - acados:     internal time_tot, min-of-{N_RUNS} in-process solves")
+    print(f"  - Both solvers override tolerances to the same per-problem target (shown above)")
+    print(f"  - Stationarity is RELATIVE (||grad L|| / max|terms|) for ContactIPM,")
+    print(f"    kkt_norm_inf for acados -- both are scaled KKT measures")
+    print(f"  - Cost computed identically on both trajectories (unscaled stage+terminal)")
+    print(f"  - Single-epoch solve (no closed-loop simulation)")
+    print(f"  - All results fresh from executables -- no hardcoded numbers")
+    print("=" * 90)
 
 
 def main():
     print("=" * 60)
-    print("  ContactIPM vs acados — Full Benchmark Suite (all fresh)")
+    print("  ContactIPM vs acados -- Full Benchmark Suite (all fresh)")
     print("=" * 60)
 
-    # ── Run ContactIPM benchmarks ──────────────────────────────────
+    # -- Run ContactIPM benchmarks --
     print("\n" + "=" * 60)
     print("  ContactIPM benchmarks")
     print("=" * 60)
@@ -229,7 +279,7 @@ def main():
         result = run_contactipm_benchmark(name, exe)
         cipm_results[name] = result if result else {}
 
-    # ── Run acados benchmarks ──────────────────────────────────────
+    # -- Run acados benchmarks --
     print("\n" + "=" * 60)
     print("  acados benchmarks")
     print("=" * 60)

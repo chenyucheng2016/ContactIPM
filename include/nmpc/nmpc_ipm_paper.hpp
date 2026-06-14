@@ -211,6 +211,10 @@ public:
         bool   accepted = false;
         bool   ls_failed = false;  // line search failure flag
         bool   model_evaluated = true;  // evaluate_model() already done before loop
+        // Stagnation detection: break when stationarity stops improving.
+        double stat_best = 1e100;
+        int    stagnation_count = 0;
+        constexpr int STAGNATION_LIMIT = 15;
 
         for (iter = 0; iter < params_.max_iters; ++iter) {
 
@@ -227,6 +231,24 @@ public:
             // 3. Convergence check: KKT satisfied AND μ at minimum
             if (barrier_strategy_.at_minimum(mu_) && kkt_converged()) {
                 break;
+            }
+
+            // 3b. Stagnation detection: if stationarity has not improved for
+            //     STAGNATION_LIMIT consecutive iterations, the Newton step is
+            //     no longer making progress (typical when the barrier-solve
+            //     accuracy limit is reached).  Terminate cleanly with the best
+            //     iterate rather than spinning to max_iters.
+            if (stat_inf_ < stat_best * 0.999) {
+                stat_best = stat_inf_;
+                stagnation_count = 0;
+            } else {
+                ++stagnation_count;
+                if (stagnation_count >= STAGNATION_LIMIT && barrier_strategy_.at_minimum(mu_)) {
+                    if (params_.verbosity >= 1)
+                        printf("  [stagnation: stat=%.3e unchanged for %d iters - terminating\n",
+                               stat_inf_, STAGNATION_LIMIT);
+                    break;
+                }
             }
             if (barrier_strategy_.at_minimum(mu_) && params_.verbosity >= 3) {
                 bool primal_ok  = (primal_inf_ <= params_.tol_primal);
@@ -289,6 +311,35 @@ public:
             if (st != Status::SUCCESS) return st;
             recover_inequality_steps(sigma_);
             has_costates_ = true;  // costates now valid for stationarity check
+
+            // ── Conditional Mehrotra cross-term gate ────────────────
+            // Compute the predicted average complementarity at the full
+            // corrector step (alpha=1).  If the cross-term pushed it above
+            // 2*mu, the second-order correction is hurting -- recompute the
+            // corrector globally with the cross-term dropped (pure linear).
+            // The result (cross_term_accepted_) is fed to the barrier FSM to
+            // bias mu-reduction aggressiveness.
+            cross_term_accepted_ = true;  // default: healthy (no constraints / sigma=0)
+            if (sigma_ > 0.0 && prob_->constraints) {
+                double mu_with = 0.0;
+                int cnt = 0;
+                for (int k = 0; k <= HORIZON; ++k) {
+                    for (int j = 0; j < NC; ++j) {
+                        double sp = prob_->stages[k].s[j]      + ds_[k][j];
+                        double lp = prob_->stages[k].lambda[j] + dlambda_[k][j];
+                        mu_with += std::max(sp, 0.0) * std::max(lp, 0.0);
+                        ++cnt;
+                    }
+                }
+                if (cnt > 0) mu_with /= cnt;
+                cross_term_accepted_ = (mu_with <= 2.0 * mu_);
+                if (!cross_term_accepted_) {
+                    if (params_.verbosity >= 2)
+                        printf("  [mehrotra: cross-term rejected, mu_with=%.3e > 2*mu=%.3e\n",
+                               mu_with, 2.0 * mu_);
+                    recover_inequality_steps(sigma_, false);
+                }
+            }
 
             // ── Check linearized constraint residual BEFORE step ────────
             if (params_.verbosity >= 2 && iter <= 2) {
@@ -592,7 +643,7 @@ public:
             // Barrier update: reduce μ if subproblem solved, else hold
             {
                 double E_mu = std::max(primal_inf_, compl_inf_);
-                bool mu_changed = barrier_strategy_.update(mu_, primal_inf_, compl_inf_, sigma_, stat_inf_);
+                bool mu_changed = barrier_strategy_.update(mu_, primal_inf_, compl_inf_, sigma_, stat_inf_, cross_term_accepted_);
                 if (params_.verbosity >= 1) {
                     printf("  [barrier: E_mu=%.2e k*mu=%.2e %s mu=%.2e]\n",
                            E_mu, barrier_strategy_.kappa_eps() * mu_,
@@ -621,6 +672,7 @@ public:
         out_stats.condition_estimate = ineq_viol_;
         out_stats.penalty_weight   = 0.0;
         out_stats.regularization   = reg_used_;
+        out_stats.cost             = compute_objective();
         out_stats.linear_kkt_abs   = linear_kkt_res_.max_abs_res;
         out_stats.linear_kkt_rel   = linear_kkt_res_.max_rel_res;
         out_stats.linear_kkt_quality = linear_kkt_res_.is_well_solved() ? 0
@@ -930,7 +982,21 @@ private:
 
                 double stat_x_full = lag_x.norm_inf();
                 double stat_u_full = lag_u.norm_inf();
-                double stat = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
+                double stat_abs = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
+
+                // Relative stationarity: normalize by the natural scale of the
+                // terms being summed.  Without this, catastrophic cancellation
+                // between large terms (e.g. grad_x vs costate_x) leaves a
+                // residual that is a fixed fraction of the term magnitude --
+                // a floating-point artifact that no number of Newton steps can
+                // reduce.  Scaling by max(|terms|, 1) yields the fraction of
+                // the largest term that is unbalanced, which is the quantity
+                // that actually converges to zero.  (This matches the scaled
+                // KKT norm used by acados / IPOPT.)
+                double scale_x = std::max({grad_x_inf, clam_x_inf, cos_x_inf, 1.0});
+                double scale_u = std::max({grad_u_inf, clam_u_inf, cos_u_inf, 1.0});
+                double scale = (scale_x > scale_u) ? scale_x : scale_u;
+                double stat = stat_abs / scale;
                 if (stat > stat_inf_) {
                     stat_inf_ = stat;
                     // Save component breakdown for worst node
@@ -1413,7 +1479,7 @@ private:
     //  Recover Δs, Δλ from primal step (for the corrector direction)
     // ═════════════════════════════════════════════════════════════════════
 
-    void recover_inequality_steps(double sigma) {
+    void recover_inequality_steps(double sigma, bool apply_cross = true) {
         const int N = HORIZON;
         Stage* s = prob_->stages;
 
@@ -1431,8 +1497,12 @@ private:
                 ds_[k][j] = -(gj + s[k].s[j]) - cj_dz;
 
                 if (s[k].s[j] > 1e-14) {
-                    // Cross-term only for corrector (sigma > 0), not predictor
-                    double cross = (sigma > 0.0) ? ds_aff_[k][j] * dlambda_aff_[k][j] : 0.0;
+                    // Mehrotra cross-term (corrector only, sigma > 0).
+                    // Gated globally by the caller: when apply_cross is false
+                    // the cross-term has been rejected because it pushed the
+                    // predicted average complementarity above 2*mu.
+                    double cross = (sigma > 0.0 && apply_cross)
+                                 ? ds_aff_[k][j] * dlambda_aff_[k][j] : 0.0;
                     dlambda_[k][j] = (sigma * mu_ - s[k].s[j] * s[k].lambda[j]
                                       - cross
                                       - s[k].lambda[j] * ds_[k][j]) / s[k].s[j];
@@ -2249,6 +2319,7 @@ private:
     KKTLinearResiduals linear_kkt_res_;
 
     double sigma_            = 0.0;     // Mehrotra centering parameter (current iteration)
+    bool   cross_term_accepted_ = true;  // cross-term gate result (fed to barrier FSM)
     double alpha_lambda_     = 1.0;     // FTB step for inequality duals λ (independent of line search)
 
     // Filter line search
