@@ -65,13 +65,13 @@ inline const char* status_string(Status s) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 #ifndef NMPC_MAX_NX
-#define NMPC_MAX_NX  12     // max state dimension
+#define NMPC_MAX_NX  16     // max state dimension
 #endif
 #ifndef NMPC_MAX_NU
-#define NMPC_MAX_NU   6     // max control dimension
+#define NMPC_MAX_NU  16     // max control dimension
 #endif
 #ifndef NMPC_MAX_NC
-#define NMPC_MAX_NC  20     // max inequality constraints per stage
+#define NMPC_MAX_NC  40     // max inequality constraints per stage
 #endif
 #ifndef NMPC_MAX_HORIZON
 #define NMPC_MAX_HORIZON 50 // max MPC horizon length
@@ -287,8 +287,8 @@ public:
     // Allocate once. After this, sub-allocate workspaces.
     Status init(size_t total_bytes) {
         release();
-        // _aligned_malloc on MSVC, std::aligned_alloc on C++17 POSIX
-#if defined(_MSC_VER)
+        // _aligned_malloc on MSVC / MinGW, std::aligned_alloc on C++17 POSIX
+#if defined(_MSC_VER) || (defined(_WIN32) && defined(__GNUC__))
         buf_ = static_cast<char*>(_aligned_malloc(total_bytes, 64));
 #elif defined(__cpp_aligned_new) || (__cplusplus >= 201703L)
         buf_ = static_cast<char*>(std::aligned_alloc(64, total_bytes));

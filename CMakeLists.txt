@@ -42,6 +42,9 @@ if(NMPC_BUILD_EXAMPLES)
 
     add_executable(chain_mass_nmpc examples/chain_mass_nmpc.cpp)
     target_link_libraries(chain_mass_nmpc PRIVATE nmpc_solver)
+
+    add_executable(centroidal_trot_nmpc examples/centroidal_trot_nmpc.cpp)
+    target_link_libraries(centroidal_trot_nmpc PRIVATE nmpc_solver)
 endif()
 
 # ── Tests ──

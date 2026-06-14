@@ -86,7 +86,7 @@ public:
     // ═══════════════════════════════════════════════════════════════════
 
     bool update(double& mu, double primal_inf, double compl_inf, double sigma,
-                double stat_inf = -1.0) {
+                double stat_inf = -1.0, bool mehrotra_healthy = true) {
         iters_at_mu_++;
 
         double E_mu = std::max(primal_inf, compl_inf);
@@ -108,11 +108,22 @@ public:
             return false;
         }
 
-        // ── Choose σ exponent based on difficulty ─────────────────────
+        // ── Choose sigma exponent based on difficulty ─────────────────
+        // The Mehrotra-corrector health signal refines the classification:
+        //   - rejected cross-term -> subproblem is hard -> sigma^0.5
+        //     (conservative mu reduction; the second-order correction
+        //      couldn't help, so reduce mu slowly)
+        //   - healthy corrector + solved + fast -> sigma^1.5
+        //     (aggressive mu reduction; the corrector confirms the step
+        //      is good, so reduce mu faster)
+        // The solved/force gate is NOT changed -- only the exponent.
         double sigma_exp;
         const char* difficulty;
 
-        if (solved && iters_at_mu_ <= p_.fast_threshold) {
+        if (!mehrotra_healthy) {
+            sigma_exp = p_.sigma_exp_hard;
+            difficulty = "hard(mehrotra)";
+        } else if (solved && iters_at_mu_ <= p_.fast_threshold) {
             sigma_exp = p_.sigma_exp_easy;
             difficulty = "easy";
         } else if (!solved || iters_at_mu_ >= p_.slow_threshold) {

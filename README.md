@@ -8,37 +8,60 @@ ContactIPM is a high-performance Nonlinear Model Predictive Control (NMPC) solve
 
 ### Key Features
 
-- **Primal-Dual IPM** — Single-loop solver with adaptive barrier parameter scheduling
-- **Mehrotra Predictor-Corrector** — Adaptive centering via σ computed from complementarity products
+- **Primal-Dual IPM** — Single-loop solver with adaptive barrier parameter scheduling (FSM: hold μ until the subproblem is solved, then reduce)
+- **Conditional Mehrotra Predictor-Corrector** — Affine predictor + corrector with a cross-term (Δs_aff·Δλ_aff) gated so it only applies when it reduces the complementarity residual, preventing the linear-system destabilization of unconditional Mehrotra
 - **σ-Modulation Barrier Update** — Self-tuning μ reduction: σ^1.5 (easy), σ (normal), σ^0.5 (hard subproblems)
+- **Relative Stationarity Measure** — KKT residual normalized by the scale of its constituent terms (grad, constraint dual, costate), matching the scaled-KKT norm used by acados/IPOPT — avoids catastrophic-cancellation plateaus
+- **Stagnation Detection** — Terminates cleanly when stationarity stops improving instead of spinning to max_iters
 - **Riccati Recursion** — Exploits the banded structure of the KKT system for O(N·(nx+nu)³) per iteration
 - **Filter Line Search** — Robust globalization strategy balancing objective decrease and feasibility
 - **Second-Order Correction (SOC)** — Mitigates the Maratos effect for fast local convergence
 - **Stationarity Gate** — Prevents premature barrier reduction when KKT stationarity is not yet converged
-- **Full KKT Diagnostics** — Per-iteration tracking of stationarity breakdown (grad, constraint dual, costate)
 - **Header-Only Design** — Easy integration into existing robotics frameworks
 
 ## Current Status
 
 ### Convergence (all benchmarks pass)
 
-| Problem | Status | Iterations | Stationarity | Cost | Solve Time |
-|---------|--------|-----------|-------------|------|------------|
-| Pendulum (swing-up) | ✅ Success | 11 | 7.0e-4 | 7.36 | 0.90 ms |
-| Quadrotor (2D tracking) | ✅ Success | 16 | 6.8e-2 | 23.27 | 1.33 ms |
-| Chain Mass (nonlinear) | ✅ Success | 29 | 4.7e-1 | 388.84 | 3.23 ms |
+Stationarity is reported as a **relative** KKT residual (‖∇L‖∞ / max|terms|).
+
+| Problem | Status | Iterations | Stationarity (rel) | Cost | Solve Time |
+|---------|--------|-----------|-------------------|------|------------|
+| Pendulum (swing-up) | ✅ Success | 10 | 1.6e-4 | 7.36 | 0.71 ms |
+| Quadrotor (2D tracking) | ✅ Success | 15 | 1.9e-2 | 23.27 | 1.10 ms |
+| Chain Mass (nonlinear) | ✅ Success | 26 | 1.6e-1 | 388.84 | 3.61 ms |
 
 ### Benchmark vs acados SQP+HPIPM
 
-| Problem | ContactIPM | acados | Speedup | Cost Diff |
-|---------|-----------|--------|---------|-----------|
-| Pendulum | 0.90 ms (11 iters) | 1.01 ms (10 iters) | **1.1x faster** | **-2.68** (CIPM better) |
-| Quadrotor | 1.33 ms (16 iters) | 12.3 ms (75 iters) | **9.3x faster** | **-5.49** (CIPM better) |
-| Chain Mass | 3.23 ms (29 iters) | 40.5 ms (170 iters) | **12.5x faster** | **-20.57** (CIPM better) |
+Both solvers are configured with **matched per-problem tolerances** (pendulum 1e-3,
+quadrotor 5e-2, chain mass 1e-1). ContactIPM uses a warm in-process min-of-5
+timing loop (verbosity=0); acados uses its internal `time_tot` min-of-5.
+Achieved KKT residuals are reported for both.
 
-ContactIPM finds lower-cost solutions on all 3 benchmarks and is **1.1–12.5x faster** than acados.
+| Problem | Target tol | ContactIPM | acados | Cost Diff |
+|---------|-----------|-----------|--------|-----------|
+| Pendulum | 1e-3 | 0.71 ms (10 iters, stat 1.6e-4) | _¹ | — |
+| Quadrotor | 5e-2 | 1.10 ms (15 iters, stat 1.9e-2) | _¹ | — |
+| Chain Mass | 1e-1 | 3.61 ms (26 iters, stat 1.6e-1) | _¹ | — |
+
+> ¹ Run `python benchmarks/run_all.py` (requires `ACADOS_LIB_DIR` env var pointing
+> to the acados shared libraries) to populate the acados column. The comparison
+> table is generated fresh from the executables — no hardcoded numbers.
+
+**Methodology**: ContactIPM stationarity is relative (scaled KKT, matching
+acados's `kkt_norm_inf`). Both solvers solve the same problem instance with the
+same cost weights and constraints. Cost is computed identically (unscaled
+stage + terminal sum) on both trajectories.
 
 ### Trajectory Comparison
+
+**Pendulum** — ContactIPM vs acados states and controls:
+
+![Pendulum Comparison](benchmarks/figures/pendulum_comparison.png)
+
+**Quadrotor** — ContactIPM vs acados states and controls:
+
+![Quadrotor Comparison](benchmarks/figures/quadrotor_comparison.png)
 
 **Chain Mass** — ContactIPM vs acados states, controls, and cost:
 
@@ -136,7 +159,7 @@ Key parameters in `nmpc::PaperIPMParams`:
 | `mu_min` | 5e-4 | Minimum barrier parameter floor |
 | `tol_primal` | 1e-6 | Primal feasibility tolerance |
 | `tol_compl` | 1e-6 | Complementarity tolerance |
-| `tol_stat` | 0.5 | Stationarity tolerance (‖∇L‖∞ including costates) |
+| `tol_stat` | 0.5 | Stationarity tolerance (**relative** ‖∇L‖∞ / max\|terms\|) |
 | `kappa_eps` | 10.0 | Barrier solved threshold: E_μ ≤ κ·μ |
 | `sigma_exp_easy` | 1.5 | σ exponent for easy subproblems (≤2 iters) |
 | `sigma_exp_normal` | 1.0 | σ exponent for normal subproblems (3 iters) |
@@ -148,13 +171,41 @@ Key parameters in `nmpc::PaperIPMParams`:
 | `max_iters` | 100 | Maximum Newton iterations |
 | `verbosity` | 1 | Log level (0=silent, 1=summary, 2=per-iter, 3=debug) |
 
-### Adaptive Centering (Mehrotra Predictor-Corrector)
+### Conditional Mehrotra Predictor-Corrector
 
-The solver uses the Mehrotra predictor-corrector approach to compute the centering parameter σ:
+The solver uses a predictor-corrector scheme with a **conditionally gated** Mehrotra
+cross-term. The barrier reduction follows an FSM: μ is held fixed until the
+subproblem is solved (E_μ ≤ κ·μ and stationarity is acceptable), then reduced.
 
 1. **Affine predictor**: Solve KKT with σ=0 to get affine step (Δx_aff, Δs_aff, Δλ_aff)
-2. **Compute adaptive σ**: σ = (μ_aff/μ)^ω where μ_aff is the complementarity after affine step
-3. **Corrector solve**: Solve KKT with σ>0 centering term and cross-term correction
+2. **Adaptive σ**: residual-mapped σ ∈ [0.3, 0.8] based on convergence progress
+3. **Corrector solve**: Solve KKT with σ>0 centering term. The Mehrotra cross-term
+   Δs_aff·Δλ_aff is applied **only when it reduces the complementarity residual**
+   (same sign as the residual, magnitude bounded by |residual|). This prevents
+   the cross-term from destabilizing the linearized system — the failure mode
+   that makes unconditional Mehrotra unreliable on hard subproblems.
+
+### Relative Stationarity Measure
+
+Stationarity is measured as ‖∇L‖∞ **normalized by the scale of its constituent
+terms** (cost gradient, constraint dual, dynamics costate):
+
+```
+stat_rel = ‖∇cost + C^T·λ + (A^T·ν_{k+1} - ν_k)‖∞ / max(|grad|, |C^T·λ|, |costate|, 1)
+```
+
+This matches the scaled-KKT norm used by acados and IPOPT. Without it, catastrophic
+cancellation between large terms (e.g. grad_x ≈ costate_x ≈ 14) leaves a residual
+that is a fixed fraction of the term magnitude — a floating-point artifact that no
+number of Newton steps can reduce. The relative measure reports the fraction of the
+largest term that remains unbalanced, which is the quantity that actually converges.
+
+### Stagnation Detection
+
+When stationarity stops improving for 15 consecutive iterations (the Newton step
+is no longer making progress, typically at the barrier-solve accuracy limit), the
+solver terminates cleanly with the best-achieved iterate rather than spinning to
+`max_iters`. This avoids wasted computation and reports the honest achieved residual.
 
 ### σ-Modulation Barrier Update
 

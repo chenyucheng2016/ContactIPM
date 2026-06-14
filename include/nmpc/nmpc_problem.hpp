@@ -91,6 +91,24 @@ struct DynamicsModel {
     virtual Status linearize(const Vec<NX>& x, const Vec<NU>& u,
                              double dt,
                              Mat<NX, NX>& A, Mat<NX, NU>& B) = 0;
+
+    // ── k-aware overloads for time-varying dynamics ──────────────────
+    //
+    // Override these when the dynamics depend on the stage index k
+    // (e.g. time-varying contact schedules, reference trajectories).
+    // Default implementations delegate to the k-free versions above,
+    // so existing benchmarks require no changes.
+
+    virtual Status discrete_step(const Vec<NX>& x, const Vec<NU>& u,
+                                 double dt, Vec<NX>& x_next, int /*k*/) {
+        return discrete_step(x, u, dt, x_next);
+    }
+
+    virtual Status linearize(const Vec<NX>& x, const Vec<NU>& u,
+                             double dt,
+                             Mat<NX, NX>& A, Mat<NX, NU>& B, int /*k*/) {
+        return linearize(x, u, dt, A, B);
+    }
 };
 
 template <int NX, int NU>
