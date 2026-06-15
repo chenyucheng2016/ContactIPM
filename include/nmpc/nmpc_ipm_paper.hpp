@@ -85,7 +85,7 @@ struct KKTLinearResiduals {
     double max_stat_x_res;    // x-stationarity (full KKT, Bellman equation)
     double max_stat_u_res;    // u-stationarity
     double max_stat_term_res; // terminal x-stationarity
-    double max_comp_res;      // complementarity: ||s·Δλ + λ·Δs - σμ||_∞
+    double max_comp_res;      // complementarity: ||s·Δλ + λ·Δs + sλ + cross - σμ||_∞
 
     // Riccati-specific (pure reduced system, excluding barrier terms)
     double max_riccati_x_res; // Riccati x-stationarity: qx + H̄^xx·Δx + (H̄^ux)^T·Δu - A^T·ν_{k+1} + ν_k
@@ -302,7 +302,25 @@ public:
                 dlambda_aff_[k] = dlambda_[k];
             }
 
-            // Adaptive σ scheduling (overrides Mehrotra centering for robustness)
+            // ── Compute affine FTB limits (for σ and barrier FSM) ────
+            {
+                double ap_aff = 1.0, ad_aff = 1.0;
+                for (int k = 0; k <= HORIZON; ++k)
+                    for (int j = 0; j < NC; ++j) {
+                        if (ds_aff_[k][j] < -1e-16) {
+                            double a = -params_.tau * prob_->stages[k].s[j] / ds_aff_[k][j];
+                            if (a < ap_aff) ap_aff = a;
+                        }
+                        if (dlambda_aff_[k][j] < -1e-16) {
+                            double a = -params_.tau * prob_->stages[k].lambda[j] / dlambda_aff_[k][j];
+                            if (a < ad_aff) ad_aff = a;
+                        }
+                    }
+                aff_alpha_p_ = ap_aff;
+                aff_alpha_d_ = ad_aff;
+            }
+
+            // Adaptive σ scheduling with FTB-bottleneck override
             sigma_ = compute_adaptive_sigma();
 
             // 5. ── CORRECTOR: reuse LHS, update RHS with centering ──
@@ -579,8 +597,39 @@ public:
 
             // 6. Step acceptance: separate primal/dual fraction-to-boundary ──
             compute_ftb_limits(alpha_p, alpha_d);
+            last_alpha_p_ = alpha_p;  // store for barrier FTB-bottleneck detection
             log_iteration(iter, sigma_, alpha_p, alpha_d);
             alpha_lambda_ = alpha_d;  // FTB step for λ (independent of line search)
+
+            // ── FTB bottleneck diagnostic (periodic, verbose only) ──
+            if (params_.verbosity >= 2 && iter % 25 == 0 && iter > 0) {
+                // Find primal FTB bottleneck
+                double worst_r = 0.0;
+                int bkw = -1, bjw = -1;
+                for (int kk = 0; kk <= HORIZON; ++kk)
+                    for (int jj = 0; jj < NC; ++jj)
+                        if (ds_[kk][jj] < -1e-16) {
+                            double r = -ds_[kk][jj] / (prob_->stages[kk].s[jj] + 1e-14);
+                            if (r > worst_r) { worst_r = r; bkw = kk; bjw = jj; }
+                        }
+                // Find dual FTB bottleneck
+                double worst_rd = 0.0;
+                int bkw_d = -1, bjw_d = -1;
+                for (int kk = 0; kk <= HORIZON; ++kk)
+                    for (int jj = 0; jj < NC; ++jj)
+                        if (dlambda_[kk][jj] < -1e-16) {
+                            double r = -dlambda_[kk][jj] / (prob_->stages[kk].lambda[jj] + 1e-14);
+                            if (r > worst_rd) { worst_rd = r; bkw_d = kk; bjw_d = jj; }
+                        }
+                double bp_s = (bkw >= 0) ? prob_->stages[bkw].s[bjw] : -1;
+                double bp_ds = (bkw >= 0) ? ds_[bkw][bjw] : 0;
+                double bp_g = (bkw >= 0) ? prob_->stages[bkw].d[bjw] : 0;
+                double bd_l = (bkw_d >= 0) ? prob_->stages[bkw_d].lambda[bjw_d] : -1;
+                double bd_dl = (bkw_d >= 0) ? dlambda_[bkw_d][bjw_d] : 0;
+                printf("  [ftb-diag] alpha_p=%.3f bottleneck: k=%d j=%d s=%.2e ds=%+.2e g=%.2e | alpha_d=%.3f bottleneck: k=%d j=%d lam=%.2e dlam=%+.2e\n",
+                       alpha_p, bkw, bjw, bp_s, bp_ds, bp_g,
+                       alpha_d, bkw_d, bjw_d, bd_l, bd_dl);
+            }
 
             if (alpha_p < 1e-14 || alpha_lambda_ < 1e-14) {
                 sz_complement();
@@ -643,7 +692,17 @@ public:
             // Barrier update: reduce μ if subproblem solved, else hold
             {
                 double E_mu = std::max(primal_inf_, compl_inf_);
-                bool mu_changed = barrier_strategy_.update(mu_, primal_inf_, compl_inf_, sigma_, stat_inf_, cross_term_accepted_);
+                // FTB-bottleneck detection: primal step severely limited
+                // while constraint violation is still significant.
+                // This signals that the barrier force is too strong and
+                // μ should be reduced more aggressively.
+                double ftb_cons_thresh = barrier_strategy_.kappa_eps() * mu_;
+                bool ftb_bottleneck = (last_alpha_p_ < 0.1)
+                                   && (primal_inf_ > ftb_cons_thresh)
+                                   && (aff_alpha_p_ < 0.1);
+                bool mu_changed = barrier_strategy_.update(
+                    mu_, primal_inf_, compl_inf_, sigma_, stat_inf_,
+                    cross_term_accepted_, ftb_bottleneck);
                 if (params_.verbosity >= 1) {
                     printf("  [barrier: E_mu=%.2e k*mu=%.2e %s mu=%.2e]\n",
                            E_mu, barrier_strategy_.kappa_eps() * mu_,
@@ -809,14 +868,14 @@ private:
             // Dynamics defect: c_k = f(x_k, u_k) - x_{k+1}
             Vec<NX> fk;
             Status st = prob_->dynamics->discrete_step(s[k].x, s[k].u,
-                                                        prob_->dt, fk);
+                                                        prob_->dt, fk, k);
             if (st != Status::SUCCESS) return st;
             for (int i = 0; i < NX; ++i)
                 s[k].c[i] = fk[i] - s[k + 1].x[i];
 
             // Dynamics Jacobians
             st = prob_->dynamics->linearize(s[k].x, s[k].u, prob_->dt,
-                                            s[k].A, s[k].B);
+                                            s[k].A, s[k].B, k);
             if (st != Status::SUCCESS) return st;
 
             // Cost
@@ -1255,11 +1314,19 @@ private:
             }
 
             // ── (C) Complementarity residual ──────────────────────
-            // s_j·Δλ_j + λ_j·Δs_j - σμ = 0
+            // Mehrotra corrector: s·Δλ + λ·Δs = σμ - sλ - cross
+            //   residual = s·Δλ + λ·Δs + sλ + cross - σμ
+            // Predictor (σ=0, cross=0): s·Δλ + λ·Δs = -sλ
+            //   residual = s·Δλ + λ·Δs + sλ
             if (prob_->constraints) {
                 for (int j = 0; j < NC; ++j) {
+                    double cross = (sigma_ > 0.0 && cross_term_accepted_)
+                                 ? ds_aff_[k][j] * dlambda_aff_[k][j] : 0.0;
+                    double sl = stg.s[j] * stg.lambda[j];
                     double res_c = stg.s[j] * dlambda_[k][j]
                                  + stg.lambda[j] * ds_[k][j]
+                                 + sl
+                                 + cross
                                  - smu;
                     double ar = std::fabs(res_c);
                     if (ar > res.max_comp_res) { res.max_comp_res = ar; res.worst_stage = k; res.worst_eq_type = 4; }
@@ -1362,9 +1429,6 @@ private:
             if (prob_->constraints) {
                 // Add -C^T·λ (Lagrangian gradient with correct sign for
                 // the reduced KKT stationarity equation).
-                // After eliminating Δλ, stationarity becomes:
-                //   H̄·Δz + A^T·ν + (∇ℓ - C^T·λ + C^T·μ/s) = 0
-                // So the gradient is: ∇ℓ - C^T·λ + C^T·μ/s
                 for (int j = 0; j < NC; ++j) {
                     double lj = s[k].lambda[j];
                     for (int i = 0; i < NX; ++i)
@@ -1375,16 +1439,20 @@ private:
                 }
 
                 // ── Barrier centering: +C^T·(σμ + λ(g+s))/s ────────
-                // From the reduced KKT after eliminating dlambda:
-                //   dlambda_j = (σμ - λ·ds)/s = σμ/s + λ(g+s)/s + λ·C·dz/s
-                // The stationarity becomes:
-                //   qu + Cu^T·(σμ + λ(g+s))/s + H̄·dz + B^T·ν = 0
-                // So the gradient needs (σμ + λ(g+s))/s, not (μ/s - λ).
+                // Mehrotra corrector RHS: s·Δλ + λ·Δs = σμ - sλ - cross.
+                // Solving for Δλ: (σμ - sλ - cross - λ·Δs) / s.
+                // Substituting Δs = -(g+s) - C·Δz:
+                //   Δλ = (σμ - sλ - cross + λ(g+s) + λ·C·Δz) / s
+                // The λ·C·Δz/s term merges into the Hessian (barrier Hessian
+                // H̄ = H + C^T·(λ/s)·C).  The remaining gradient contribution
+                // per constraint is (σμ - sλ + λ(g+s))/s = (σμ + λg)/s.
+                // Combined with the -C^T·λ above, the net gradient is:
+                //   ∇ℓ + C^T·[-λ + (σμ + λ(g+s))/s] = ∇ℓ + C^T·(σμ + λg)/s
                 for (int j = 0; j < NC; ++j) {
                     double sj = s[k].s[j];
                     if (sj < 1e-14) continue;
                     double lj = s[k].lambda[j];
-                    double gj = s[k].d[j] + sj;  // constraint infeasibility: g+s = d+s
+                    double gj = s[k].d[j] + sj;  // constraint infeasibility: g+s
                     double centering = (sigma_ * mu_ + lj * gj) / sj;
 
                     for (int i = 0; i < NX; ++i)
@@ -1472,6 +1540,13 @@ private:
         // progress=0 (bad convergence) → σ = σ_max
         // progress=1 (good convergence) → σ = σ_min
         double sigma = sigma_max - (sigma_max - sigma_min) * t;
+
+        // FTB-bottleneck override: when the affine predictor is also
+        // blocked by FTB (aff_alpha_p_ < 0.1), the subproblem is
+        // genuinely hard. Keep the standard adaptive σ (which reflects
+        // KKT quality) rather than forcing a reduction.
+        // The barrier schedule handles μ reduction speed separately.
+
         return sigma;
     }
 
@@ -1498,13 +1573,21 @@ private:
 
                 if (s[k].s[j] > 1e-14) {
                     // Mehrotra cross-term (corrector only, sigma > 0).
+                    // Second-order correction: ds_aff·dλ_aff.
                     // Gated globally by the caller: when apply_cross is false
                     // the cross-term has been rejected because it pushed the
                     // predicted average complementarity above 2*mu.
                     double cross = (sigma > 0.0 && apply_cross)
                                  ? ds_aff_[k][j] * dlambda_aff_[k][j] : 0.0;
-                    dlambda_[k][j] = (sigma * mu_ - s[k].s[j] * s[k].lambda[j]
-                                      - cross
+                    // dlambda from Mehrotra complementarity linearization:
+                    //   s·dλ + λ·ds = σμ - sλ - cross
+                    //   dλ = (σμ - sλ - cross - λ·ds) / s
+                    // The -sλ term is the Newton linearization residual
+                    // (target σμ minus current value sλ, minus cross correction).
+                    // For predictor (σ=0, cross=0): dλ = (-sλ - λ·ds)/s = -λ - λ·ds/s
+                    // For corrector (σ>0): dλ = (σμ - sλ - cross - λ·ds) / s
+                    double sl_term = s[k].s[j] * s[k].lambda[j];
+                    dlambda_[k][j] = (sigma * mu_ - sl_term - cross
                                       - s[k].lambda[j] * ds_[k][j]) / s[k].s[j];
                 } else {
                     dlambda_[k][j] = 0.0;
@@ -2092,7 +2175,7 @@ private:
 
                 out_phi += sv->prob_->cost->stage_cost(xk_t, uk_t, k);
                 Vec<NX> fk;
-                sv->prob_->dynamics->discrete_step(xk_t, uk_t, sv->prob_->dt, fk);
+                sv->prob_->dynamics->discrete_step(xk_t, uk_t, sv->prob_->dt, fk, k);
                 for (int i = 0; i < NX; ++i) {
                     double def = std::fabs(fk[i] - xkp1_t[i]);
                     out_theta += def;  // Use SUM to match compute_theta()
@@ -2214,7 +2297,7 @@ private:
                 for (int i = 0; i < NX; ++i) xkp1_t[i] += alpha * sv->soc_save_dx_[k+1][i];
 
                 Vec<NX> fk;
-                sv->prob_->dynamics->discrete_step(xk_t, uk_t, sv->prob_->dt, fk);
+                sv->prob_->dynamics->discrete_step(xk_t, uk_t, sv->prob_->dt, fk, k);
                 for (int i = 0; i < NX; ++i)
                     sv->soc_save_c_[k][i] = fk[i] - xkp1_t[i];
             }
@@ -2321,6 +2404,11 @@ private:
     double sigma_            = 0.0;     // Mehrotra centering parameter (current iteration)
     bool   cross_term_accepted_ = true;  // cross-term gate result (fed to barrier FSM)
     double alpha_lambda_     = 1.0;     // FTB step for inequality duals λ (independent of line search)
+
+    // Affine predictor FTB limits (for FTB-bottleneck detection)
+    double aff_alpha_p_      = 1.0;     // affine primal FTB step
+    double aff_alpha_d_      = 1.0;     // affine dual FTB step
+    double last_alpha_p_     = 1.0;     // previous corrector primal FTB step
 
     // Filter line search
     FilterLineSearch<NX, NU, HORIZON> filter_ls_;

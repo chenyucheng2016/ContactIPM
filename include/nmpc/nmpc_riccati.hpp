@@ -118,19 +118,32 @@ struct RiccatiSolver {
             ws.Qux_plus_BtPA_stages[k] = ws.Qux_plus_BtPA;
 
             // Regularize & factorize S
+            // Scale-aware regularization floor (Layer 2C)
+            double s_max_abs = 0.0;
+            for (int i = 0; i < NU; ++i)
+                for (int j = 0; j <= i; ++j)
+                    if (std::fabs(ws.S(i, j)) > s_max_abs)
+                        s_max_abs = std::fabs(ws.S(i, j));
+
             double min_diag = 1e100;
             for (int i = 0; i < NU; ++i)
                 if (ws.S(i, i) < min_diag) min_diag = ws.S(i, i);
             double reg = reg_base;
             if (min_diag < 0.0)
-                reg = std::max(reg_base, -min_diag * 1.1);
+                reg = std::max(reg, -min_diag * 1.1);
+            reg = std::max(reg, 1e-10 * s_max_abs);
+
+            // Save original S for clean restore on each retry
+            SymMat<NU> S_save = ws.S;
 
             bool factored = false;
             for (int attempt = 0; attempt < 6; ++attempt) {
+                ws.S = S_save;  // full restore before each attempt
                 for (int i = 0; i < NU; ++i) ws.S(i, i) += reg;
-                if (ws.S.ldlt_factorize(1e-14)) { factored = true; break; }
-                for (int i = 0; i < NU; ++i) ws.S(i, i) -= reg;
-                reg *= 10.0;
+                double d_min = 0.0;
+                if (ws.S.ldlt_factorize(1e-14, &d_min)) { factored = true; break; }
+                // Layer 2A: informed bump from actual indefiniteness magnitude
+                reg = std::max(reg * 10.0, 2.0 * std::fabs(d_min) + 1e-12);
             }
             if (!factored) return Status::KKT_SINGULAR;
             if (reg > reg_used) reg_used = reg;

@@ -225,7 +225,11 @@ struct SymMat {
 
     // LDL^T factorization (in-place). Returns true if positive definite.
     // After call: L in lower triangle, D on diagonal.
-    bool ldlt_factorize(double reg = 1e-12) {
+    // If d_min_out is provided, stores the minimum pivot encountered.
+    // Scans all pivots even on indefiniteness to report the most-negative d_min.
+    bool ldlt_factorize(double reg = 1e-12, double* d_min_out = nullptr) {
+        double d_min = 1e100;
+        bool ok = true;
         for (int j = 0; j < N; ++j) {
             // Compute L_{j,0:j-1} * D * L_{j,0:j-1}^T contribution
             double d_jj = (*this)(j, j);
@@ -234,9 +238,11 @@ struct SymMat {
                 double d_kk = (*this)(k, k);
                 d_jj -= l_jk * l_jk * d_kk;
             }
-            // If pivot is substantially negative, matrix is indefinite → fail
-            if (d_jj < -1e-12) return false;
-            // Regularize near-zero pivots
+            if (d_jj < d_min) d_min = d_jj;
+            // If pivot is substantially negative, mark indefinite but continue
+            // scanning to find the true d_min for informed regularization.
+            if (d_jj < -1e-12) { ok = false; /* continue scanning */ }
+            // Regularize near-zero pivots for remaining computation
             if (d_jj < reg) d_jj = reg;
             (*this)(j, j) = d_jj;  // D(j,j)
 
@@ -249,7 +255,8 @@ struct SymMat {
                 (*this)(i, j) = s / d_jj;  // L(i,j)
             }
         }
-        return true;
+        if (d_min_out) *d_min_out = d_min;
+        return ok;
     }
 
     // Solve L D L^T x = b  after ldlt_factorize. x overwrites b.

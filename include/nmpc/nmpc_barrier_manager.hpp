@@ -86,7 +86,8 @@ public:
     // ═══════════════════════════════════════════════════════════════════
 
     bool update(double& mu, double primal_inf, double compl_inf, double sigma,
-                double stat_inf = -1.0, bool mehrotra_healthy = true) {
+                double stat_inf = -1.0, bool mehrotra_healthy = true,
+                bool ftb_bottleneck = false) {
         iters_at_mu_++;
 
         double E_mu = std::max(primal_inf, compl_inf);
@@ -97,7 +98,14 @@ public:
         bool stat_ok = (stat_inf < 0.0) || (stat_inf <= stat_gate);
 
         bool solved = (primal_compl_ok && stat_ok);
-        bool force  = (iters_at_mu_ >= p_.max_same_mu);
+
+        // FTB-bottleneck: when step is severely limited, the solver
+        // needs more iterations at each μ level to make progress.
+        // Extend max_same_mu to prevent premature forced μ reduction.
+        int effective_max = ftb_bottleneck
+                          ? std::max(p_.max_same_mu * 3, 45)
+                          : p_.max_same_mu;
+        bool force  = (iters_at_mu_ >= effective_max);
 
         if (!solved && !force) {
             // Barrier subproblem not yet solved — hold μ fixed
@@ -109,18 +117,17 @@ public:
         }
 
         // ── Choose sigma exponent based on difficulty ─────────────────
-        // The Mehrotra-corrector health signal refines the classification:
-        //   - rejected cross-term -> subproblem is hard -> sigma^0.5
-        //     (conservative mu reduction; the second-order correction
-        //      couldn't help, so reduce mu slowly)
-        //   - healthy corrector + solved + fast -> sigma^1.5
-        //     (aggressive mu reduction; the corrector confirms the step
-        //      is good, so reduce mu faster)
-        // The solved/force gate is NOT changed -- only the exponent.
+        // FTB-bottleneck override: when fraction-to-boundary limits
+        // the step AND constraint violation is significant, use aggressive
+        // μ reduction exponent. This does NOT override the solved/force
+        // gate — it only changes the exponent when μ IS being reduced.
         double sigma_exp;
         const char* difficulty;
 
-        if (!mehrotra_healthy) {
+        if (ftb_bottleneck) {
+            sigma_exp = p_.sigma_exp_easy;
+            difficulty = "ftb-bottleneck";
+        } else if (!mehrotra_healthy) {
             sigma_exp = p_.sigma_exp_hard;
             difficulty = "hard(mehrotra)";
         } else if (solved && iters_at_mu_ <= p_.fast_threshold) {
