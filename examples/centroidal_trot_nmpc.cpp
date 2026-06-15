@@ -241,6 +241,21 @@ struct TrotCost : CostModel<NX, NU> {
         pref[0] = 0.8 * t;  pref[1] = 0.0;  pref[2] = 0.28;
     }
 
+    // Pre-jump: stages immediately before a phase boundary
+    //   Phase 0→1 at k=12 (switch at k=11→12)
+    //   Phase 1→2 at k=25 (switch at k=24→25)
+    //   Phase 2→3 at k=37 (switch at k=36→37)
+    static bool is_pre_jump(int k) {
+        return (k == 11 || k == 24 || k == 36);
+    }
+
+    // Boost factor for pre-jump cost (like a terminal cost at switch boundaries)
+    static constexpr double PJ_SCL = 12.0;  // 12× boost at switch points (pre-jump)
+
+    double stage_scale(int k) const {
+        return is_pre_jump(k) ? (1.0 + PJ_SCL) : 1.0;
+    }
+
     double stage_cost(const VecX& x, const VecU& u, int k) override {
         double pr[3]; ref_at(k, pr);
         double c = 0;
@@ -251,7 +266,7 @@ struct TrotCost : CostModel<NX, NU> {
         c += Qq[0]*qw_e*qw_e + Qq[1]*x[7]*x[7] + Qq[2]*x[8]*x[8] + Qq[3]*x[9]*x[9];
         for (int i=0;i<3;++i) c += Qw[i]*x[10+i]*x[10+i];
         for (int i=0;i<NU;++i) c += Rf*u[i]*u[i];
-        return 0.5*c;
+        return 0.5 * c * stage_scale(k);   // apply pre-jump boost
     }
 
     double terminal_cost(const VecX& x) override {
@@ -276,10 +291,13 @@ struct TrotCost : CostModel<NX, NU> {
         qx[7] = Qq[1]*x[7];  qx[8] = Qq[2]*x[8];  qx[9] = Qq[3]*x[9];
         for (int i=0;i<3;++i) qx[10+i] = Qw[i]*x[10+i];
         for (int i=0;i<NU;++i) qu[i]   = Rf*u[i];
+        double scl = stage_scale(k);
+        for (int i=0;i<NX;++i) qx[i] *= scl;
+        for (int i=0;i<NU;++i) qu[i] *= scl;
         return Status::SUCCESS;
     }
 
-    Status stage_hessian(const VecX&, const VecU&, int,
+    Status stage_hessian(const VecX&, const VecU&, int k,
                          MatXX& Qxx, Mat<NU,NU>& Quu,
                          Mat<NU,NX>& Qux) override {
         Qxx.zero();
@@ -290,6 +308,10 @@ struct TrotCost : CostModel<NX, NU> {
         Quu.zero();
         for (int i=0;i<NU;++i) Quu(i,i)=Rf;
         Qux.zero();
+        double scl = stage_scale(k);
+        for (int i=0;i<NX;++i) for (int j=0;j<NX;++j) Qxx(i,j) *= scl;
+        for (int i=0;i<NU;++i) Quu(i,i) *= scl;
+        for (int i=0;i<NU;++i) for (int j=0;j<NX;++j) Qux(i,j) *= scl;
         return Status::SUCCESS;
     }
 
