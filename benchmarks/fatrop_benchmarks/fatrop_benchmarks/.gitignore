@@ -1,0 +1,82 @@
+benchmark/
+*.orig
+*jit_tmp*
+.vscode/
+*.pyc
+*.mp4
+/__pycache__/
+/foobar/
+foobar/*
+*.ipynb_checkpoints*
+*.aux
+*.log
+*.synctex.gz
+*.pdf
+*.out
+*.pyobj
+*.so
+*.o
+*.out
+*.a
+*.idea/*
+*.bin
+*.pdf
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.egg
+outp**
+export.bash
+c_generated_code/
+acados_ocp_rockit_model.json
+
+*egg-info/
+
+*build/
+release/
+fatropspec.json
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+vimsession
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app

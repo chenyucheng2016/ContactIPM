@@ -42,6 +42,7 @@ enum class Status : int32_t {
     DIVERGING              = 6,   // Cost increasing despite regularization
     BAD_ARGUMENT           = 7,   // Invalid dimensions or nullptr
     NOT_INITIALIZED        = 8,   // Solver not initialized
+    STAGNATION             = 10,  // Stagnation break but KKT tol not met
     INTERNAL_ERROR         = 99
 };
 
@@ -56,6 +57,7 @@ inline const char* status_string(Status s) {
     case Status::DIVERGING:           return "Diverging";
     case Status::BAD_ARGUMENT:        return "Bad argument";
     case Status::NOT_INITIALIZED:     return "Not initialized";
+    case Status::STAGNATION:          return "Stagnation (KKT tol not met)";
     default:                          return "Unknown error";
     }
 }

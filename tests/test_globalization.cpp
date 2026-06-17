@@ -187,7 +187,8 @@ void test_complementarity_safeguard() {
     Status st = solver.solve(prob);
     const auto& stats = solver.last_stats();
 
-    if (st != Status::SUCCESS && st != Status::MAX_ITERATIONS) {
+    if (st != Status::SUCCESS && st != Status::MAX_ITERATIONS
+        && st != Status::STAGNATION) {
         char buf[128];
         snprintf(buf, sizeof(buf), "solve failed: %s", status_string(st));
         FAIL(buf); return;
@@ -233,7 +234,8 @@ void test_barrier_manager_integration() {
     Status st = solver.solve(prob);
     const auto& stats = solver.last_stats();
 
-    if (st != Status::SUCCESS && st != Status::MAX_ITERATIONS) {
+    if (st != Status::SUCCESS && st != Status::MAX_ITERATIONS
+        && st != Status::STAGNATION) {
         char buf[128];
         snprintf(buf, sizeof(buf), "barrier strategy failed: %s", status_string(st));
         FAIL(buf); return;
@@ -261,8 +263,9 @@ void test_adaptive_penalty() {
     Status st1 = solver1.solve(prob1);
     const auto& stats1 = solver1.last_stats();
 
-    // Accept SUCCESS or MAX_ITERATIONS
-    if (st1 != Status::SUCCESS && st1 != Status::MAX_ITERATIONS) {
+    // Accept SUCCESS, MAX_ITERATIONS, or STAGNATION
+    if (st1 != Status::SUCCESS && st1 != Status::MAX_ITERATIONS
+        && st1 != Status::STAGNATION) {
         char buf[128];
         snprintf(buf, sizeof(buf), "filter_ls failed: status=%d", (int)st1);
         FAIL(buf); return;
@@ -295,7 +298,7 @@ void test_soc_activation() {
     const auto& stats1 = solver1.last_stats();
 
     if (st1 != Status::SUCCESS && st1 != Status::MAX_ITERATIONS
-        && st1 != Status::LINE_SEARCH_FAILURE) {
+        && st1 != Status::LINE_SEARCH_FAILURE && st1 != Status::STAGNATION) {
         char buf[128];
         snprintf(buf, sizeof(buf), "soc_max=4 failed: %s", status_string(st1));
         FAIL(buf); return;
@@ -313,7 +316,7 @@ void test_soc_activation() {
 
     // Both should produce a result (might not converge fully)
     if (st2 != Status::SUCCESS && st2 != Status::MAX_ITERATIONS
-        && st2 != Status::LINE_SEARCH_FAILURE) {
+        && st2 != Status::LINE_SEARCH_FAILURE && st2 != Status::STAGNATION) {
         char buf[128];
         snprintf(buf, sizeof(buf), "soc_max=0 unexpected: %s", status_string(st2));
         FAIL(buf); return;

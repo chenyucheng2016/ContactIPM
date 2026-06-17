@@ -1,0 +1,16 @@
+num_trailers: 2
+
+truck:
+  L: 0.4
+  M: 0.1
+  W: 0.2
+
+trailer1:
+  L: 1.1
+  M: 0.2
+  W: 0.2
+
+trailer2:
+  L: 0.8
+  M: 0.1
+  W: 0.2

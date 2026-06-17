@@ -753,7 +753,7 @@ public:
 
         Status final_status;
         if (iter < params_.max_iters && !ls_failed) {
-            final_status = Status::SUCCESS;
+            final_status = kkt_converged() ? Status::SUCCESS : Status::STAGNATION;
         } else if (ls_failed) {
             final_status = Status::LINE_SEARCH_FAILURE;
         } else {

@@ -237,7 +237,7 @@ int main() {
     pp.max_iters = 300;
     // Matched tolerances for fair comparison vs acados.
     pp.mu_min = 1e-4;
-    pp.tol_primal = 1e-3; pp.tol_compl = 1e-3; pp.tol_ineq = 1e-4; pp.tol_stat = 1e-1;
+    pp.tol_primal = 1e-2; pp.tol_compl = 1e-2; pp.tol_ineq = 1e-2; pp.tol_stat = 1e-2;
     pp.kappa_eps = 5.0;  pp.max_same_mu = 15;
     pp.verbosity = 2;
     solver.configure(pp);

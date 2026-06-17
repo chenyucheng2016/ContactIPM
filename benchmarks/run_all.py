@@ -8,17 +8,13 @@ Methodology (honest):
   - ContactIPM:  warm in-process min-of-5 timing loop (verbosity=0 during
                  timed solves), mirrors acados's NTIMINGS=5 internal timer.
   - acados:      internal time_tot, min-of-5 in-process solves (unchanged).
-  - Tolerances:  ContactIPM uses per-problem tol_stat (pendulum 1e-3, quadrotor
-                 5e-2, chain_mass 1e-1, all RELATIVE).  acados uses its codegen
-                 tolerances (pendulum/chain 1e-2, quadrotor 5e-2).  The achieved
-                 KKT residual is reported for each -- they are NOT identical.
-  - Cost:        CAVEAT -- the solvers optimize slightly different objectives.
-                 acados uses dt-scaled stage costs (cost_scaling=dt); ContactIPM
-                 uses unscaled stage costs.  The reported "Cost" is computed by
-                 the SAME unscaled formula on both trajectories, but since each
-                 solver minimized a different objective, the trajectories (and
-                 thus costs) are not directly comparable.  Treat cost differences
-                 as indicative, not definitive.
+  - Tolerances:  Both solvers use matched per-component tolerances.
+                 Pendulum/Chain Mass: all 1e-2.  Quadrotor: all 5e-2 (codegen
+                 default for both solvers).  Achieved KKT residual is reported
+                 for transparency.
+  - Cost:        Both solvers optimize the SAME objective (acados EXTERNAL cost
+                 with no dt-scaling, verified via codegen).  Costs are directly
+                 comparable.
   - Solution quality is best judged by primal feasibility (both ~0 violation)
                  and solve time, which are directly comparable.
 """
@@ -47,10 +43,11 @@ CONTACTIPM_BENCHMARKS = [
 ]
 
 # Per-problem matched tolerance target (applied to both solvers).
+# All 4 KKT conditions (stat, eq, ineq, comp) use the SAME value per problem.
 TARGET_TOL = {
-    'Pendulum':   '1e-3',
+    'Pendulum':   '1e-2',
     'Quadrotor':  '5e-2',
-    'Chain Mass': '1e-1',
+    'Chain Mass': '1e-2',
 }
 
 N_RUNS = 5  # min-of-N for timing stability
@@ -256,10 +253,9 @@ def print_table(cipm_results, acados_results):
     print(f"  Methodology notes:")
     print(f"  - ContactIPM: warm in-process min-of-{N_RUNS} (verbosity=0 during timed solves)")
     print(f"  - acados:     internal time_tot, min-of-{N_RUNS} in-process solves")
-    print(f"  - Both solvers override tolerances to the same per-problem target (shown above)")
-    print(f"  - Stationarity is RELATIVE (||grad L|| / max|terms|) for ContactIPM,")
-    print(f"    kkt_norm_inf for acados -- both are scaled KKT measures")
-    print(f"  - Cost computed identically on both trajectories (unscaled stage+terminal)")
+    print(f"  - Both solvers override tolerances to matched per-component values")
+    print(f"  - ContactIPM SUCCESS requires all 4 KKT conditions met (else STAGNATION)")
+    print(f"  - Cost computed identically on both trajectories (verified: no dt-scaling)")
     print(f"  - Single-epoch solve (no closed-loop simulation)")
     print(f"  - All results fresh from executables -- no hardcoded numbers")
     print("=" * 90)
