@@ -1218,6 +1218,35 @@ private:
         // Are Riccati costates available? (not on first iteration)
         bool costates_valid = (riccati_ws_.p[N].norm_inf() > 0.0 || has_costates_);
 
+        // ── Costate recovery: overwrite Riccati costates with KKT-consistent
+        //    costates computed from the x-stationarity equation using FRESH
+        //    Jacobians from evaluate_model().  The Riccati backward pass uses
+        //    barrier-augmented gradients at the LINEARIZATION point, but after
+        //    applying the Newton step and re-evaluating the model, the Jacobians
+        //    A, B change (nonlinear dynamics).  Recomputing p[k] via:
+        //       p[N] = qx[N]
+        //       p[k] = qx[k] + Cx^T·λ + A^T·p[k+1]
+        //    ensures ∇_x L = 0 by construction, so stationarity reduces to
+        //    checking ∇_u L (the actual convergence measure).
+        if (costates_valid) {
+            riccati_ws_.p[N] = s[N].qx;
+            for (int k = N - 1; k >= 0; --k) {
+                riccati_ws_.p[k] = s[k].qx;
+                // Add Cx^T·λ
+                if (prob_->constraints) {
+                    for (int j = 0; j < NC; ++j) {
+                        double lj = s[k].lambda[j];
+                        for (int i = 0; i < NX; ++i)
+                            riccati_ws_.p[k][i] += s[k].Cx(j, i) * lj;
+                    }
+                }
+                // Add A^T·p[k+1]
+                for (int i = 0; i < NX; ++i)
+                    for (int m = 0; m < NX; ++m)
+                        riccati_ws_.p[k][i] += s[k].A(m, i) * riccati_ws_.p[k + 1][m];
+            }
+        }
+
         for (int k = 0; k <= N; ++k) {
             // ── 1. Primal feasibility ────────────────────────────
             // Dynamics defect: c_k = f(x_k,u_k) - x_{k+1}
@@ -1258,13 +1287,10 @@ private:
             }
 
             // ── 4. Stationarity: full Lagrangian gradient ─────────
-            // Full KKT stationarity:
-            //   ∇_x L = qx + Cx^T·λ + A^T·ν_{k+1} - ν_k = 0
-            //   ∇_u L = qu + Cu^T·λ + B^T·ν_{k+1}         = 0
-            // where ν_k = Riccati costate p[k].
-            //
-            // WITHOUT costate terms (old code), we only check
-            //   ∇cost + C^T·λ, which is NOT the full stationarity.
+            // Full KKT stationarity (using costates recovered from the
+            // x-stationarity equation in the costate recovery step above):
+            //   ∇_x L = qx + Cx^T·λ + A^T·p_{k+1} - p_k = 0  (by construction)
+            //   ∇_u L = qu + Cu^T·λ + B^T·p_{k+1}         = 0  (convergence measure)
             {
                 Vec<NX> lag_x = s[k].qx;
                 Vec<NU> lag_u;
