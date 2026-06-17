@@ -70,6 +70,12 @@ struct PaperIPMParams {
     int    slow_threshold   = 4;      // ≥ this many iters → hard
     int    max_same_mu     = 30;      // force mu reduction after this many iterations at same mu
 
+    // === Nonlinear KKT Iterative Refinement (Shamanskii chord) ===
+    bool   enable_refinement  = true;    // enable direction refinement before line search
+    int    max_refine_iters   = 5;       // max chord passes
+    double refine_tol         = 1e-6;    // nonlinear residual tolerance
+    double refine_diverge_fac = 1.5;     // divergence guard: stop if ||r|| > fac * prev
+
     // Output
     int    verbosity     = 0;
 };
@@ -327,6 +333,12 @@ public:
             build_kkt_rhs();
             st = solve_kkt_rhs_and_forward();
             if (st != Status::SUCCESS) return st;
+
+            // ── Nonlinear KKT iterative refinement (Shamanskii chord) ────
+            if (params_.enable_refinement) {
+                refine_newton_direction();  // refines ws.dx, ws.du in-place
+            }
+
             recover_inequality_steps(sigma_);
             has_costates_ = true;  // costates now valid for stationarity check
 
@@ -921,6 +933,270 @@ private:
         s[N].qu.zero();
 
         return Status::SUCCESS;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    //  Evaluate trial point for nonlinear KKT refinement (Shamanskii chord)
+    // ═════════════════════════════════════════════════════════════════════
+
+    bool evaluate_trial_point() {
+        const int N = HORIZON;
+        Stage* s = prob_->stages;
+
+        for (int k = 0; k < N; ++k) {
+            // Trial point: x_trial = x_k + dx[k], u_trial = u_k + du[k]
+            Vec<NX> x_trial;
+            Vec<NU> u_trial;
+            for (int i = 0; i < NX; ++i)
+                x_trial[i] = s[k].x[i] + riccati_ws_.dx[k][i];
+            for (int i = 0; i < NU; ++i)
+                u_trial[i] = s[k].u[i] + riccati_ws_.du[k][i];
+
+            // NaN guard on trial point
+            if (!is_finite(x_trial) || !is_finite(u_trial))
+                return false;
+
+            // Dynamics at trial point
+            Vec<NX> fk;
+            Status st = prob_->dynamics->discrete_step(x_trial, u_trial, prob_->dt, fk, k);
+            if (st != Status::SUCCESS) return false;
+            if (!is_finite(fk)) return false;
+
+            // Dynamics defect: c_trial[k] = f(x_trial, u_trial) - (x_{k+1} + dx[k+1])
+            for (int i = 0; i < NX; ++i)
+                trial_stages_[k].c[i] = fk[i] - (s[k + 1].x[i] + riccati_ws_.dx[k + 1][i]);
+
+            // Dynamics Jacobians at trial point (frozen in riccati_stages_, not updated)
+            // We only need the defect c for the chord method
+
+            // Cost gradient at trial point
+            Vec<NX> qx_trial;
+            Vec<NU> qu_trial;
+            st = prob_->cost->stage_gradient(x_trial, u_trial, k, qx_trial, qu_trial);
+            if (st != Status::SUCCESS) return false;
+            trial_stages_[k].qx = qx_trial;
+            trial_stages_[k].qu = qu_trial;
+
+            // Constraints at trial point
+            if (prob_->constraints) {
+                Vec<NC> d_trial;
+                st = prob_->constraints->evaluate(x_trial, u_trial, k, d_trial);
+                if (st != Status::SUCCESS) return false;
+                trial_stages_[k].d = d_trial;
+
+                // Jacobians at trial point
+                st = prob_->constraints->jacobian(x_trial, u_trial, k,
+                                                   trial_stages_[k].Cx, trial_stages_[k].Cu);
+                if (st != Status::SUCCESS) return false;
+            }
+        }
+
+        // Terminal stage
+        Vec<NX> xN_trial;
+        for (int i = 0; i < NX; ++i)
+            xN_trial[i] = s[N].x[i] + riccati_ws_.dx[N][i];
+        if (!is_finite(xN_trial)) return false;
+
+        Status st = prob_->cost->terminal_gradient(xN_trial, trial_stages_[N].qx);
+        if (st != Status::SUCCESS) return false;
+
+        if (prob_->constraints) {
+            Vec<NC> dN_trial;
+            st = prob_->constraints->evaluate_terminal(xN_trial, dN_trial);
+            if (st != Status::SUCCESS) return false;
+            trial_stages_[N].d = dN_trial;
+
+            st = prob_->constraints->jacobian_terminal(xN_trial, trial_stages_[N].Cx);
+            if (st != Status::SUCCESS) return false;
+        }
+
+        // Terminal has no u
+        trial_stages_[N].qu.zero();
+
+        return true;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    //  Compute nonlinear KKT residual norm (cheap, no dynamics eval)
+    // ═════════════════════════════════════════════════════════════════════
+
+    // Check dynamics defect norm only (the true target of Shamanskii refinement).
+    // Stationarity uses a DIFFERENT effective gradient (barrier-modified) that we
+    // can't easily evaluate without updating dual/slack variables, so it's excluded.
+    double dynamics_defect_norm() {
+        const int N = HORIZON;
+        Stage* s = prob_->stages;
+        double max_def = 0.0;
+        for (int k = 0; k < N; ++k)
+            max_def = std::max(max_def, s[k].c.norm_inf());
+        return max_def;
+    }
+
+    // Trial-point dynamics defect norm (after evaluate_trial_point)
+    double trial_dynamics_defect() {
+        const int N = HORIZON;
+        double max_def = 0.0;
+        for (int k = 0; k < N; ++k)
+            max_def = std::max(max_def, trial_stages_[k].c.norm_inf());
+        return max_def;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    //  Pack nonlinear KKT residual into riccati_stages_ RHS
+    // ═════════════════════════════════════════════════════════════════════
+
+    double compute_nonlinear_kkt_rhs() {
+        const int N = HORIZON;
+        Stage* s = prob_->stages;
+        double res_norm = 0.0;
+
+        for (int k = 0; k <= N; ++k) {
+            // Dynamics defect from trial evaluation
+            if (k < N) {
+                riccati_stages_[k].c = trial_stages_[k].c;
+                res_norm = std::max(res_norm, trial_stages_[k].c.norm_inf());
+            }
+
+            // Stationarity-x: qx_trial + Cx_trial^T * lambda_k
+            // (using lambda from z_k -- primal-only refinement)
+            Vec<NX> rx = trial_stages_[k].qx;
+            if (prob_->constraints) {
+                for (int j = 0; j < NC; ++j)
+                    for (int i = 0; i < NX; ++i)
+                        rx[i] += trial_stages_[k].Cx(j, i) * s[k].lambda[j];
+            }
+            riccati_stages_[k].qx = rx;
+            res_norm = std::max(res_norm, rx.norm_inf());
+
+            // Stationarity-u: qu_trial + Cu_trial^T * lambda_k (k < N only)
+            if (k < N) {
+                Vec<NU> ru = trial_stages_[k].qu;
+                if (prob_->constraints) {
+                    for (int j = 0; j < NC; ++j)
+                        for (int i = 0; i < NU; ++i)
+                            ru[i] += trial_stages_[k].Cu(j, i) * s[k].lambda[j];
+                }
+                riccati_stages_[k].qu = ru;
+                res_norm = std::max(res_norm, ru.norm_inf());
+            } else {
+                riccati_stages_[k].qu.zero();
+            }
+            // A, B, Quu, Qux, Qxx remain frozen from build_kkt_lhs()
+        }
+        return res_norm;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
+    //  Refine Newton direction via Shamanskii chord method
+    // ═════════════════════════════════════════════════════════════════════
+
+    void refine_newton_direction() {
+        // ── Step 0: Current-point dynamics defect (for no-improvement guard) ──
+        double c0 = dynamics_defect_norm();
+
+        // ── Step 1: Evaluate trial point BEFORE loop ────────────────────────
+        // For linear/exact-linearization problems, Newton already drives the
+        // dynamics defect to ~0 at the trial point → refinement can't improve.
+        if (!evaluate_trial_point()) {
+            if (params_.verbosity >= 2)
+                printf("  [refine: NaN/inf in initial trial eval, skipping]\n");
+            return;
+        }
+
+        double c_trial = trial_dynamics_defect();
+
+        // Early exit: trial dynamics defect already small enough
+        if (c_trial < params_.refine_tol) {
+            if (params_.verbosity >= 2)
+                printf("  [refine: skip, ||c_trial||=%.3e < tol=%.1e]\n",
+                       c_trial, params_.refine_tol);
+            return;
+        }
+
+        // No-improvement guard: if trial defect >= current defect,
+        // Newton didn't reduce dynamics error → refinement won't help.
+        if (c_trial >= c0) {
+            if (params_.verbosity >= 2)
+                printf("  [refine: skip, ||c_trial||=%.3e >= ||c_0||=%.3e, no improvement]\n",
+                       c_trial, c0);
+            return;
+        }
+
+        // Set up Riccati RHS using full residual (dynamics + stationarity coupling)
+        compute_nonlinear_kkt_rhs();
+
+        double prev_def = c_trial;
+        int passes_used = 0;
+
+        for (int pass = 0; pass < params_.max_refine_iters; ++pass) {
+            if (params_.verbosity >= 2)
+                printf("  [refine:%d] ||c||=%.3e\n", pass, c_trial);
+
+            // Divergence guard: factorization too stale
+            if (pass > 0 && c_trial > params_.refine_diverge_fac * prev_def) {
+                if (params_.verbosity >= 2)
+                    printf("  [refine:%d] diverging (%.3e > %.1f*%.3e), stopping\n",
+                           pass, c_trial, params_.refine_diverge_fac, prev_def);
+                break;
+            }
+            prev_def = c_trial;
+
+            // Save accumulated direction (will be overwritten by backward_rhs)
+            Vec<NX> saved_dx[HORIZON + 1];
+            Vec<NU> saved_du[HORIZON];
+            for (int k = 0; k <= HORIZON; ++k) {
+                saved_dx[k] = riccati_ws_.dx[k];
+                if (k < HORIZON) saved_du[k] = riccati_ws_.du[k];
+            }
+
+            // Solve correction: K(z_k) * delta = -r(z_trial)
+            Status st = Ricc::backward_rhs(riccati_stages_, riccati_ws_);
+            if (st != Status::SUCCESS) {
+                if (params_.verbosity >= 1)
+                    printf("  [refine:%d] backward_rhs failed, stopping\n", pass);
+                break;
+            }
+            Vec<NX> dx0_zero;
+            dx0_zero.zero();
+            st = Ricc::forward(riccati_stages_, riccati_ws_, dx0_zero);
+            if (st != Status::SUCCESS) {
+                if (params_.verbosity >= 1)
+                    printf("  [refine:%d] forward failed, stopping\n", pass);
+                break;
+            }
+
+            // Direct accumulation: ws = saved + correction
+            for (int k = 0; k <= HORIZON; ++k) {
+                for (int i = 0; i < NX; ++i)
+                    riccati_ws_.dx[k][i] = saved_dx[k][i] + riccati_ws_.dx[k][i];
+                if (k < HORIZON)
+                    for (int i = 0; i < NU; ++i)
+                        riccati_ws_.du[k][i] = saved_du[k][i] + riccati_ws_.du[k][i];
+            }
+            passes_used = pass + 1;
+
+            // Re-evaluate trial at updated direction for next iteration
+            if (!evaluate_trial_point()) {
+                if (params_.verbosity >= 1)
+                    printf("  [refine:%d] NaN/inf in trial eval, aborting\n", pass);
+                break;
+            }
+            c_trial = trial_dynamics_defect();
+
+            // Termination: dynamics defect small enough
+            if (c_trial < params_.refine_tol) {
+                if (params_.verbosity >= 2)
+                    printf("  [refine:%d] converged, ||c||=%.3e < tol=%.1e\n",
+                           pass + 1, c_trial, params_.refine_tol);
+                break;
+            }
+
+            // Update Riccati RHS for next correction solve
+            compute_nonlinear_kkt_rhs();
+        }
+
+        if (params_.verbosity >= 1 && passes_used > 0)
+            printf("  [refine: %d passes, final ||c||=%.3e]\n", passes_used, c_trial);
     }
 
     // ═════════════════════════════════════════════════════════════════════
@@ -2420,6 +2696,11 @@ private:
     Vec<NC> soc_save_ds_[HORIZON + 1];
     Vec<NC> soc_save_dlam_[HORIZON + 1];
     Vec<NX> soc_save_c_[HORIZON];
+
+    // Nonlinear KKT iterative refinement workspace (Shamanskii chord method)
+    StageData<NX, NU, NC> trial_stages_[HORIZON + 1];  // trial point evaluation
+    Vec<NX> temp_corr_dx_[HORIZON + 1];                 // correction buffer (x)
+    Vec<NU> temp_corr_du_[HORIZON];                     // correction buffer (u)
 
 };
 
