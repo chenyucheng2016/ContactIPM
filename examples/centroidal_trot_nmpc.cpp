@@ -35,7 +35,7 @@ using namespace nmpc;
 // == Dimensions ================================================================
 constexpr int NX = 13;   // [px,py,pz, vx,vy,vz, qw,qx,qy,qz, wx,wy,wz]
 constexpr int NU = 12;   // [fFL_x,y,z, fFR_x,y,z, fRL_x,y,z, fRR_x,y,z]
-constexpr int NC = 34;   // 20 active-foot + 6 inactive-foot + 8 state bounds
+constexpr int NC = 38;   // 20 active-foot + 10 inactive-foot + 8 state bounds
 constexpr int N  = 50;   // horizon length
 
 // == Physical parameters =======================================================
@@ -67,15 +67,15 @@ static constexpr double RF[4][2][3] = {
     {{0.22,-0.19, 0.0}, {0.22, 0.19, 0.0}},   // Phase 1: FR, RL
     {{0.42, 0.19, 0.0}, {0.42,-0.19, 0.0}},   // Phase 2: FL, RR
     {{0.62,-0.19, 0.0}, {0.62, 0.19, 0.0}},   // Phase 3: FR, RL
-};
+}; // world frame (used for dynamics moment arm)
 
 // == Constraint index map ======================================================
 // Layout (always):
 //   [0..9]   = first active foot  (10 constraints)
 //   [10..19] = second active foot (10 constraints)
-//   [20..22] = first inactive foot  (3 constraints: -fx, fx, -fz)
-//   [23..25] = second inactive foot (3 constraints: -fx, fx, -fz)
-//   [26..33] = state bounds (8 constraints)
+//   [20..24] = first inactive foot  (5 constraints: -fx, fx, -fy, fy, -fz)
+//   [25..29] = second inactive foot (5 constraints: -fx, fx, -fy, fy, -fz)
+//   [30..37] = state bounds (8 constraints)
 //
 // Which foot maps to which slot depends on the phase.
 // ==============================================================================
@@ -234,6 +234,18 @@ struct TrotCost : CostModel<NX, NU> {
     static constexpr double Qw[3]  = { 2.0,  2.0,  1.0};
     static constexpr double Rf     = 1e-3;
     static constexpr double TSCL   = 7.0;   // terminal ≈ 7x stage
+    static constexpr double Qws[3] = {50.0, 50.0, 30.0}; // body-frame posture penalty
+    static constexpr double FZ_NOM = 0.5 * BODY_MASS * 9.81;  // ~58.86 N (nominal stance force)
+    static constexpr double Qfz    = 2e-3;  // force-target penalty weight
+
+    // Nominal body-frame foothold positions (constant, robot geometry)
+    // Order: FL, FR, RL, RR  (x=forward, y=left, z=down from COM)
+    static constexpr double RNOM[4][3] = {
+        { 0.20,  0.19, -0.28},   // FL
+        { 0.20, -0.19, -0.28},   // FR
+        {-0.20,  0.19, -0.28},   // RL
+        {-0.20, -0.19, -0.28}    // RR
+    };
 
     // Reference: p_ref(t) = [0.8t, 0, 0.28],  v_ref = [0.8, 0, 0]
     static void ref_at(int k, double pref[3]) {
@@ -256,6 +268,52 @@ struct TrotCost : CostModel<NX, NU> {
         return is_pre_jump(k) ? (1.0 + PJ_SCL) : 1.0;
     }
 
+    // ── Body-frame posture penalty helpers ──────────────────────────
+    // R^T(q): world → body rotation (q = [qw,qx,qy,qz])
+    static void Rt_mat(double qw, double qx, double qy, double qz, double R[3][3]) {
+        R[0][0]=1-2*(qy*qy+qz*qz); R[0][1]=2*(qx*qy+qz*qw);   R[0][2]=2*(qx*qz-qy*qw);
+        R[1][0]=2*(qx*qy-qz*qw);   R[1][1]=1-2*(qx*qx+qz*qz); R[1][2]=2*(qy*qz+qx*qw);
+        R[2][0]=2*(qx*qz+qy*qw);   R[2][1]=2*(qy*qz-qx*qw);   R[2][2]=1-2*(qx*qx+qy*qy);
+    }
+
+    // For each foot i=0..3: compute body-frame deviation e[i] = R^T*(pW_i - pC) - rNom_i
+    // fpw[i] = world foothold, rb[i] = body-frame position of foothold
+    static void posture_devs(const VecX& x, int ph, double fpw[4][3],
+                             double rb[4][3], double e[4][3]) {
+        double R[3][3];
+        Rt_mat(x[6],x[7],x[8],x[9], R);
+        for (int i = 0; i < 4; ++i) {
+            int sl = -1;
+            if (i == PH_FEET[ph][0]) sl = 0;
+            else if (i == PH_FEET[ph][1]) sl = 1;
+            double pw[3];
+            if (sl >= 0) {
+                pw[0]=RF[ph][sl][0]; pw[1]=RF[ph][sl][1]; pw[2]=RF[ph][sl][2];
+            } else {
+                // Inactive foot: approximate world foothold from nearest active
+                int asl = (std::fabs(RF[ph][0][0]-x[0]) < std::fabs(RF[ph][1][0]-x[0])) ? 0 : 1;
+                pw[0]=RF[ph][asl][0]; pw[1]=(i%2==0)?0.19:-0.19; pw[2]=0.0;
+            }
+            fpw[i][0]=pw[0]; fpw[i][1]=pw[1]; fpw[i][2]=pw[2];
+            double d[3] = {pw[0]-x[0], pw[1]-x[1], pw[2]-x[2]};
+            for (int a=0;a<3;++a)
+                rb[i][a] = R[a][0]*d[0] + R[a][1]*d[1] + R[a][2]*d[2];
+            for (int a=0;a<3;++a)
+                e[i][a] = rb[i][a] - RNOM[i][a];
+        }
+    }
+
+    // Jacobian block de_i/dx: 3×13 sparse
+    // Columns 0-2: -R^T,  3-5: 0,  6-9: -[r_i^B]_x
+    static void posture_J(const double R[3][3], const double rb[3], double J[3][13]) {
+        for(int a=0;a<3;++a) for(int b=0;b<13;++b) J[a][b]=0;
+        for(int a=0;a<3;++a) for(int b=0;b<3;++b) J[a][b] = -R[a][b];
+        // -[r^B]_x  where [r]_x v = r × v
+        J[0][7]=-rb[2]; J[0][8]= rb[1];
+        J[1][6]= rb[2];                 J[1][8]=-rb[0];
+        J[2][6]=-rb[1]; J[2][7]= rb[0];
+    }
+
     double stage_cost(const VecX& x, const VecU& u, int k) override {
         double pr[3]; ref_at(k, pr);
         double c = 0;
@@ -266,6 +324,24 @@ struct TrotCost : CostModel<NX, NU> {
         c += Qq[0]*qw_e*qw_e + Qq[1]*x[7]*x[7] + Qq[2]*x[8]*x[8] + Qq[3]*x[9]*x[9];
         for (int i=0;i<3;++i) c += Qw[i]*x[10+i]*x[10+i];
         for (int i=0;i<NU;++i) c += Rf*u[i]*u[i];
+        // Force-target penalty: penalize active fz deviating from mg/2
+        {
+            int ph = get_phase(k);
+            for (int s=0;s<2;++s) {
+                int fi = PH_FEET[ph][s];
+                double dfz = u[fi*3+2] - FZ_NOM;
+                c += Qfz * dfz * dfz;
+            }
+        }
+
+        // Body-frame posture penalty at pre-event stages only (before contact switches)
+        if (is_pre_jump(k)) {
+            int ph = get_phase(k);
+            double fpw[4][3], rb[4][3], e[4][3];
+            posture_devs(x, ph, fpw, rb, e);
+            for (int i=0;i<4;++i)
+                for (int a=0;a<3;++a) c += Qws[a]*e[i][a]*e[i][a];
+        }
         return 0.5 * c * stage_scale(k);   // apply pre-jump boost
     }
 
@@ -291,22 +367,67 @@ struct TrotCost : CostModel<NX, NU> {
         qx[7] = Qq[1]*x[7];  qx[8] = Qq[2]*x[8];  qx[9] = Qq[3]*x[9];
         for (int i=0;i<3;++i) qx[10+i] = Qw[i]*x[10+i];
         for (int i=0;i<NU;++i) qu[i]   = Rf*u[i];
+        // Force-target gradient
+        {
+            int ph = get_phase(k);
+            for (int s=0;s<2;++s) {
+                int fi = PH_FEET[ph][s];
+                qu[fi*3+2] += Qfz * (u[fi*3+2] - FZ_NOM);
+            }
+        }
+
+        // Posture gradient at pre-event stages only
+        if (is_pre_jump(k)) {
+            int ph = get_phase(k);
+            double fpw[4][3], rb[4][3], e[4][3];
+            posture_devs(x, ph, fpw, rb, e);
+            double R[3][3]; Rt_mat(x[6],x[7],x[8],x[9], R);
+            for (int i=0;i<4;++i) {
+                double J[3][13]; posture_J(R, rb[i], J);
+                for (int j=0;j<13;++j)
+                    for (int a=0;a<3;++a) qx[j] += Qws[a]*e[i][a]*J[a][j];
+            }
+        }
         double scl = stage_scale(k);
         for (int i=0;i<NX;++i) qx[i] *= scl;
         for (int i=0;i<NU;++i) qu[i] *= scl;
         return Status::SUCCESS;
     }
 
-    Status stage_hessian(const VecX&, const VecU&, int k,
+    Status stage_hessian(const VecX& x, const VecU&, int k,
                          MatXX& Qxx, Mat<NU,NU>& Quu,
                          Mat<NU,NX>& Qux) override {
+        // Base tracking cost Hessian (unscaled)
         Qxx.zero();
         for (int i=0;i<3;++i) Qxx(i,i)=Qp[i];
         for (int i=0;i<3;++i) Qxx(3+i,3+i)=Qv[i];
         for (int i=0;i<4;++i) Qxx(6+i,6+i)=Qq[i];
         for (int i=0;i<3;++i) Qxx(10+i,10+i)=Qw[i];
+        // Posture Gauss-Newton Hessian at pre-event stages only
+        if (is_pre_jump(k)) {
+            int ph = get_phase(k);
+            double fpw[4][3], rb[4][3], e[4][3];
+            posture_devs(x, ph, fpw, rb, e);
+            double R[3][3]; Rt_mat(x[6],x[7],x[8],x[9], R);
+            for (int fi=0;fi<4;++fi) {
+                double J[3][13]; posture_J(R, rb[fi], J);
+                for (int a=0;a<13;++a)
+                    for (int b=0;b<13;++b)
+                        for (int c=0;c<3;++c)
+                            Qxx(a,b) += Qws[c]*J[c][a]*J[c][b];
+            }
+        }
         Quu.zero();
         for (int i=0;i<NU;++i) Quu(i,i)=Rf;
+        // Force-target Hessian
+        {
+            int ph = get_phase(k);
+            for (int s=0;s<2;++s) {
+                int fi = PH_FEET[ph][s];
+                Quu(fi*3+2, fi*3+2) += Qfz;
+            }
+        }
+
         Qux.zero();
         double scl = stage_scale(k);
         for (int i=0;i<NX;++i) for (int j=0;j<NX;++j) Qxx(i,j) *= scl;
@@ -343,7 +464,7 @@ struct TrotCost : CostModel<NX, NU> {
 //  Layout (g <= 0):
 //    For each foot i = 0..3:
 //      if active (10 constraints):
-//        -f_z              (normal force >= 0)
+//        -(f_z)             (normal force >= 0)
 //        f_z - FZ_MAX      (normal force <= 120)
 //        f_x - mu*f_z      (friction x+)
 //        -f_x - mu*f_z     (friction x-)
@@ -353,8 +474,8 @@ struct TrotCost : CostModel<NX, NU> {
 //        f_x - FXY         (component bound)
 //        -f_y - FXY        (component bound)
 //        f_y - FXY         (component bound)
-//      if inactive (3 constraints):
-//        -f_x, f_x, -f_z   (zero force)
+//      if inactive (5 constraints):
+//        -f_x, f_x, -f_y, f_y, -f_z   (zero lateral force)
 //    State bounds (8 constraints):
 //      PZ_MIN - p_z        (height >= 0.22)
 //      p_z - PZ_MAX        (height <= 0.35)
@@ -365,7 +486,7 @@ struct TrotCost : CostModel<NX, NU> {
 //      omega_z - OMEGA_MAX   (yaw rate <= 8 rad/s)
 //      -omega_z - OMEGA_MAX
 //
-//  Total: 2 active*10 + 2 inactive*3 + 8 state = 20 + 6 + 8 = 34
+//   Total: 2 active*10 + 2 inactive*5 + 8 state = 20 + 10 + 8 = 38
 // ==============================================================================
 
 struct TrotCons : ConstraintModel<NX, NU, NC> {
@@ -373,11 +494,11 @@ struct TrotCons : ConstraintModel<NX, NU, NC> {
     static constexpr double PHI_MAX = 0.7;    // rad  (roll and pitch)
     static constexpr double OMEGA_MAX = 8.0;   // rad/s (yaw rate bound)
     static constexpr double FXY_MAX = MU_FRIC * FZ_MAX;  // 84 N
-    static constexpr int CB_S = 26;  // state bounds start
+    static constexpr int CB_S = 30;  // state bounds start
 
     // Get constraint base index for a foot given phase k
     // Active feet -> slot 0 or 10 (in order PH_FEET[ph][0]=0, PH_FEET[ph][1]=10)
-    // Inactive feet -> slot 20 or 23 (in encounter order)
+    // Inactive feet -> slot 20 or 25 (in encounter order)
     static void foot_slots(int ph, int foot_base[4]) {
         int inactive_idx = 0;
         for (int fi = 0; fi < 4; ++fi) {
@@ -386,7 +507,7 @@ struct TrotCons : ConstraintModel<NX, NU, NC> {
             } else if (fi == PH_FEET[ph][1]) {
                 foot_base[fi] = 10;
             } else {
-                foot_base[fi] = 20 + inactive_idx * 3;  // 20 or 23
+                foot_base[fi] = 20 + inactive_idx * 5;  // 20 or 25
                 ++inactive_idx;
             }
         }
@@ -403,7 +524,7 @@ struct TrotCons : ConstraintModel<NX, NU, NC> {
             int b = fb[fi];
             if (fi == PH_FEET[ph][0] || fi == PH_FEET[ph][1]) {
                 // Active foot (10 constraints)
-                g[b+0] = -fz;
+                g[b+0] = -fz;  // fz >= 0
                 g[b+1] = fz - FZ_MAX;
                 g[b+2] = fx - MU_FRIC*fz;
                 g[b+3] = -fx - MU_FRIC*fz;
@@ -414,10 +535,12 @@ struct TrotCons : ConstraintModel<NX, NU, NC> {
                 g[b+8] = -fy - FXY_MAX;
                 g[b+9] = fy - FXY_MAX;
             } else {
-                // Inactive foot (3 constraints): zero force
+                // Inactive foot (5 constraints): zero lateral force
                 g[b+0] = -fx;
                 g[b+1] = fx;
-                g[b+2] = -fz;
+                g[b+2] = -fy;
+                g[b+3] = fy;
+                g[b+4] = -fz;
             }
         }
         // -- State bounds --
@@ -477,7 +600,9 @@ struct TrotCons : ConstraintModel<NX, NU, NC> {
                 // Inactive foot Jacobians
                 Cu(b+0, off+0) = -1.0;
                 Cu(b+1, off+0) =  1.0;
-                Cu(b+2, off+2) = -1.0;
+                Cu(b+2, off+1) = -1.0;
+                Cu(b+3, off+1) =  1.0;
+                Cu(b+4, off+2) = -1.0;
             }
         }
 
@@ -581,7 +706,7 @@ int main() {
     pp.tol_primal  = 1e-2;
     pp.tol_compl   = 5e-2;
     pp.tol_ineq    = 1e-2;
-    pp.tol_stat    = 1.0;  // relative stationarity (large cost/costate terms cancel)
+    pp.tol_stat    = 1.0;  // relative stationarity
     pp.kappa_eps   = 10.0;
     pp.max_same_mu = 15;
     pp.tau         = 0.99;
