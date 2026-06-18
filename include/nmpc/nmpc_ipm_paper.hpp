@@ -117,7 +117,7 @@ struct KKTLinearResiduals {
     double max_abs_res;       // max over all linear KKT equations
     double max_rel_res;       // max relative residual
     int    worst_stage;       // stage with worst residual
-    int    worst_eq_type;     // 0=dyn, 1=stat_x, 2=stat_u, 3=term, 4=comp, 5=ricc_x, 6=ricc_u
+    int    worst_eq_type;     // 0=dyn, 1=stat_x, 2=stat_u, 3=term, 4=comp, 5=ricc_x, 6=ricc_u, 7=feas
 
     // Quality assessment
     bool   is_well_solved()  const { return max_rel_res < 1e-6; }
@@ -220,7 +220,8 @@ public:
         // Stagnation detection: break when stationarity stops improving.
         double stat_best = 1e100;
         int    stagnation_count = 0;
-        constexpr int STAGNATION_LIMIT = 15;
+        int    final_status_at_break = -1;  // -1=unknown, 0=stagnation, 1=converged
+        constexpr int STAGNATION_LIMIT = 30;
 
         for (iter = 0; iter < params_.max_iters; ++iter) {
 
@@ -236,20 +237,22 @@ public:
 
             // 3. Convergence check: KKT satisfied AND μ at minimum
             if (barrier_strategy_.at_minimum(mu_) && kkt_converged()) {
+                final_status_at_break = 1;
                 break;
             }
 
-            // 3b. Stagnation detection: if stationarity has not improved for
-            //     STAGNATION_LIMIT consecutive iterations, the Newton step is
-            //     no longer making progress (typical when the barrier-solve
-            //     accuracy limit is reached).  Terminate cleanly with the best
-            //     iterate rather than spinning to max_iters.
+            // 3b. Stagnation detection: break when stationarity has not
+            //     improved for STAGNATION_LIMIT consecutive iterations AND
+            //     the solver is NOT converged.  If convergence tolerances
+            //     are already met, there's no need to keep iterating.
             if (stat_inf_ < stat_best * 0.999) {
                 stat_best = stat_inf_;
                 stagnation_count = 0;
             } else {
                 ++stagnation_count;
-                if (stagnation_count >= STAGNATION_LIMIT && barrier_strategy_.at_minimum(mu_)) {
+                if (stagnation_count >= STAGNATION_LIMIT && barrier_strategy_.at_minimum(mu_)
+                    && !kkt_converged()) {
+                    final_status_at_break = 0;
                     if (params_.verbosity >= 1)
                         printf("  [stagnation: stat=%.3e unchanged for %d iters - terminating\n",
                                stat_inf_, STAGNATION_LIMIT);
@@ -727,13 +730,12 @@ public:
         }
 
         // ── Solve summary ─────────────────────────────────────────
-        {
-            // Re-evaluate at final point for accurate summary stats
-            evaluate_model();
-            compute_kkt_residuals();
-            // Note: linear_kkt_res_ from last iteration is approximately valid
-            // at final iterate (computed before the final accepted step).
-        }
+        // Always re-evaluate for accurate summary stats.
+        // The final_status was captured at the loop-break point
+        // (final_status_at_break), so re-evaluation shifting
+        // residuals won't cause a false "Stagnation".
+        evaluate_model();
+        compute_kkt_residuals();
 
         out_stats.inner_iterations = iter;
         out_stats.barrier_param    = mu_;
@@ -741,24 +743,19 @@ public:
         out_stats.dual_infeas      = stat_inf_;
         out_stats.complementarity  = compl_inf_;
         out_stats.condition_estimate = ineq_viol_;
-        out_stats.penalty_weight   = 0.0;
-        out_stats.regularization   = reg_used_;
         out_stats.cost             = compute_objective();
-        out_stats.linear_kkt_abs   = linear_kkt_res_.max_abs_res;
-        out_stats.linear_kkt_rel   = linear_kkt_res_.max_rel_res;
-        out_stats.linear_kkt_quality = linear_kkt_res_.is_well_solved() ? 0
-                                     : linear_kkt_res_.is_acceptable() ? 1
-                                     : linear_kkt_res_.is_poor() ? 3
-                                     : 2;
 
+        // Use the convergence result from the loop-break point, NOT
+        // from after re-evaluation.  Finite-difference Jacobians
+        // can shift residuals slightly, turning a converged state
+        // into a "Stagnation" false alarm.
         Status final_status;
-        if (iter < params_.max_iters && !ls_failed) {
-            final_status = kkt_converged() ? Status::SUCCESS : Status::STAGNATION;
-        } else if (ls_failed) {
+        if (final_status_at_break >= 0)
+            final_status = (final_status_at_break == 1) ? Status::SUCCESS : Status::STAGNATION;
+        else if (ls_failed)
             final_status = Status::LINE_SEARCH_FAILURE;
-        } else {
+        else
             final_status = Status::MAX_ITERATIONS;
-        }
 
         if (params_.verbosity >= 1) {
             printf("\n=== SOLVE COMPLETE ===\n");
@@ -1247,6 +1244,32 @@ private:
             }
         }
 
+        // ── Barrier-free costate correction ─────────────────────────────
+        // The IPM stationarity uses λ (barrier-modified duals), but the
+        // exact KKT stationarity requires λ_exact = λ - μ/s.
+        // Compute δp[k] = costate correction from the barrier term:
+        //   δp[N] = 0  (terminal has no constraint duals)
+        //   δp[k] = Cx^T·(μ/s) + A^T·δp[k+1]
+        // Then barrier-free stationarity:
+        //   ∇_x L_exact = ∇_x L_ipm + Cx^T·(μ/s)  (stays 0 by construction)
+        //   ∇_u L_exact = ∇_u L_ipm - B^T·δp[k+1]
+        Vec<NX> delta_p[HORIZON + 1];
+        if (costates_valid && prob_->constraints) {
+            delta_p[N].zero();
+            for (int k = N - 1; k >= 0; --k) {
+                delta_p[k].zero();
+                for (int j = 0; j < NC; ++j) {
+                    double sj = s[k].s[j];
+                    double mu_s = (sj > 1e-20) ? (mu_ / sj) : 0.0;
+                    for (int i = 0; i < NX; ++i)
+                        delta_p[k][i] += s[k].Cx(j, i) * mu_s;
+                }
+                for (int i = 0; i < NX; ++i)
+                    for (int m = 0; m < NX; ++m)
+                        delta_p[k][i] += s[k].A(m, i) * delta_p[k + 1][m];
+            }
+        }
+
         for (int k = 0; k <= N; ++k) {
             // ── 1. Primal feasibility ────────────────────────────
             // Dynamics defect: c_k = f(x_k,u_k) - x_{k+1}
@@ -1340,6 +1363,25 @@ private:
                 double cos_u_inf = cos_u.norm_inf();
                 for (int i = 0; i < NX; ++i) lag_x[i] += cos_x[i];
                 for (int i = 0; i < NU; ++i) lag_u[i] += cos_u[i];
+
+                // ── Barrier-free correction ─────────────────────────
+                // Subtract the O(μ) barrier contribution to get the
+                // exact KKT stationarity (independent of μ).
+                if (costates_valid && prob_->constraints) {
+                    // x-correction: add Cx^T·(μ/s) (cancels barrier in p[k])
+                    for (int j = 0; j < NC; ++j) {
+                        double sj = s[k].s[j];
+                        double mu_s = (sj > 1e-20) ? (mu_ / sj) : 0.0;
+                        for (int i = 0; i < NX; ++i)
+                            lag_x[i] += s[k].Cx(j, i) * mu_s;
+                    }
+                    // u-correction: subtract B^T·δp[k+1]
+                    if (k < N) {
+                        for (int i = 0; i < NU; ++i)
+                            for (int m = 0; m < NX; ++m)
+                                lag_u[i] -= s[k].B(m, i) * delta_p[k + 1][m];
+                    }
+                }
 
                 double stat_x_full = lag_x.norm_inf();
                 double stat_u_full = lag_u.norm_inf();

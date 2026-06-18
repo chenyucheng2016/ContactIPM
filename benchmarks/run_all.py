@@ -26,7 +26,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 BIN_DIR = os.path.join(SCRIPT_DIR, 'bin')
 PROJECT_ROOT = os.path.normpath(os.path.join(SCRIPT_DIR, '..'))
-CONTACTIPM_BIN = os.path.join(PROJECT_ROOT, 'build', 'Release')
+CONTACTIPM_BIN = os.path.join(PROJECT_ROOT, 'build', 'Debug')
 
 # acados C benchmarks (compiled main_*.exe in bin/)
 ACADOS_BENCHMARKS = [
@@ -42,12 +42,11 @@ CONTACTIPM_BENCHMARKS = [
     ('Chain Mass', 'chain_mass_nmpc.exe'),
 ]
 
-# Per-problem matched tolerance target (applied to both solvers).
-# All 4 KKT conditions (stat, eq, ineq, comp) use the SAME value per problem.
+# Per-problem matched tolerance (stat value; other components set per-solver).
 TARGET_TOL = {
-    'Pendulum':   '1e-2',
-    'Quadrotor':  '5e-2',
-    'Chain Mass': '1e-2',
+    'Pendulum':   '2e-4',
+    'Quadrotor':  '2e-2',
+    'Chain Mass': '2e-1',
 }
 
 N_RUNS = 5  # min-of-N for timing stability

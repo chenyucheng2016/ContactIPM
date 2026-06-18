@@ -61,6 +61,8 @@ public:
         p_ = p;
         iters_at_mu_ = 0;
         last_sigma_exp_ = p.sigma_exp_normal;
+        last_E_mu_ = 1.0;
+        stall_count_ = 0;
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -99,20 +101,43 @@ public:
 
         bool solved = (primal_compl_ok && stat_ok);
 
-        // FTB-bottleneck: when step is severely limited, the solver
-        // needs more iterations at each μ level to make progress.
-        // Extend max_same_mu to prevent premature forced μ reduction.
+        // ── Force-reduction via E_μ stagnation detection ──────────
+        // When the barrier subproblem is "stuck" — E_μ isn't improving —
+        // forcing μ down reduces the barrier force C^T·(μ/s) and lets
+        // the Newton step make progress again.  Without this, the solver
+        // can spin dozens of iterations at the same μ making negligible
+        // progress.
+        double improv = 0.0;
+        if (last_E_mu_ > 1e-14)
+            improv = (last_E_mu_ - E_mu) / last_E_mu_;  // >0 means improving
+        last_E_mu_ = E_mu;
+
+        // Count consecutive iterations with negligible improvement
+        constexpr double kStallThreshold = 0.02;  // < 2% → stalled
+        if (improv < kStallThreshold && iters_at_mu_ >= 4)
+            stall_count_++;
+        else
+            stall_count_ = 0;
+
+        // Force μ reduction when stalled for N consecutive iterations
+        constexpr int kStallForceLimit = 5;
+        bool force_by_stall = (stall_count_ >= kStallForceLimit);
+
+        // FTB-bottleneck: when step is severely FTB-limited, the solver
+        // genuinely needs more time per μ level — but not unbounded.
+        // Use a shorter force horizon than the normal max_same_mu.
         int effective_max = ftb_bottleneck
-                          ? std::max(p_.max_same_mu * 3, 45)
+                          ? std::max(p_.max_same_mu / 2, 6)
                           : p_.max_same_mu;
-        bool force  = (iters_at_mu_ >= effective_max);
+        bool force = (iters_at_mu_ >= effective_max) || force_by_stall;
 
         if (!solved && !force) {
             // Barrier subproblem not yet solved — hold μ fixed
             if (p_.verbosity >= 3)
-                printf("  [barrier: HOLD E_mu=%.2e k*mu=%.2e stat=%.2e gate=%.2e iters=%d/%d]\n",
+                printf("  [barrier: HOLD E_mu=%.2e k*mu=%.2e stat=%.2e gate=%.2e iters=%d/%d"
+                       " improv=%.1f%% stall=%d]\n",
                        E_mu, p_.kappa_eps * mu, stat_inf, stat_gate,
-                       iters_at_mu_, p_.max_same_mu);
+                       iters_at_mu_, effective_max, 100.0*improv, stall_count_);
             return false;
         }
 
@@ -176,6 +201,8 @@ private:
     BarrierUpdateParams p_;
     int    iters_at_mu_ = 0;
     double last_sigma_exp_ = 1.0;
+    double last_E_mu_ = 1.0;     // E_μ from previous iteration (for stall detection)
+    int    stall_count_ = 0;     // consecutive stalled iterations at same μ
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
