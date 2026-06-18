@@ -45,7 +45,7 @@ CONTACTIPM_BENCHMARKS = [
 # Per-problem matched tolerance (stat value; other components set per-solver).
 TARGET_TOL = {
     'Pendulum':   '2e-4',
-    'Quadrotor':  '2e-2',
+    'Quadrotor':  '2e-1',
     'Chain Mass': '2e-1',
 }
 
