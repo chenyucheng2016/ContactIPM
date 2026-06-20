@@ -241,24 +241,9 @@ public:
                 break;
             }
 
-            // 3b. Stagnation detection: break when stationarity has not
-            //     improved for STAGNATION_LIMIT consecutive iterations AND
-            //     the solver is NOT converged.  If convergence tolerances
-            //     are already met, there's no need to keep iterating.
-            if (stat_inf_ < stat_best * 0.999) {
-                stat_best = stat_inf_;
-                stagnation_count = 0;
-            } else {
-                ++stagnation_count;
-                if (stagnation_count >= STAGNATION_LIMIT && barrier_strategy_.at_minimum(mu_)
-                    && !kkt_converged()) {
-                    final_status_at_break = 0;
-                    if (params_.verbosity >= 1)
-                        printf("  [stagnation: stat=%.3e unchanged for %d iters - terminating\n",
-                               stat_inf_, STAGNATION_LIMIT);
-                    break;
-                }
-            }
+            // 3b. Stagnation detection is now handled post-Riccati (after
+            //     compute_post_riccati_stationarity) where costates are
+            //     consistent with the current model evaluation.
             if (barrier_strategy_.at_minimum(mu_) && params_.verbosity >= 3) {
                 bool primal_ok  = (primal_inf_ <= params_.tol_primal);
                 bool compl_ok   = (compl_inf_  <= params_.tol_compl);
@@ -344,6 +329,33 @@ public:
 
             recover_inequality_steps(sigma_);
             has_costates_ = true;  // costates now valid for stationarity check
+
+            // ── Post-Riccati stationarity: use consistent costates ────
+            compute_post_riccati_stationarity();
+
+            // ── Early convergence check with post-Riccati stationarity ──
+            // The primal/complementarity residuals from compute_kkt_residuals
+            // are still valid (same point).  Only stat_inf_ was updated.
+            if (barrier_strategy_.at_minimum(mu_) && kkt_converged()) {
+                final_status_at_break = 1;
+                break;
+            }
+
+            // ── Post-Riccati stagnation detection ──────────────
+            if (stat_inf_ < stat_best * 0.999) {
+                stat_best = stat_inf_;
+                stagnation_count = 0;
+            } else {
+                ++stagnation_count;
+                if (stagnation_count >= STAGNATION_LIMIT && barrier_strategy_.at_minimum(mu_)
+                    && !kkt_converged()) {
+                    final_status_at_break = 0;
+                    if (params_.verbosity >= 1)
+                        printf("  [stagnation: stat=%.3e unchanged for %d iters - terminating\n",
+                               stat_inf_, STAGNATION_LIMIT);
+                    break;
+                }
+            }
 
             // ── Conditional Mehrotra cross-term gate ────────────────
             // Compute the predicted average complementarity at the full
@@ -730,12 +742,14 @@ public:
         }
 
         // ── Solve summary ─────────────────────────────────────────
-        // Always re-evaluate for accurate summary stats.
-        // The final_status was captured at the loop-break point
-        // (final_status_at_break), so re-evaluation shifting
-        // residuals won't cause a false "Stagnation".
+        // Always re-evaluate for accurate primal/complementarity stats.
+        // Save stat_inf_ because the post-Riccati stationarity (which
+        // triggered convergence) uses Riccati costates that would be
+        // overwritten by compute_kkt_residuals' costate recovery.
+        double saved_stat = stat_inf_;
         evaluate_model();
         compute_kkt_residuals();
+        stat_inf_ = saved_stat;  // restore convergence-triggering metric
 
         out_stats.inner_iterations = iter;
         out_stats.barrier_param    = mu_;
@@ -1197,6 +1211,90 @@ private:
     }
 
     // ═════════════════════════════════════════════════════════════════════
+    //  Post-Riccati stationarity: compute stationarity using the Riccati
+    //  corrector costates, which are consistent with the CURRENT model
+    //  evaluation (same linearization point).  This avoids the mismatch
+    //  in compute_kkt_residuals() where costates come from the PREVIOUS
+    //  iteration's Riccati solve.
+    //
+    //  The Riccati costate p[k] satisfies the linearized stationarity.
+    //  At convergence (Δz → 0), the nonlinear stationarity converges to
+    //  the linearized stationarity, so this metric should go to ~0.
+    // ═════════════════════════════════════════════════════════════════════
+
+    void compute_post_riccati_stationarity() {
+        const int N = HORIZON;
+        Stage* s = prob_->stages;
+
+        double post_stat = 0.0;
+
+        for (int k = 0; k <= N; ++k) {
+            // Use EXACTLY the same gradient as the Riccati solver RHS.
+            // At convergence (g+s≈0, σμ≈μ), this becomes:
+            //   qx_work = qx + Cx^T·(μ/s - λ)
+            // The Riccati costate satisfies:
+            //   qx_work + A^T·p[k+1] - p[k] = 0  (x-stationarity)
+            //   qu_work + B^T·p[k+1] = 0  (u-stationarity)
+            // Both should be ~machine epsilon.
+            Vec<NX> lag_x = s[k].qx;
+            Vec<NU> lag_u;
+            if (k < N) lag_u = s[k].qu; else lag_u.zero();
+
+            // Add the barrier centering term (same as build_kkt_rhs)
+            if (prob_->constraints) {
+                for (int j = 0; j < NC; ++j) {
+                    double sj = s[k].s[j];
+                    if (sj < 1e-14) continue;
+                    double lj = s[k].lambda[j];
+                    double gj = s[k].d[j] + sj;  // g + s
+                    double centering = (sigma_ * mu_ + lj * gj) / sj;
+                    double w = centering - lj;  // net contribution per constraint
+                    for (int i = 0; i < NX; ++i)
+                        lag_x[i] += s[k].Cx(j, i) * w;
+                    if (k < N)
+                        for (int i = 0; i < NU; ++i)
+                            lag_u[i] += s[k].Cu(j, i) * w;
+                }
+            }
+
+            double grad_x_inf = lag_x.norm_inf();
+            double grad_u_inf = lag_u.norm_inf();
+
+            // Add costate terms using RICCATI costate
+            Vec<NX> cos_x; cos_x.zero();
+            Vec<NU> cos_u; cos_u.zero();
+            if (k < N) {
+                for (int i = 0; i < NX; ++i)
+                    for (int m = 0; m < NX; ++m)
+                        cos_x[i] += s[k].A(m, i) * riccati_ws_.p[k+1][m];
+                for (int i = 0; i < NU; ++i)
+                    for (int m = 0; m < NX; ++m)
+                        cos_u[i] += s[k].B(m, i) * riccati_ws_.p[k+1][m];
+            }
+            for (int i = 0; i < NX; ++i)
+                cos_x[i] -= riccati_ws_.p[k][i];
+
+            double cos_x_inf = cos_x.norm_inf();
+            double cos_u_inf = cos_u.norm_inf();
+            for (int i = 0; i < NX; ++i) lag_x[i] += cos_x[i];
+            for (int i = 0; i < NU; ++i) lag_u[i] += cos_u[i];
+
+            double stat_x_full = lag_x.norm_inf();
+            double stat_u_full = lag_u.norm_inf();
+            double stat_abs = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
+
+            double scale_x = std::max({grad_x_inf, cos_x_inf, 1.0});
+            double scale_u = std::max({grad_u_inf, cos_u_inf, 1.0});
+            double scale = (scale_x > scale_u) ? scale_x : scale_u;
+            double stat = stat_abs / scale;
+            if (stat > post_stat) post_stat = stat;
+        }
+
+        // Override the stationarity from compute_kkt_residuals
+        stat_inf_ = post_stat;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════
     //  Compute KKT residuals of the barrier subproblem
     // ═════════════════════════════════════════════════════════════════════
 
@@ -1216,25 +1314,36 @@ private:
         bool costates_valid = (riccati_ws_.p[N].norm_inf() > 0.0 || has_costates_);
 
         // ── Costate recovery: overwrite Riccati costates with KKT-consistent
-        //    costates computed from the x-stationarity equation using FRESH
-        //    Jacobians from evaluate_model().  The Riccati backward pass uses
-        //    barrier-augmented gradients at the LINEARIZATION point, but after
-        //    applying the Newton step and re-evaluating the model, the Jacobians
-        //    A, B change (nonlinear dynamics).  Recomputing p[k] via:
-        //       p[N] = qx[N]
-        //       p[k] = qx[k] + Cx^T·λ + A^T·p[k+1]
-        //    ensures ∇_x L = 0 by construction, so stationarity reduces to
-        //    checking ∇_u L (the actual convergence measure).
+        //    costates from the barrier-problem x-stationarity equation.
+        //    The barrier Lagrangian is:
+        //      L_b = cost + p^T·(f-x') + λ^T·(g+s) - μ·Σ ln(s)
+        //    x-stationarity gives:
+        //      p_k = qx + Cx^T·(λ + μ/s) + A^T·p_{k+1}
+        //    The Cx^T·(μ/s) term is CRITICAL: without it, the recovered
+        //    costate differs from the true barrier costate by an amount
+        //    that accumulates through A^T, causing a stationarity floor.
         if (costates_valid) {
             riccati_ws_.p[N] = s[N].qx;
+            // Terminal: add Cx^T·(λ + μ/s)
+            if (prob_->constraints) {
+                for (int j = 0; j < NC; ++j) {
+                    double lj = s[N].lambda[j];
+                    double sj = s[N].s[j];
+                    double dual_j = lj + ((sj > 1e-20) ? (mu_ / sj) : 0.0);
+                    for (int i = 0; i < NX; ++i)
+                        riccati_ws_.p[N][i] += s[N].Cx(j, i) * dual_j;
+                }
+            }
             for (int k = N - 1; k >= 0; --k) {
                 riccati_ws_.p[k] = s[k].qx;
-                // Add Cx^T·λ
+                // Add Cx^T·(λ + μ/s)
                 if (prob_->constraints) {
                     for (int j = 0; j < NC; ++j) {
                         double lj = s[k].lambda[j];
+                        double sj = s[k].s[j];
+                        double dual_j = lj + ((sj > 1e-20) ? (mu_ / sj) : 0.0);
                         for (int i = 0; i < NX; ++i)
-                            riccati_ws_.p[k][i] += s[k].Cx(j, i) * lj;
+                            riccati_ws_.p[k][i] += s[k].Cx(j, i) * dual_j;
                     }
                 }
                 // Add A^T·p[k+1]
@@ -1244,31 +1353,8 @@ private:
             }
         }
 
-        // ── Barrier-free costate correction ─────────────────────────────
-        // The IPM stationarity uses λ (barrier-modified duals), but the
-        // exact KKT stationarity requires λ_exact = λ - μ/s.
-        // Compute δp[k] = costate correction from the barrier term:
-        //   δp[N] = 0  (terminal has no constraint duals)
-        //   δp[k] = Cx^T·(μ/s) + A^T·δp[k+1]
-        // Then barrier-free stationarity:
-        //   ∇_x L_exact = ∇_x L_ipm + Cx^T·(μ/s)  (stays 0 by construction)
-        //   ∇_u L_exact = ∇_u L_ipm - B^T·δp[k+1]
-        Vec<NX> delta_p[HORIZON + 1];
-        if (costates_valid && prob_->constraints) {
-            delta_p[N].zero();
-            for (int k = N - 1; k >= 0; --k) {
-                delta_p[k].zero();
-                for (int j = 0; j < NC; ++j) {
-                    double sj = s[k].s[j];
-                    double mu_s = (sj > 1e-20) ? (mu_ / sj) : 0.0;
-                    for (int i = 0; i < NX; ++i)
-                        delta_p[k][i] += s[k].Cx(j, i) * mu_s;
-                }
-                for (int i = 0; i < NX; ++i)
-                    for (int m = 0; m < NX; ++m)
-                        delta_p[k][i] += s[k].A(m, i) * delta_p[k + 1][m];
-            }
-        }
+        // δp correction removed: the costate recovery now includes Cx^T·(μ/s),
+        // making the barrier-free correction unnecessary.
 
         for (int k = 0; k <= N; ++k) {
             // ── 1. Primal feasibility ────────────────────────────
@@ -1342,20 +1428,20 @@ private:
                 for (int i = 0; i < NU; ++i) lag_u[i] += ct_lam_u[i];
 
                 // Add dynamics costate terms: A^T·ν_{k+1} - ν_k
+                // Use RECOVERED costate (p = qx + Cx^Tλ + A^T·p[k+1]) for both x and u.
+                // This makes lag_x = 0 by construction.
                 Vec<NX> cos_x; cos_x.zero();
                 Vec<NU> cos_u; cos_u.zero();
                 if (costates_valid) {
                     if (k < N) {
-                        // +A_k^T · p[k+1]
                         for (int i = 0; i < NX; ++i)
                             for (int m = 0; m < NX; ++m)
                                 cos_x[i] += s[k].A(m, i) * riccati_ws_.p[k+1][m];
-                        // +B_k^T · p[k+1]
+                        // u: use RECOVERED costate p[k+1] (same as x)
                         for (int i = 0; i < NU; ++i)
                             for (int m = 0; m < NX; ++m)
                                 cos_u[i] += s[k].B(m, i) * riccati_ws_.p[k+1][m];
                     }
-                    // -ν_k = -p[k]
                     for (int i = 0; i < NX; ++i)
                         cos_x[i] -= riccati_ws_.p[k][i];
                 }
@@ -1364,27 +1450,13 @@ private:
                 for (int i = 0; i < NX; ++i) lag_x[i] += cos_x[i];
                 for (int i = 0; i < NU; ++i) lag_u[i] += cos_u[i];
 
-                // ── Barrier-free correction ─────────────────────────
-                // Subtract the O(μ) barrier contribution to get the
-                // exact KKT stationarity (independent of μ).
-                if (costates_valid && prob_->constraints) {
-                    // x-correction: add Cx^T·(μ/s) (cancels barrier in p[k])
-                    for (int j = 0; j < NC; ++j) {
-                        double sj = s[k].s[j];
-                        double mu_s = (sj > 1e-20) ? (mu_ / sj) : 0.0;
-                        for (int i = 0; i < NX; ++i)
-                            lag_x[i] += s[k].Cx(j, i) * mu_s;
-                    }
-                    // u-correction: subtract B^T·δp[k+1]
-                    if (k < N) {
-                        for (int i = 0; i < NU; ++i)
-                            for (int m = 0; m < NX; ++m)
-                                lag_u[i] -= s[k].B(m, i) * delta_p[k + 1][m];
-                    }
-                }
-
+                // No barrier-free correction needed: costate recovery
+                // already includes Cx^T·(μ/s), so x-stationarity is 0
+                // by construction and u-stationarity is the convergence
+                // measure.
                 double stat_x_full = lag_x.norm_inf();
                 double stat_u_full = lag_u.norm_inf();
+
                 double stat_abs = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
 
                 // Relative stationarity: normalize by the natural scale of the
@@ -1828,6 +1900,7 @@ private:
         // For high cost/control ratios (e.g. 1000), even reg=1e-5 can
         // overwhelm the true descent term.
         // LDLT factorization stability only needs reg ≈ ε·κ(S).
+        reg_used_ = 0.0;  // Reset each call — measure actual reg used
         double reg_base = 1e-12;
         if (cond_estimate_ > 1e6) {
             reg_base = 1e-8;

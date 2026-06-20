@@ -207,18 +207,13 @@ int main() {
     prob.dynamics = &dyn; prob.cost = &cost; prob.constraints = &cons; prob.dt = DT;
     prob.x0 = x0;
 
-    // Warm-start: simulate forward with hover thrust for better initial trajectory
+    // Flat initialization (matching acados: x=x0, u=hover everywhere)
     VecU u_hover; u_hover[0] = HOVER_THRUST; u_hover[1] = 0.0;
-    prob.stages[0].x = x0;
-    prob.stages[0].u = u_hover;
-    for (int k = 0; k < N; ++k) {
+    for (int k = 0; k <= N; ++k) {
+        prob.stages[k].x = x0;
         prob.stages[k].u = u_hover;
-        VecX nx;
-        dyn.discrete_step(prob.stages[k].x, prob.stages[k].u, DT, nx);
-        prob.stages[k + 1].x = nx;
     }
     prob.stages[N].u.zero();
-    prob.stages[N].u[0] = HOVER_THRUST;
 
     NMPCSolverPaper<NX, NU, NC, N> solver;
     PaperIPMParams pp;
@@ -226,7 +221,7 @@ int main() {
     pp.max_iters = 300;
     // Matched tolerances for fair comparison vs acados.
     pp.mu_min = 1e-4;
-    pp.tol_primal = 1.5e-2; pp.tol_compl = 5e-2; pp.tol_ineq = 1e-2; pp.tol_stat = 2e-1;
+    pp.tol_primal = 1.5e-2; pp.tol_compl = 5e-2; pp.tol_ineq = 1e-4; pp.tol_stat = 2e-1;
     pp.kappa_eps = 5.0;  pp.max_same_mu = 5;  // Faster mu reduction
     pp.tau = 0.99;
     pp.soc_max = 4;             // enable SOC (layer 2)

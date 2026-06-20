@@ -705,7 +705,7 @@ int main() {
     pp.max_iters   = 300;
     pp.tol_primal  = 1e-2;
     pp.tol_compl   = 5e-2;
-    pp.tol_ineq    = 1e-2;
+    pp.tol_ineq    = 1e-4;
     pp.tol_stat    = 1.0;  // relative stationarity
     pp.kappa_eps   = 10.0;
     pp.max_same_mu = 15;

@@ -55,23 +55,30 @@ using MatCU = Mat<NC, NU>;
 struct ChainDyn : DynamicsModel<NX, NU> {
     Status discrete_step(const VecX& x, const VecU& u, double dt,
                          VecX& nx) override {
-        // Semi-implicit Euler on the spring-mass chain
-        for (int i = 0; i < N_MASSES; ++i) {
-            double x_i   = x[i];
-            double x_im1 = (i > 0) ? x[i-1] : 0.0;
-            double x_ip1 = (i < N_MASSES-1) ? x[i+1] : 0.0;
-            double v_i   = x[N_MASSES + i];
-            double F_i   = (i < N_ACTUATED) ? u[i] : 0.0;
-
-            double spring_force = SPRING_K * (x_ip1 - 2.0*x_i + x_im1);
-            double damp_force   = DAMPING * v_i;
-            double a_i = (F_i + spring_force - damp_force) / MASS;
-
-            // Update velocity first, then position (semi-implicit)
-            double v_new = v_i + dt * a_i;
-            nx[N_MASSES + i] = v_new;
-            nx[i] = x_i + dt * v_new;
-        }
+        // RK4 integration (matching acados ERK4)
+        auto f = [this](const VecX& s, const VecU& c, VecX& dx) {
+            for (int i = 0; i < N_MASSES; ++i) {
+                double x_i   = s[i];
+                double x_im1 = (i > 0) ? s[i-1] : 0.0;
+                double x_ip1 = (i < N_MASSES-1) ? s[i+1] : 0.0;
+                double v_i   = s[N_MASSES + i];
+                double F_i   = (i < N_ACTUATED) ? c[i] : 0.0;
+                double spring_force = SPRING_K * (x_ip1 - 2.0*x_i + x_im1);
+                double damp_force   = DAMPING * v_i;
+                dx[i] = v_i;
+                dx[N_MASSES + i] = (F_i + spring_force - damp_force) / MASS;
+            }
+        };
+        VecX k1, k2, k3, k4, tmp;
+        f(x, u, k1);
+        for (int i = 0; i < NX; ++i) tmp[i] = x[i] + 0.5*dt*k1[i];
+        f(tmp, u, k2);
+        for (int i = 0; i < NX; ++i) tmp[i] = x[i] + 0.5*dt*k2[i];
+        f(tmp, u, k3);
+        for (int i = 0; i < NX; ++i) tmp[i] = x[i] + dt*k3[i];
+        f(tmp, u, k4);
+        for (int i = 0; i < NX; ++i)
+            nx[i] = x[i] + (dt/6.0)*(k1[i] + 2.0*k2[i] + 2.0*k3[i] + k4[i]);
         return Status::SUCCESS;
     }
 
@@ -237,7 +244,7 @@ int main() {
     pp.max_iters = 300;
     // Matched tolerances for fair comparison vs acados.
     pp.mu_min = 1e-4;
-    pp.tol_primal = 1e-2; pp.tol_compl = 1e-2; pp.tol_ineq = 1e-2; pp.tol_stat = 2e-1;
+    pp.tol_primal = 1e-2; pp.tol_compl = 1e-2; pp.tol_ineq = 1e-4; pp.tol_stat = 2e-1;
     pp.kappa_eps = 1.0;  // 1.0 (tighter) — was 5.0 (too loose, holds mu too long), now tighter: reduce when E_mu ≤ 1.0·mu
     pp.max_same_mu = 5;  // More aggressive mu reduction — was 15
     pp.verbosity = 2;
