@@ -244,7 +244,7 @@ int main() {
     pp.max_iters = 300;
     // Matched tolerances for fair comparison vs acados.
     pp.mu_min = 1e-4;
-    pp.tol_primal = 1e-2; pp.tol_compl = 1e-2; pp.tol_ineq = 1e-4; pp.tol_stat = 2e-1;
+    pp.tol_primal = 1e-4; pp.tol_compl = 1e-4; pp.tol_ineq = 1e-4; pp.tol_stat = 0.02;
     pp.kappa_eps = 1.0;  // 1.0 (tighter) — was 5.0 (too loose, holds mu too long), now tighter: reduce when E_mu ≤ 1.0·mu
     pp.max_same_mu = 5;  // More aggressive mu reduction — was 15
     pp.verbosity = 2;
