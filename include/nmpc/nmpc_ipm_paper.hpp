@@ -24,6 +24,7 @@
 #include "nmpc_riccati.hpp"
 #include "nmpc_barrier_manager.hpp"
 #include "nmpc_filter_ls.hpp"
+#include "nmpc_preconditioner.hpp"
 
 namespace nmpc {
 
@@ -71,13 +72,16 @@ struct PaperIPMParams {
     int    max_same_mu     = 30;      // force mu reduction after this many iterations at same mu
 
     // === Nonlinear KKT Iterative Refinement (Shamanskii chord) ===
-    bool   enable_refinement  = true;    // enable direction refinement before line search
+    bool   enable_refinement  = false;   // enable direction refinement before line search
     int    max_refine_iters   = 5;       // max chord passes
     double refine_tol         = 1e-6;    // nonlinear residual tolerance
     double refine_diverge_fac = 1.5;     // divergence guard: stop if ||r|| > fac * prev
 
     // Output
     int    verbosity     = 0;
+
+    // Preconditioning
+    bool   enable_preconditioner = false;  // diagonal Jacobi preconditioner
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -143,8 +147,65 @@ public:
     using Stage = StageData<NX, NU, NC>;
     using WS    = RiccatiWorkspace<NX, NU, HORIZON>;
     using Ricc  = RiccatiSolver<NX, NU, NC, HORIZON>;
+    using Prec  = HessianPreconditioner<NX, NU, HORIZON>;
 
     PaperIPMSolver() = default;
+
+    // ── Step snapshot for regression testing ──────────────────────
+    // Captures the Newton step and globalization data from the last
+    // iteration.  Used by test_precond_invariance to verify that
+    // baseline and preconditioned solves produce identical steps.
+    struct StepSnapshot {
+        const Vec<NX>* dx;   // [HORIZON+1]  primal x-step (physical)
+        const Vec<NU>* du;   // [HORIZON]    primal u-step (physical)
+        const Vec<NC>* ds;   // [HORIZON+1]  slack step
+        const Vec<NC>* dlambda; // [HORIZON+1]  multiplier step
+        double alpha_p;      // primal step size
+        double alpha_lambda; // dual step size
+        double sigma;        // Mehrotra centering parameter
+        double mu;           // barrier parameter
+    };
+    StepSnapshot get_step_snapshot() const {
+        return { riccati_ws_.dx, riccati_ws_.du, ds_, dlambda_,
+                 last_alpha_p_, alpha_lambda_, sigma_, mu_ };
+    }
+
+    // ── Diagnostic: expose Riccati internals for invariance debugging ──
+    struct RiccatiDiag {
+        Vec<NU> d_feedforward;     // d[0] (feedforward term, scaled space)
+        Vec<NU> S_diag;            // S_fact[0] diagonal (scaled space)
+        Vec<NX> p_terminal;        // p[N] (scaled space)
+        Vec<NX> p_stage0;          // p[0] (scaled space)
+        Vec<NU> rhs_d;             // RHS for d[0]: qu + B^T*p[1] + B^T*P[1]*c
+        double reg_used;
+        double sigma;
+        double mu;
+    };
+    RiccatiDiag get_riccati_diag() const {
+        RiccatiDiag r;
+        r.d_feedforward = riccati_ws_.d[0];
+        for (int i = 0; i < NU; ++i)
+            r.S_diag[i] = riccati_ws_.S_fact[0](i, i);
+        r.p_terminal = riccati_ws_.p[HORIZON];
+        r.p_stage0 = riccati_ws_.p[0];
+        // Reconstruct RHS for d[0]: qu[0] + B[0]^T*p[1] + B[0]^T*P[1]*c[0]
+        const auto& s0 = riccati_stages_[0];
+        const auto& p1 = riccati_ws_.p[1];
+        const auto& P1 = riccati_ws_.P[1];
+        for (int r = 0; r < NU; ++r) {
+            double btp = 0.0;
+            for (int m = 0; m < NX; ++m) btp += s0.B(m, r) * p1[m];
+            double btpc = 0.0;
+            for (int m = 0; m < NX; ++m)
+                for (int n = 0; n < NX; ++n)
+                    btpc += s0.B(m, r) * P1(m, n) * s0.c[n];
+            r.rhs_d[r] = s0.qu[r] + btp + btpc;
+        }
+        r.reg_used = reg_used_;
+        r.sigma = sigma_;
+        r.mu = mu_;
+        return r;
+    }
 
     Status init(const PaperIPMParams& params = PaperIPMParams{}) {
         params_ = params;
@@ -169,6 +230,14 @@ public:
         prob_ = &problem;
         initialize_from_problem();
         evaluate_model();          // ensure first KKT uses fresh data
+
+        // Compute preconditioner scaling ONCE per MPC solve (outside Newton loop)
+        if (params_.enable_preconditioner) {
+            prec_.compute(prob_->stages);
+            // Note: transform_qp() is called inside the loop before compute_kkt_residuals
+            // so that convergence checks use scaled residuals.
+        }
+
         mu_ = params_.mu_init;
         cond_estimate_ = 1.0;
         has_costates_ = false;
@@ -231,11 +300,38 @@ public:
                 if (st != Status::SUCCESS) return st;
             }
             model_evaluated = false;
+            stages_scaled_ = false;
 
-            // 2. Compute KKT residuals
+            // 2. Apply FIXED preconditioner scaling to derivatives (before KKT build)
+            // After this, prob_->stages derivatives are in SCALED space.
+            if (params_.enable_preconditioner) {
+                prec_.transform_qp(prob_->stages);
+                stages_scaled_ = true;
+            }
+
+            // 3. Compute KKT residuals (uses SCALED derivatives after transform_qp)
             compute_kkt_residuals();
 
-            // 3. Convergence check: KKT satisfied AND μ at minimum
+            // TEMPORARY: physical stationarity diagnostic (no convergence decisions)
+            if (params_.enable_preconditioner && params_.verbosity >= 2
+                && (iter % 5 == 0 || barrier_strategy_.at_minimum(mu_))) {
+                // Save scaled residuals
+                double s_stat = stat_inf_, s_prim = primal_inf_, s_compl = compl_inf_;
+                // Evaluate physical model and compute physical KKT
+                evaluate_model();
+                stages_scaled_ = false;
+                compute_kkt_residuals();
+                double p_stat = stat_inf_, p_prim = primal_inf_, p_compl = compl_inf_;
+                // Restore scaled stages and residuals
+                prec_.transform_qp(prob_->stages);
+                stages_scaled_ = true;
+                compute_kkt_residuals();
+                stat_inf_ = s_stat; primal_inf_ = s_prim; compl_inf_ = s_compl;
+                printf("  [PHYS] stat=%.4e prim=%.4e compl=%.4e | scaled stat=%.4e\n",
+                       p_stat, p_prim, p_compl, s_stat);
+            }
+
+            // 4. Convergence check: KKT satisfied AND μ at minimum
             if (barrier_strategy_.at_minimum(mu_) && kkt_converged()) {
                 final_status_at_break = 1;
                 break;
@@ -288,7 +384,17 @@ public:
             build_kkt_rhs();
             st = solve_kkt_rhs_and_forward();
             if (st != Status::SUCCESS) return st;
+
+            // Compute ds/dλ BEFORE recovering primal step to physical space.
+            // recover_inequality_steps uses scaled Cx/Cu with scaled dx̂/dû from Riccati:
+            //   Cx_scaled·dx̂ = (Cx·inv_Lx)·(Lx·dx_phys) = Cx·dx_phys  → correct physical ds.
             recover_inequality_steps(0.0);
+
+            // Recover physical step from scaled Riccati solution
+            if (params_.enable_preconditioner) {
+                prec_.recover_primal_step(riccati_ws_);
+                prec_.recover_dual_step(riccati_ws_);
+            }
 
             // Copy predictor steps (avoids redundant save_predictor_step)
             for (int k = 0; k <= HORIZON; ++k) {
@@ -318,20 +424,200 @@ public:
             sigma_ = compute_adaptive_sigma();
 
             // 5. ── CORRECTOR: reuse LHS, update RHS with centering ──
+            // Save sigma/mu for invariance debugging
+            debug_sigma_ = sigma_;
+            debug_mu_ = mu_;
+            debug_primal_inf_ = primal_inf_;
+            debug_compl_inf_ = compl_inf_;
+
             build_kkt_rhs();
+
+            // Save PRISTINE Riccati stages right after KKT build (before SOC/LS)
+            for (int kk = 0; kk <= HORIZON; ++kk) {
+                debug_pristine_stages_[kk] = riccati_stages_[kk];
+            }
+
+            // Save Riccati internals for invariance debugging
+            // NOTE: save BEFORE corrector forward — d[0] is from predictor here
+            // We'll re-save after corrector below
+            debug_P_term_ = riccati_ws_.P[HORIZON];
+            debug_S_fact0_ = riccati_ws_.S_fact[0];
+
             st = solve_kkt_rhs_and_forward();
             if (st != Status::SUCCESS) return st;
 
-            // ── Nonlinear KKT iterative refinement (Shamanskii chord) ────
-            if (params_.enable_refinement) {
-                refine_newton_direction();  // refines ws.dx, ws.du in-place
+            // Re-save Riccati internals AFTER corrector forward pass
+            // d[0] and K[0] are now from the corrector
+            for (int i = 0; i < NU; ++i) {
+                debug_d0_[i] = riccati_ws_.d[0][i];
+                for (int j = 0; j < NX; ++j)
+                    debug_K0_(i, j) = riccati_ws_.K[0](i, j);
             }
 
+            // ── Nonlinear KKT iterative refinement (DISABLED) ────
+            // if (params_.enable_refinement) {
+            //     refine_newton_direction();
+            // }
+
+            // Compute ds/dλ BEFORE recovering primal step (same as predictor).
             recover_inequality_steps(sigma_);
+
+            // ── True scaled-space linear KKT residual (before recovery) ──
+            // At this point ws.dx, ws.du, ws.p are ALL in scaled space.
+            // This measures ||K̂·ẑ - r̂|| directly.
+            if (params_.verbosity >= 2) {
+                double max_ricc_u = 0.0, max_ricc_x = 0.0;
+                double min_S_diag = 1e100, max_S_diag = 0.0;
+                int worst_u_k = -1, worst_u_i = -1;
+                double max_reg_perturb = 0.0;
+                for (int kk = 0; kk < HORIZON; ++kk) {
+                    const auto& rs = riccati_stages_[kk];
+                    const auto& dx_k = riccati_ws_.dx[kk];
+                    const auto& du_k = riccati_ws_.du[kk];
+                    const auto& dx_k1 = riccati_ws_.dx[kk+1];
+                    // ν_k = p_k + P_k·dx_k (scaled)
+                    Vec<NX> nu_k;
+                    for (int i = 0; i < NX; ++i) {
+                        nu_k[i] = riccati_ws_.p[kk][i];
+                        for (int j = 0; j < NX; ++j)
+                            nu_k[i] += riccati_ws_.P[kk](i,j) * dx_k[j];
+                    }
+                    Vec<NX> nu_next;
+                    for (int i = 0; i < NX; ++i) {
+                        nu_next[i] = riccati_ws_.p[kk+1][i];
+                        for (int j = 0; j < NX; ++j)
+                            nu_next[i] += riccati_ws_.P[kk+1](i,j) * dx_k1[j];
+                    }
+                    // u-stationarity: rs.qu + H̄uu·du + H̄ux·dx + B^T·ν_{k+1}
+                    for (int i = 0; i < NU; ++i) {
+                        double r = rs.qu[i];
+                        for (int j = 0; j < NU; ++j) r += rs.Quu(i,j) * du_k[j];
+                        for (int j = 0; j < NX; ++j) r += rs.Qux(i,j) * dx_k[j];
+                        for (int j = 0; j < NX; ++j) r += rs.B(j,i) * nu_next[j];
+                        if (std::fabs(r) > max_ricc_u) {
+                            max_ricc_u = std::fabs(r);
+                            worst_u_k = kk; worst_u_i = i;
+                        }
+                    }
+                    // Regularization perturbation estimate:
+                    // Riccati solves (S + reg·D)·du = rhs, so the residual
+                    // of the UNREGULARIZED equation is ≈ reg·D·du
+                    for (int i = 0; i < NU; ++i) {
+                        double perturb = reg_used_ * std::max(std::fabs(riccati_ws_.S_fact[kk](i,i)), 1e-14) * std::fabs(du_k[i]);
+                        max_reg_perturb = std::max(max_reg_perturb, perturb);
+                    }
+                    // x-stationarity: rs.qx + H̄xx·dx + H̄ux^T·du + A^T·ν_{k+1} - ν_k
+                    for (int i = 0; i < NX; ++i) {
+                        double r = rs.qx[i];
+                        for (int j = 0; j < NX; ++j) r += rs.Qxx(i,j) * dx_k[j];
+                        for (int j = 0; j < NU; ++j) r += rs.Qux(j,i) * du_k[j];
+                        for (int j = 0; j < NX; ++j) r += rs.A(j,i) * nu_next[j];
+                        r -= nu_k[i];
+                        max_ricc_x = std::max(max_ricc_x, std::fabs(r));
+                    }
+                    // S diagonal stats
+                    for (int i = 0; i < NU; ++i) {
+                        double d = riccati_ws_.S_fact[kk](i, i);
+                        min_S_diag = std::min(min_S_diag, d);
+                        max_S_diag = std::max(max_S_diag, d);
+                    }
+                }
+                // Terminal stationarity
+                {
+                    const auto& rs = riccati_stages_[HORIZON];
+                    const auto& dx_k = riccati_ws_.dx[HORIZON];
+                    Vec<NX> nu_k;
+                    for (int i = 0; i < NX; ++i) {
+                        nu_k[i] = riccati_ws_.p[HORIZON][i];
+                        for (int j = 0; j < NX; ++j)
+                            nu_k[i] += riccati_ws_.P[HORIZON](i,j) * dx_k[j];
+                    }
+                    for (int i = 0; i < NX; ++i) {
+                        double r = rs.qx[i];
+                        for (int j = 0; j < NX; ++j) r += rs.Qxx(i,j) * dx_k[j];
+                        r -= nu_k[i];
+                        max_ricc_x = std::max(max_ricc_x, std::fabs(r));
+                    }
+                }
+                double reg_S_ratio = reg_used_ / std::max(max_S_diag, 1e-14);
+                printf("  [linKKT-scaled] ricc_x=%.3e ricc_u=%.3e(worst k=%d i=%d)"
+                       " reg_perturb=%.3e"
+                       " S_diag=[%.2e,%.2e] reg=%.1e reg/S=%.3e\n",
+                       max_ricc_x, max_ricc_u, worst_u_k, worst_u_i,
+                       max_reg_perturb,
+                       min_S_diag, max_S_diag, reg_used_, reg_S_ratio);
+                // ── Term decomposition at worst u node ──────────
+                if (worst_u_k >= 0) {
+                    const auto& rs = riccati_stages_[worst_u_k];
+                    const auto& dx_k = riccati_ws_.dx[worst_u_k];
+                    const auto& du_k = riccati_ws_.du[worst_u_k];
+                    const auto& dx_k1 = riccati_ws_.dx[worst_u_k+1];
+                    Vec<NX> nu_next;
+                    for (int i = 0; i < NX; ++i) {
+                        nu_next[i] = riccati_ws_.p[worst_u_k+1][i];
+                        for (int j = 0; j < NX; ++j)
+                            nu_next[i] += riccati_ws_.P[worst_u_k+1](i,j) * dx_k1[j];
+                    }
+                    int wi = worst_u_i;
+                    double t_qu = rs.qu[wi];
+                    double t_Quu_du = 0.0;
+                    for (int j = 0; j < NU; ++j) t_Quu_du += rs.Quu(wi,j) * du_k[j];
+                    double t_Qux_dx = 0.0;
+                    for (int j = 0; j < NX; ++j) t_Qux_dx += rs.Qux(wi,j) * dx_k[j];
+                    double t_Bt_nu = 0.0;
+                    for (int j = 0; j < NX; ++j) t_Bt_nu += rs.B(j,wi) * nu_next[j];
+                    printf("  [res-decomp] k=%d i=%d:"
+                           " qu=%.4e Quu·du=%.4e Qux·dx=%.4e Bᵀν=%.4e"
+                           " |du|=%.4e |dx|=%.4e\n",
+                           worst_u_k, wi,
+                           t_qu, t_Quu_du, t_Qux_dx, t_Bt_nu,
+                           std::fabs(du_k[wi]), dx_k.norm_inf());
+                }
+            }
+
+            // ── Post-Riccati stationarity: use ORIGINAL Riccati costates ────
+            // MUST be called BEFORE recover_dual_step(), which converts p[k]
+            // from scaled to physical space.
+            compute_post_riccati_stationarity();
+
+            // Save corrector step BEFORE recovery (scaled space for precond)
+            for (int kk = 0; kk <= HORIZON; ++kk) {
+                debug_scaled_dx_[kk] = riccati_ws_.dx[kk];
+                debug_scaled_p_[kk]  = riccati_ws_.p[kk];
+                if (kk < HORIZON)
+                    debug_scaled_du_[kk] = riccati_ws_.du[kk];
+            }
+
+            // Recover physical step from scaled Riccati solution
+            if (params_.enable_preconditioner) {
+                prec_.recover_primal_step(riccati_ws_);
+                prec_.recover_dual_step(riccati_ws_);
+            }
+
+            // Save corrector step AFTER recovery (physical space for both)
+            for (int kk = 0; kk <= HORIZON; ++kk) {
+                debug_phys_dx_[kk] = riccati_ws_.dx[kk];
+                debug_phys_p_[kk]  = riccati_ws_.p[kk];
+                if (kk < HORIZON)
+                    debug_phys_du_[kk] = riccati_ws_.du[kk];
+            }
             has_costates_ = true;  // costates now valid for stationarity check
 
-            // ── Post-Riccati stationarity: use consistent costates ────
-            compute_post_riccati_stationarity();
+            // ── Step-norm diagnostic: physical Newton step magnitudes ──
+            if (params_.verbosity >= 2) {
+                double dx_inf = 0.0, du_inf = 0.0, p_inf = 0.0;
+                for (int kk = 0; kk <= HORIZON; ++kk) {
+                    for (int i = 0; i < NX; ++i)
+                        dx_inf = std::max(dx_inf, std::fabs(riccati_ws_.dx[kk][i]));
+                    if (kk < HORIZON)
+                        for (int i = 0; i < NU; ++i)
+                            du_inf = std::max(du_inf, std::fabs(riccati_ws_.du[kk][i]));
+                    for (int i = 0; i < NX; ++i)
+                        p_inf = std::max(p_inf, std::fabs(riccati_ws_.p[kk][i]));
+                }
+                printf("  [step] ||dx||=%.3e ||du||=%.3e ||p||=%.3e reg=%.1e\n",
+                       dx_inf, du_inf, p_inf, reg_used_);
+            }
 
             // ── Early convergence check with post-Riccati stationarity ──
             // The primal/complementarity residuals from compute_kkt_residuals
@@ -342,12 +628,13 @@ public:
             }
 
             // ── Post-Riccati stagnation detection ──────────────
+            const int stag_limit = STAGNATION_LIMIT;
             if (stat_inf_ < stat_best * 0.999) {
                 stat_best = stat_inf_;
                 stagnation_count = 0;
             } else {
                 ++stagnation_count;
-                if (stagnation_count >= STAGNATION_LIMIT && barrier_strategy_.at_minimum(mu_)
+                if (stagnation_count >= stag_limit && barrier_strategy_.at_minimum(mu_)
                     && !kkt_converged()) {
                     final_status_at_break = 0;
                     if (params_.verbosity >= 1)
@@ -382,7 +669,19 @@ public:
                     if (params_.verbosity >= 2)
                         printf("  [mehrotra: cross-term rejected, mu_with=%.3e > 2*mu=%.3e\n",
                                mu_with, 2.0 * mu_);
-                    recover_inequality_steps(sigma_, false);
+                    // Recompute dlambda ONLY (ds unchanged by cross-term).
+                    // Cannot re-call recover_inequality_steps because dx/du
+                    // are already physical (recovered). Just strip the cross term.
+                    for (int kk = 0; kk <= HORIZON; ++kk) {
+                        const Stage& stg = prob_->stages[kk];
+                        for (int jj = 0; jj < NC; ++jj) {
+                            if (stg.s[jj] > 1e-14) {
+                                double sl = stg.s[jj] * stg.lambda[jj];
+                                dlambda_[kk][jj] = (sigma_ * mu_ - sl
+                                                    - stg.lambda[jj] * ds_[kk][jj]) / stg.s[jj];
+                            }
+                        }
+                    }
                 }
             }
 
@@ -673,10 +972,32 @@ public:
             // ── Globalization: filter line search ────────────────
             evaluator_.bind(this);
 
-            if (params_.verbosity >= 2)
-                printf("  [filter: theta_0=%.4e phi0=%.4e Dphi=%.3e]\n",
+            if (params_.verbosity >= 2) {
+                // θ decomposition: dynamics vs inequality contributions
+                double theta_dyn_0 = 0.0, theta_ineq_0 = 0.0;
+                {
+                    Stage* s = prob_->stages;
+                    for (int k = 0; k < HORIZON; ++k)
+                        for (int i = 0; i < NX; ++i) {
+                            double c_phys = stages_scaled_ ? s[k].c[i] * prec_.inv_Lx(k + 1)[i] : s[k].c[i];
+                            theta_dyn_0 += std::fabs(c_phys);
+                        }
+                    if (prob_->constraints) {
+                        for (int k = 0; k <= HORIZON; ++k)
+                            for (int j = 0; j < NC; ++j)
+                                theta_ineq_0 += std::fabs(s[k].d[j] + s[k].s[j]);
+                    } else {
+                        for (int k = 0; k <= HORIZON; ++k)
+                            for (int j = 0; j < NC; ++j)
+                                theta_ineq_0 += std::fabs(s[k].s[j]);
+                    }
+                }
+                printf("  [filter: theta_0=%.4e phi0=%.4e Dphi=%.3e"
+                       " | th_dyn=%.4e th_ineq=%.4e | ap=%.4f ad=%.4f]\n",
                        evaluator_.current_theta(), evaluator_.current_phi(),
-                       evaluator_.compute_Dphi());
+                       evaluator_.compute_Dphi(),
+                       theta_dyn_0, theta_ineq_0, alpha_p, alpha_d);
+            }
 
             LSResult ls_result = filter_ls_.search(evaluator_, alpha_p);
 
@@ -686,6 +1007,16 @@ public:
                 ls_iters = ls_result.ls_iters;
                 if (ls_result.soc_used) out_stats.soc_steps++;
 
+                // Evaluate trial θ,φ at accepted alpha for diagnostics
+                if (params_.verbosity >= 2) {
+                    double theta_trial, phi_trial;
+                    evaluator_.evaluate(alpha, theta_trial, phi_trial);
+                    printf("  [ls-accept] a=%.4e theta_trial=%.4e phi_trial=%.4e"
+                           " soc=%d ls_iters=%d\n",
+                           alpha, theta_trial, phi_trial,
+                           ls_result.soc_used ? 1 : 0, ls_result.ls_iters);
+                }
+
                 // Apply the accepted step — the ONLY place variables are updated
                 apply_primal_dual_step(alpha, alpha_lambda_);
 
@@ -693,6 +1024,7 @@ public:
                 st = evaluate_model();
                 if (st != Status::SUCCESS) return st;
                 model_evaluated = true;
+                stages_scaled_ = false;
 
                 if (params_.verbosity >= 1) {
                     printf("  [step: a=%.4f alam=%.4f ls=%d soc=%s cost=%.4e theta=%.4e]\n",
@@ -742,14 +1074,18 @@ public:
         }
 
         // ── Solve summary ─────────────────────────────────────────
-        // Always re-evaluate for accurate primal/complementarity stats.
-        // Save stat_inf_ because the post-Riccati stationarity (which
-        // triggered convergence) uses Riccati costates that would be
-        // overwritten by compute_kkt_residuals' costate recovery.
+        // Re-evaluate for accurate final primal/complementarity stats.
+        // Save the riccati-based stationarity (the convergence metric)
+        // before re-evaluation overwrites it.
         double saved_stat = stat_inf_;
         evaluate_model();
+        // Restore scaled stages so compute_linear_kkt_residual is consistent
+        // with the scaled Riccati workspace (dx, du, P, p).
+        if (params_.enable_preconditioner) {
+            prec_.transform_qp(prob_->stages);
+        }
         compute_kkt_residuals();
-        stat_inf_ = saved_stat;  // restore convergence-triggering metric
+        stat_inf_ = saved_stat;  // restore Riccati-consistent stationarity
 
         out_stats.inner_iterations = iter;
         out_stats.barrier_param    = mu_;
@@ -1038,8 +1374,10 @@ private:
         const int N = HORIZON;
         Stage* s = prob_->stages;
         double max_def = 0.0;
-        for (int k = 0; k < N; ++k)
-            max_def = std::max(max_def, s[k].c.norm_inf());
+        for (int k = 0; k < N; ++k) {
+            double def = s[k].c.norm_inf();
+            max_def = std::max(max_def, def);
+        }
         return max_def;
     }
 
@@ -1052,165 +1390,12 @@ private:
         return max_def;
     }
 
-    // ═════════════════════════════════════════════════════════════════════
-    //  Pack nonlinear KKT residual into riccati_stages_ RHS
-    // ═════════════════════════════════════════════════════════════════════
+    // [REMOVED] compute_nonlinear_kkt_rhs() and refine_newton_direction()
+    // Disabled per user instruction: the solving process operates exclusively
+    // on scaled QP data from transform_qp(); no manual scaling code permitted.
 
-    double compute_nonlinear_kkt_rhs() {
-        const int N = HORIZON;
-        Stage* s = prob_->stages;
-        double res_norm = 0.0;
 
-        for (int k = 0; k <= N; ++k) {
-            // Dynamics defect from trial evaluation
-            if (k < N) {
-                riccati_stages_[k].c = trial_stages_[k].c;
-                res_norm = std::max(res_norm, trial_stages_[k].c.norm_inf());
-            }
-
-            // Stationarity-x: qx_trial + Cx_trial^T * lambda_k
-            // (using lambda from z_k -- primal-only refinement)
-            Vec<NX> rx = trial_stages_[k].qx;
-            if (prob_->constraints) {
-                for (int j = 0; j < NC; ++j)
-                    for (int i = 0; i < NX; ++i)
-                        rx[i] += trial_stages_[k].Cx(j, i) * s[k].lambda[j];
-            }
-            riccati_stages_[k].qx = rx;
-            res_norm = std::max(res_norm, rx.norm_inf());
-
-            // Stationarity-u: qu_trial + Cu_trial^T * lambda_k (k < N only)
-            if (k < N) {
-                Vec<NU> ru = trial_stages_[k].qu;
-                if (prob_->constraints) {
-                    for (int j = 0; j < NC; ++j)
-                        for (int i = 0; i < NU; ++i)
-                            ru[i] += trial_stages_[k].Cu(j, i) * s[k].lambda[j];
-                }
-                riccati_stages_[k].qu = ru;
-                res_norm = std::max(res_norm, ru.norm_inf());
-            } else {
-                riccati_stages_[k].qu.zero();
-            }
-            // A, B, Quu, Qux, Qxx remain frozen from build_kkt_lhs()
-        }
-        return res_norm;
-    }
-
-    // ═════════════════════════════════════════════════════════════════════
-    //  Refine Newton direction via Shamanskii chord method
-    // ═════════════════════════════════════════════════════════════════════
-
-    void refine_newton_direction() {
-        // ── Step 0: Current-point dynamics defect (for no-improvement guard) ──
-        double c0 = dynamics_defect_norm();
-
-        // ── Step 1: Evaluate trial point BEFORE loop ────────────────────────
-        // For linear/exact-linearization problems, Newton already drives the
-        // dynamics defect to ~0 at the trial point → refinement can't improve.
-        if (!evaluate_trial_point()) {
-            if (params_.verbosity >= 2)
-                printf("  [refine: NaN/inf in initial trial eval, skipping]\n");
-            return;
-        }
-
-        double c_trial = trial_dynamics_defect();
-
-        // Early exit: trial dynamics defect already small enough
-        if (c_trial < params_.refine_tol) {
-            if (params_.verbosity >= 2)
-                printf("  [refine: skip, ||c_trial||=%.3e < tol=%.1e]\n",
-                       c_trial, params_.refine_tol);
-            return;
-        }
-
-        // No-improvement guard: if trial defect >= current defect,
-        // Newton didn't reduce dynamics error → refinement won't help.
-        if (c_trial >= c0) {
-            if (params_.verbosity >= 2)
-                printf("  [refine: skip, ||c_trial||=%.3e >= ||c_0||=%.3e, no improvement]\n",
-                       c_trial, c0);
-            return;
-        }
-
-        // Set up Riccati RHS using full residual (dynamics + stationarity coupling)
-        compute_nonlinear_kkt_rhs();
-
-        double prev_def = c_trial;
-        int passes_used = 0;
-
-        for (int pass = 0; pass < params_.max_refine_iters; ++pass) {
-            if (params_.verbosity >= 2)
-                printf("  [refine:%d] ||c||=%.3e\n", pass, c_trial);
-
-            // Divergence guard: factorization too stale
-            if (pass > 0 && c_trial > params_.refine_diverge_fac * prev_def) {
-                if (params_.verbosity >= 2)
-                    printf("  [refine:%d] diverging (%.3e > %.1f*%.3e), stopping\n",
-                           pass, c_trial, params_.refine_diverge_fac, prev_def);
-                break;
-            }
-            prev_def = c_trial;
-
-            // Save accumulated direction (will be overwritten by backward_rhs)
-            Vec<NX> saved_dx[HORIZON + 1];
-            Vec<NU> saved_du[HORIZON];
-            for (int k = 0; k <= HORIZON; ++k) {
-                saved_dx[k] = riccati_ws_.dx[k];
-                if (k < HORIZON) saved_du[k] = riccati_ws_.du[k];
-            }
-
-            // Solve correction: K(z_k) * delta = -r(z_trial)
-            Status st = Ricc::backward_rhs(riccati_stages_, riccati_ws_);
-            if (st != Status::SUCCESS) {
-                if (params_.verbosity >= 1)
-                    printf("  [refine:%d] backward_rhs failed, stopping\n", pass);
-                break;
-            }
-            Vec<NX> dx0_zero;
-            dx0_zero.zero();
-            st = Ricc::forward(riccati_stages_, riccati_ws_, dx0_zero);
-            if (st != Status::SUCCESS) {
-                if (params_.verbosity >= 1)
-                    printf("  [refine:%d] forward failed, stopping\n", pass);
-                break;
-            }
-
-            // Direct accumulation: ws = saved + correction
-            for (int k = 0; k <= HORIZON; ++k) {
-                for (int i = 0; i < NX; ++i)
-                    riccati_ws_.dx[k][i] = saved_dx[k][i] + riccati_ws_.dx[k][i];
-                if (k < HORIZON)
-                    for (int i = 0; i < NU; ++i)
-                        riccati_ws_.du[k][i] = saved_du[k][i] + riccati_ws_.du[k][i];
-            }
-            passes_used = pass + 1;
-
-            // Re-evaluate trial at updated direction for next iteration
-            if (!evaluate_trial_point()) {
-                if (params_.verbosity >= 1)
-                    printf("  [refine:%d] NaN/inf in trial eval, aborting\n", pass);
-                break;
-            }
-            c_trial = trial_dynamics_defect();
-
-            // Termination: dynamics defect small enough
-            if (c_trial < params_.refine_tol) {
-                if (params_.verbosity >= 2)
-                    printf("  [refine:%d] converged, ||c||=%.3e < tol=%.1e\n",
-                           pass + 1, c_trial, params_.refine_tol);
-                break;
-            }
-
-            // Update Riccati RHS for next correction solve
-            compute_nonlinear_kkt_rhs();
-        }
-
-        if (params_.verbosity >= 1 && passes_used > 0)
-            printf("  [refine: %d passes, final ||c||=%.3e]\n", passes_used, c_trial);
-    }
-
-    // ═════════════════════════════════════════════════════════════════════
+    // =====================================================================
     //  Post-Riccati stationarity: compute stationarity using the Riccati
     //  corrector costates, which are consistent with the CURRENT model
     //  evaluation (same linearization point).  This avoids the mismatch
@@ -1222,6 +1407,17 @@ private:
     //  the linearized stationarity, so this metric should go to ~0.
     // ═════════════════════════════════════════════════════════════════════
 
+    // =====================================================================
+    //  Post-Riccati stationarity: compute stationarity using the ORIGINAL
+    //  Riccati costates (scaled space) BEFORE they are overwritten by
+    //  costate recovery.  The Riccati solver's costates satisfy the
+    //  linear KKT stationarity (both x and u) by construction, so the
+    //  residual should be ≈ 0 (limited only by Riccati solve accuracy).
+    //
+    //  MUST be called BEFORE recover_dual_step(), which converts p[k]
+    //  from scaled to physical space.
+    // ═════════════════════════════════════════════════════════════════════
+
     void compute_post_riccati_stationarity() {
         const int N = HORIZON;
         Stage* s = prob_->stages;
@@ -1229,24 +1425,19 @@ private:
         double post_stat = 0.0;
 
         for (int k = 0; k <= N; ++k) {
-            // Use EXACTLY the same gradient as the Riccati solver RHS.
-            // At convergence (g+s≈0, σμ≈μ), this becomes:
-            //   qx_work = qx + Cx^T·(μ/s - λ)
-            // The Riccati costate satisfies:
-            //   qx_work + A^T·p[k+1] - p[k] = 0  (x-stationarity)
-            //   qu_work + B^T·p[k+1] = 0  (u-stationarity)
-            // Both should be ~machine epsilon.
+            // Build the MODIFIED gradient (same as build_kkt_rhs).
+            // q̃ = qx + Cx^T·(centering - λ)  where centering = (σμ + λ(g+s))/s
+            // All terms here are in SCALED space (after transform_qp).
             Vec<NX> lag_x = s[k].qx;
             Vec<NU> lag_u;
             if (k < N) lag_u = s[k].qu; else lag_u.zero();
 
-            // Add the barrier centering term (same as build_kkt_rhs)
             if (prob_->constraints) {
                 for (int j = 0; j < NC; ++j) {
                     double sj = s[k].s[j];
                     if (sj < 1e-14) continue;
                     double lj = s[k].lambda[j];
-                    double gj = s[k].d[j] + sj;  // g + s
+                    double gj = s[k].d[j] + sj;  // g + s (constraint infeasibility)
                     double centering = (sigma_ * mu_ + lj * gj) / sj;
                     double w = centering - lj;  // net contribution per constraint
                     for (int i = 0; i < NX; ++i)
@@ -1257,10 +1448,8 @@ private:
                 }
             }
 
-            double grad_x_inf = lag_x.norm_inf();
-            double grad_u_inf = lag_u.norm_inf();
-
-            // Add costate terms using RICCATI costate
+            // Add costate terms using ORIGINAL Riccati costates (scaled space).
+            // p[k] is in scaled space (before recover_dual_step).
             Vec<NX> cos_x; cos_x.zero();
             Vec<NU> cos_u; cos_u.zero();
             if (k < N) {
@@ -1274,23 +1463,59 @@ private:
             for (int i = 0; i < NX; ++i)
                 cos_x[i] -= riccati_ws_.p[k][i];
 
-            double cos_x_inf = cos_x.norm_inf();
-            double cos_u_inf = cos_u.norm_inf();
             for (int i = 0; i < NX; ++i) lag_x[i] += cos_x[i];
             for (int i = 0; i < NU; ++i) lag_u[i] += cos_u[i];
+
+            // ── Convert to PHYSICAL stationarity ──────────────────────
+            // Transform: qx_scaled = (1/Lx) * qx_phys, so Lx = 1/inv_Lx.
+            // Physical = scaled * Lx = scaled / inv_Lx  (component-wise).
+            // Proof: physical stationarity = ∇_x L_phys
+            //   = Lx · (∇_x̂ L_scaled) = Lx · lag_scaled = lag_scaled / inv_Lx.
+            if (params_.enable_preconditioner) {
+                for (int i = 0; i < NX; ++i)
+                    lag_x[i] /= prec_.inv_Lx(k)[i];
+                if (k < N)
+                    for (int i = 0; i < NU; ++i)
+                        lag_u[i] /= prec_.inv_Lu(k)[i];
+            }
 
             double stat_x_full = lag_x.norm_inf();
             double stat_u_full = lag_u.norm_inf();
             double stat_abs = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
 
-            double scale_x = std::max({grad_x_inf, cos_x_inf, 1.0});
-            double scale_u = std::max({grad_u_inf, cos_u_inf, 1.0});
+            // Scale-invariant denominator: use physical component magnitudes.
+            // Recompute from original scaled vectors / inv_Lx = physical.
+            double scale_x, scale_u;
+            if (params_.enable_preconditioner) {
+                double gx = 0.0, gu = 0.0;
+                for (int i = 0; i < NX; ++i) {
+                    gx = std::max(gx, std::fabs(s[k].qx[i] / prec_.inv_Lx(k)[i]));
+                    gx = std::max(gx, std::fabs(cos_x[i] / prec_.inv_Lx(k)[i]));
+                }
+                scale_x = std::max({gx, 1.0});
+                if (k < N) {
+                    for (int i = 0; i < NU; ++i) {
+                        gu = std::max(gu, std::fabs(s[k].qu[i] / prec_.inv_Lu(k)[i]));
+                        gu = std::max(gu, std::fabs(cos_u[i] / prec_.inv_Lu(k)[i]));
+                    }
+                    scale_u = std::max({gu, 1.0});
+                } else {
+                    scale_u = 1.0;
+                }
+            } else {
+                double grad_x_inf = s[k].qx.norm_inf();
+                double grad_u_inf = (k < N) ? s[k].qu.norm_inf() : 0.0;
+                double cos_x_inf = cos_x.norm_inf();
+                double cos_u_inf = cos_u.norm_inf();
+                scale_x = std::max({grad_x_inf, cos_x_inf, 1.0});
+                scale_u = std::max({grad_u_inf, cos_u_inf, 1.0});
+            }
             double scale = (scale_x > scale_u) ? scale_x : scale_u;
             double stat = stat_abs / scale;
             if (stat > post_stat) post_stat = stat;
         }
 
-        // Override the stationarity from compute_kkt_residuals
+        // Override stat_inf_ with Riccati-consistent stationarity.
         stat_inf_ = post_stat;
     }
 
@@ -1313,18 +1538,28 @@ private:
         // Are Riccati costates available? (not on first iteration)
         bool costates_valid = (riccati_ws_.p[N].norm_inf() > 0.0 || has_costates_);
 
+        // Save Riccati costates BEFORE recovery (they satisfy the scaled KKT
+        // by construction; needed for compute_linear_kkt_residual).
+        Vec<NX> riccati_p_save[N + 1];
+        if (costates_valid) {
+            for (int k = 0; k <= N; ++k)
+                riccati_p_save[k] = riccati_ws_.p[k];
+        }
+
         // ── Costate recovery: overwrite Riccati costates with KKT-consistent
         //    costates from the barrier-problem x-stationarity equation.
-        //    The barrier Lagrangian is:
-        //      L_b = cost + p^T·(f-x') + λ^T·(g+s) - μ·Σ ln(s)
-        //    x-stationarity gives:
-        //      p_k = qx + Cx^T·(λ + μ/s) + A^T·p_{k+1}
-        //    The Cx^T·(μ/s) term is CRITICAL: without it, the recovered
-        //    costate differs from the true barrier costate by an amount
-        //    that accumulates through A^T, causing a stationarity floor.
-        if (costates_valid) {
+        //    SKIP when preconditioner is enabled: the recovery formula mixes
+        //    physical gradients with scaled Hessians (from transform_qp),
+        //    producing incorrect costates.  The saved Riccati costates
+        //    (physical after recover_dual_step) are correct and are converted
+        //    to scaled space inside compute_linear_kkt_residual().
+        bool do_costate_recovery = costates_valid && !params_.enable_preconditioner;
+        if (do_costate_recovery) {
             riccati_ws_.p[N] = s[N].qx;
-            // Terminal: add Cx^T·(λ + μ/s)
+            // Terminal: add Qxx·Δx + Cx^T·(λ + μ/s)
+            for (int i = 0; i < NX; ++i)
+                for (int j = 0; j < NX; ++j)
+                    riccati_ws_.p[N][i] += s[N].Qxx(i,j) * riccati_ws_.dx[N][j];
             if (prob_->constraints) {
                 for (int j = 0; j < NC; ++j) {
                     double lj = s[N].lambda[j];
@@ -1336,6 +1571,14 @@ private:
             }
             for (int k = N - 1; k >= 0; --k) {
                 riccati_ws_.p[k] = s[k].qx;
+                // Add Qxx·Δx + Qux^T·Δu
+                for (int i = 0; i < NX; ++i) {
+                    for (int j = 0; j < NX; ++j)
+                        riccati_ws_.p[k][i] += s[k].Qxx(i,j) * riccati_ws_.dx[k][j];
+                    if (k < N)
+                        for (int j = 0; j < NU; ++j)
+                            riccati_ws_.p[k][i] += s[k].Qux(j,i) * riccati_ws_.du[k][j];
+                }
                 // Add Cx^T·(λ + μ/s)
                 if (prob_->constraints) {
                     for (int j = 0; j < NC; ++j) {
@@ -1359,8 +1602,14 @@ private:
         for (int k = 0; k <= N; ++k) {
             // ── 1. Primal feasibility ────────────────────────────
             // Dynamics defect: c_k = f(x_k,u_k) - x_{k+1}
+            // Note: c was scaled by transform_qp (c *= Lx_{k+1}), so we must
+            // unscale to get the physical dynamics defect.
             if (k < N) {
-                double dc = s[k].c.norm_inf();
+                double dc = 0.0;
+                for (int i = 0; i < NX; ++i) {
+                    double c_phys = s[k].c[i] * prec_.inv_Lx(k + 1)[i];
+                    dc = std::max(dc, std::fabs(c_phys));
+                }
                 if (dc > dyn_defect_) dyn_defect_ = dc;
                 if (dc > primal_inf_) primal_inf_ = dc;
             }
@@ -1395,17 +1644,37 @@ private:
                 if (s[k].lambda[j] < ineq_viol_)  ineq_viol_ = s[k].lambda[j];
             }
 
-            // ── 4. Stationarity: full Lagrangian gradient ─────────
-            // Full KKT stationarity (using costates recovered from the
-            // x-stationarity equation in the costate recovery step above):
-            //   ∇_x L = qx + Cx^T·λ + A^T·p_{k+1} - p_k = 0  (by construction)
-            //   ∇_u L = qu + Cu^T·λ + B^T·p_{k+1}         = 0  (convergence measure)
+            // ── 4. Stationarity: barrier Lagrangian gradient ─────
+            // The barrier Lagrangian is:
+            //   L_b = cost(x,u) + p^T·(f-x') + λ^T·(g+s) - μ·Σ ln(s)
+            // At the barrier optimum, ∇_z L_b = 0 gives:
+            //   ∇_x L_b = qx + Cx^T·(λ + μ/s) + A^T·p_{k+1} - p_k = 0
+            //   ∇_u L_b = qu + Cu^T·(λ + μ/s) + B^T·p_{k+1}         = 0
+            //
+            // The costate recovery above defines p[k] using (λ + μ/s),
+            // making x-stationarity = 0 by construction.  The u-stationarity
+            // is the convergence measure.
+            //
+            // CRITICAL: we must use (λ + μ/s), not just λ, in the
+            // stationarity computation.  Using only λ would leave a
+            // (1-σ)·C^T·(μ/s) gap from the Mehrotra centering, creating
+            // an artificial stationarity floor.
+            //
+            // SCALE INVARIANCE: qx, qu, Cx, Cu, A, B are all in SCALED
+            // coordinates after transform_qp.  The costate p[k] is also
+            // in scaled space (satisfying scaled x-stationarity).  We
+            // unscale lag_x and lag_u before taking the norm to get a
+            // scale-invariant convergence measure.
             {
+                // Accumulate barrier Lagrangian gradient in SCALED space.
+                // All terms (qx, Cx, A, B, costate p) are in scaled coords
+                // after transform_qp.  We unscale at the end for a
+                // scale-invariant convergence measure.
                 Vec<NX> lag_x = s[k].qx;
                 Vec<NU> lag_u;
                 if (k < N) lag_u = s[k].qu; else lag_u.zero();
 
-                // Track component magnitudes for diagnostics
+                // Track component magnitudes (in scaled space, for diagnostics)
                 double grad_x_inf = lag_x.norm_inf();
                 double grad_u_inf = lag_u.norm_inf();
 
@@ -1427,63 +1696,107 @@ private:
                 for (int i = 0; i < NX; ++i) lag_x[i] += ct_lam_x[i];
                 for (int i = 0; i < NU; ++i) lag_u[i] += ct_lam_u[i];
 
-                // Add dynamics costate terms: A^T·ν_{k+1} - ν_k
-                // Use RECOVERED costate (p = qx + Cx^Tλ + A^T·p[k+1]) for both x and u.
-                // This makes lag_x = 0 by construction.
+                // Add dynamics costate terms: A^T·p̂_{k+1} - p̂_k
+                // Convert physical costate to scaled: p̂ = inv_Lx · p_phys
                 Vec<NX> cos_x; cos_x.zero();
                 Vec<NU> cos_u; cos_u.zero();
                 if (costates_valid) {
+                    // Pre-compute scaled costate for k+1
+                    Vec<NX> p_next_s;
                     if (k < N) {
+                        for (int m = 0; m < NX; ++m) {
+                            p_next_s[m] = riccati_ws_.p[k+1][m];
+                            if (params_.enable_preconditioner)
+                                p_next_s[m] *= prec_.inv_Lx(k+1)[m];
+                        }
                         for (int i = 0; i < NX; ++i)
                             for (int m = 0; m < NX; ++m)
-                                cos_x[i] += s[k].A(m, i) * riccati_ws_.p[k+1][m];
-                        // u: use RECOVERED costate p[k+1] (same as x)
+                                cos_x[i] += s[k].A(m, i) * p_next_s[m];
                         for (int i = 0; i < NU; ++i)
                             for (int m = 0; m < NX; ++m)
-                                cos_u[i] += s[k].B(m, i) * riccati_ws_.p[k+1][m];
+                                cos_u[i] += s[k].B(m, i) * p_next_s[m];
+                    }
+                    Vec<NX> p_k_s;
+                    for (int i = 0; i < NX; ++i) {
+                        p_k_s[i] = riccati_ws_.p[k][i];
+                        if (params_.enable_preconditioner)
+                            p_k_s[i] *= prec_.inv_Lx(k)[i];
                     }
                     for (int i = 0; i < NX; ++i)
-                        cos_x[i] -= riccati_ws_.p[k][i];
+                        cos_x[i] -= p_k_s[i];
                 }
                 double cos_x_inf = cos_x.norm_inf();
                 double cos_u_inf = cos_u.norm_inf();
                 for (int i = 0; i < NX; ++i) lag_x[i] += cos_x[i];
                 for (int i = 0; i < NU; ++i) lag_u[i] += cos_u[i];
 
-                // No barrier-free correction needed: costate recovery
-                // already includes Cx^T·(μ/s), so x-stationarity is 0
-                // by construction and u-stationarity is the convergence
-                // measure.
+                // ── Unscale all vectors component-wise ────────────
+                // lag_scaled[i] = inv_L[i] · lag_phys[i]
+                // → lag_phys[i] = lag_scaled[i] / inv_L[i]
+                if (params_.enable_preconditioner) {
+                    for (int i = 0; i < NX; ++i) {
+                        double ilx = prec_.inv_Lx(k)[i];
+                        lag_x[i]    /= ilx;
+                        ct_lam_x[i] /= ilx;
+                        cos_x[i]    /= ilx;
+                    }
+                    if (k < N) {
+                        for (int i = 0; i < NU; ++i) {
+                            double ilu = prec_.inv_Lu(k)[i];
+                            lag_u[i]    /= ilu;
+                            ct_lam_u[i] /= ilu;
+                            cos_u[i]    /= ilu;
+                        }
+                    }
+                }
+
                 double stat_x_full = lag_x.norm_inf();
                 double stat_u_full = lag_u.norm_inf();
-
                 double stat_abs = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
 
-                // Relative stationarity: normalize by the natural scale of the
-                // terms being summed.  Without this, catastrophic cancellation
-                // between large terms (e.g. grad_x vs costate_x) leaves a
-                // residual that is a fixed fraction of the term magnitude --
-                // a floating-point artifact that no number of Newton steps can
-                // reduce.  Scaling by max(|terms|, 1) yields the fraction of
-                // the largest term that is unbalanced, which is the quantity
-                // that actually converges to zero.  (This matches the scaled
-                // KKT norm used by acados / IPOPT.)
-                double scale_x = std::max({grad_x_inf, clam_x_inf, cos_x_inf, 1.0});
-                double scale_u = std::max({grad_u_inf, clam_u_inf, cos_u_inf, 1.0});
+                // Physical component magnitudes (for denominator)
+                double grad_x_phys = grad_x_inf;
+                double grad_u_phys = grad_u_inf;
+                double clam_x_phys = ct_lam_x.norm_inf();
+                double clam_u_phys = ct_lam_u.norm_inf();
+                double cos_x_phys  = cos_x.norm_inf();
+                double cos_u_phys  = cos_u.norm_inf();
+                if (params_.enable_preconditioner) {
+                    // Unscale grad vectors (we only have their inf-norms,
+                    // so recompute from original scaled vectors).
+                    // qx_scaled[i] = inv_Lx[i] * qx_phys[i]
+                    // We need ||qx_phys||_inf = max_i |qx_scaled[i] / inv_Lx[i]|
+                    double gx = 0.0, gu = 0.0;
+                    for (int i = 0; i < NX; ++i)
+                        gx = std::max(gx, std::fabs(s[k].qx[i] / prec_.inv_Lx(k)[i]));
+                    grad_x_phys = gx;
+                    if (k < N) {
+                        for (int i = 0; i < NU; ++i)
+                            gu = std::max(gu, std::fabs(s[k].qu[i] / prec_.inv_Lu(k)[i]));
+                        grad_u_phys = gu;
+                    }
+                }
+                double scale_x = std::max({grad_x_phys, clam_x_phys, cos_x_phys, 1.0});
+                double scale_u = std::max({grad_u_phys, clam_u_phys, cos_u_phys, 1.0});
                 double scale = (scale_x > scale_u) ? scale_x : scale_u;
                 double stat = stat_abs / scale;
                 if (stat > stat_inf_) {
                     stat_inf_ = stat;
-                    // Save component breakdown for worst node
-                    stat_breakdown_[0] = grad_x_inf;  // |∇l_x|∞
-                    stat_breakdown_[1] = grad_u_inf;  // |∇l_u|∞
-                    stat_breakdown_[2] = clam_x_inf;  // |Cx^T·λ|∞
-                    stat_breakdown_[3] = clam_u_inf;  // |Cu^T·λ|∞
-                    stat_breakdown_[4] = cos_x_inf;   // |costate_x|∞
-                    stat_breakdown_[5] = cos_u_inf;   // |costate_u|∞
+                    stat_breakdown_[0] = grad_x_inf;
+                    stat_breakdown_[1] = grad_u_inf;
+                    stat_breakdown_[2] = clam_x_inf;
+                    stat_breakdown_[3] = clam_u_inf;
+                    stat_breakdown_[4] = cos_x_inf;
+                    stat_breakdown_[5] = cos_u_inf;
                     stat_worst_node_ = k;
                 }
             }
+        }
+
+        // Restore Riccati costates if we overwrote them
+        if (do_costate_recovery) {
+            for (int k = 0; k <= N; ++k)
+                riccati_ws_.p[k] = riccati_p_save[k];
         }
     }
 
@@ -1544,6 +1857,34 @@ private:
         const auto& rs_stages = riccati_stages_;
         const double smu = sigma_ * mu_;
 
+        // ── Convert workspace to scaled space if needed ────────────
+        // After recover_primal_step/recover_dual_step, ws.dx/du/p are physical
+        // but ws.P and riccati_stages_ are scaled.  Convert to scaled space
+        // for consistent residual computation.
+        // Convention: dx̂ = Lx·dx → dx̂[i] = dx[i]/inv_Lx[i]
+        //             p̂ = inv_Lx·p → p̂[i] = p[i]*inv_Lx[i]
+        Vec<NX> dx_s[N + 1], p_s[N + 1];
+        Vec<NU> du_s[N];
+        for (int k = 0; k <= N; ++k) {
+            for (int i = 0; i < NX; ++i) {
+                if (params_.enable_preconditioner) {
+                    dx_s[k][i] = ws.dx[k][i] / prec_.inv_Lx(k)[i];  // = Lx·dx_phys
+                    p_s[k][i]  = ws.p[k][i] * prec_.inv_Lx(k)[i];   // = inv_Lx·p_phys
+                } else {
+                    dx_s[k][i] = ws.dx[k][i];
+                    p_s[k][i]  = ws.p[k][i];
+                }
+            }
+            if (k < N) {
+                for (int i = 0; i < NU; ++i) {
+                    if (params_.enable_preconditioner)
+                        du_s[k][i] = ws.du[k][i] / prec_.inv_Lu(k)[i];
+                    else
+                        du_s[k][i] = ws.du[k][i];
+                }
+            }
+        }
+
         // ── Collect RHS norms first ───────────────────────────────
         for (int k = 0; k < N; ++k) {
             double cn = s[k].c.norm_inf();
@@ -1592,20 +1933,24 @@ private:
 
         // ── Compute residuals ─────────────────────────────────────
         for (int k = 0; k <= N; ++k) {
-            const auto& dx_k  = ws.dx[k];
-            const auto& dx_k1 = (k < N) ? ws.dx[k + 1] : ws.dx[k]; // terminal: dx_k1 unused
-            const auto& du_k  = (k < N) ? ws.du[k] : ws.du[0];     // terminal: no du
+            const auto& dx_k  = dx_s[k];
+            const auto& dx_k1 = (k < N) ? dx_s[k + 1] : dx_s[k]; // terminal: dx_k1 unused
+            const auto& du_k  = (k < N) ? du_s[k] : du_s[0];     // terminal: no du
 
             const auto& rs = rs_stages[k];
             const Stage& stg = s[k];
 
             // ── (D) Dynamics residual (k < N only) ────────────────
+            // In scaled space: r̂_dyn = Lx_{k+1} · r_phys  (since c, A, B are scaled by Lx_{k+1})
+            // Unscale: r_phys[i] = r_scaled[i] * inv_Lx_{k+1}[i]
             if (k < N) {
                 for (int i = 0; i < NX; ++i) {
                     double res_i = rs.c[i];  // c_k = f(x,u) - x_{k+1}
                     for (int j = 0; j < NX; ++j) res_i += rs.A(i,j) * dx_k[j];
                     for (int j = 0; j < NU; ++j) res_i += rs.B(i,j) * du_k[j];
                     res_i -= dx_k1[i];  // Δx_{k+1}
+                    if (params_.enable_preconditioner)
+                        res_i *= prec_.inv_Lx(k + 1)[i];  // unscale to physical
                     double ar = std::fabs(res_i);
                     if (ar > res.max_dyn_res) { res.max_dyn_res = ar; res.worst_stage = k; res.worst_eq_type = 0; }
                 }
@@ -1629,15 +1974,14 @@ private:
                 }
             }
 
-            // ── Riccati costate ν_k = p_k + P_k·Δx_k ─────────────
+            // ── Riccati costate ν̂_k = p̂_k + P̂_k·Δx̂_k (scaled space) ──
             Vec<NX> nu_k;
             {
-                const auto& P_k = ws.P[k];
-                const auto& p_k = ws.p[k];
+                const auto& P_k = ws.P[k];  // P is always in scaled space
                 for (int i = 0; i < NX; ++i) {
-                    nu_k[i] = p_k[i];
+                    nu_k[i] = p_s[k][i];  // scaled costate
                     for (int j = 0; j < NX; ++j)
-                        nu_k[i] += P_k(i,j) * dx_k[j];
+                        nu_k[i] += P_k(i,j) * dx_k[j];  // dx_k is scaled (dx_s)
                 }
             }
 
@@ -1645,9 +1989,8 @@ private:
             Vec<NX> nu_next;
             if (k < N) {
                 const auto& P_next = ws.P[k + 1];
-                const auto& p_next = ws.p[k + 1];
                 for (int i = 0; i < NX; ++i) {
-                    nu_next[i] = p_next[i];
+                    nu_next[i] = p_s[k + 1][i];
                     for (int j = 0; j < NX; ++j)
                         nu_next[i] += P_next(i,j) * dx_k1[j];
                 }
@@ -1673,57 +2016,72 @@ private:
 
             if (k < N) {
                 // ── (S_x) Full KKT x-stationarity (Bellman equation) ──
-                // q̃^x + H̄^xx·Δx + (H̄^ux)^T·Δu + A^T·ν_{k+1} - ν_k = 0
+                // Use MODIFIED gradient q̃x = qx + Cx^T·((σμ+λ(g+s))/s − λ)
+                // which is what the Riccati recursion actually uses.
                 for (int i = 0; i < NX; ++i) {
                     double res_i = qx_tilde[i];
                     for (int j = 0; j < NX; ++j) res_i += rs.Qxx(i,j) * dx_k[j];
                     for (int j = 0; j < NU; ++j) res_i += rs.Qux(j,i) * du_k[j];  // (H̄^ux)^T
                     res_i -= nu_k[i];  // -ν_k
                     for (int j = 0; j < NX; ++j) res_i += rs.A(j,i) * nu_next[j];  // +A^T·ν_{k+1}
+                    // res_raw = inv_Lx · r_phys (scaled matrices × physical steps)
+                    // r_phys = res_raw / inv_Lx
+                    if (params_.enable_preconditioner)
+                        res_i /= prec_.inv_Lx(k)[i];  // unscale: multiply by Lx_k
                     double ar = std::fabs(res_i);
                     if (ar > res.max_stat_x_res) { res.max_stat_x_res = ar; res.worst_stage = k; res.worst_eq_type = 1; }
                 }
 
                 // ── (S_u) u-stationarity ──────────────────────────
-                // q̃^u + H̄^uu·Δu + H̄^ux·Δx + B^T·ν_{k+1} = 0
+                // Use MODIFIED gradient q̃u (same as Riccati recursion).
                 for (int i = 0; i < NU; ++i) {
                     double res_i = qu_tilde[i];
                     for (int j = 0; j < NU; ++j) res_i += rs.Quu(i,j) * du_k[j];
                     for (int j = 0; j < NX; ++j) res_i += rs.Qux(i,j) * dx_k[j];
                     for (int j = 0; j < NX; ++j) res_i += rs.B(j,i) * nu_next[j];  // B^T·ν_{k+1}
+                    if (params_.enable_preconditioner)
+                        res_i /= prec_.inv_Lu(k)[i];  // unscale: multiply by Lu_k
                     double ar = std::fabs(res_i);
                     if (ar > res.max_stat_u_res) { res.max_stat_u_res = ar; res.worst_stage = k; res.worst_eq_type = 2; }
                 }
 
-                // ── Pure Riccati x-stationarity (using rs.qx directly) ──
-                // rs.qx + H̄^xx·Δx + (H̄^ux)^T·Δu + A^T·ν_{k+1} - ν_k = 0
+                // ── Pure Riccati x-stationarity (using modified gradient) ──
+                // q̃x + H̄^xx·Δx + (H̄^ux)^T·Δu + A^T·ν_{k+1} - ν_k = 0
+                // This is zero by construction (Riccati recursion solves this).
                 for (int i = 0; i < NX; ++i) {
-                    double res_i = rs.qx[i];
+                    double res_i = qx_tilde[i];
                     for (int j = 0; j < NX; ++j) res_i += rs.Qxx(i,j) * dx_k[j];
                     for (int j = 0; j < NU; ++j) res_i += rs.Qux(j,i) * du_k[j];
                     for (int j = 0; j < NX; ++j) res_i += rs.A(j,i) * nu_next[j];  // +A^T·ν_{k+1}
                     res_i -= nu_k[i];  // -ν_k
+                    if (params_.enable_preconditioner)
+                        res_i /= prec_.inv_Lx(k)[i];
                     double ar = std::fabs(res_i);
                     if (ar > res.max_riccati_x_res) { res.max_riccati_x_res = ar; res.worst_stage = k; res.worst_eq_type = 5; }
                 }
 
-                // ── Pure Riccati u-stationarity (using rs.qu directly) ──
-                // rs.qu + H̄^uu·Δu + H̄^ux·Δx + B^T·ν_{k+1} = 0
+                // ── Pure Riccati u-stationarity (using modified gradient) ──
+                // q̃u + H̄^uu·Δu + H̄^ux·Δx + B^T·ν_{k+1} = 0
+                // This is zero by construction (Riccati recursion solves this).
                 for (int i = 0; i < NU; ++i) {
-                    double res_i = rs.qu[i];
+                    double res_i = qu_tilde[i];
                     for (int j = 0; j < NU; ++j) res_i += rs.Quu(i,j) * du_k[j];
                     for (int j = 0; j < NX; ++j) res_i += rs.Qux(i,j) * dx_k[j];
                     for (int j = 0; j < NX; ++j) res_i += rs.B(j,i) * nu_next[j];
+                    if (params_.enable_preconditioner)
+                        res_i /= prec_.inv_Lu(k)[i];
                     double ar = std::fabs(res_i);
                     if (ar > res.max_riccati_u_res) { res.max_riccati_u_res = ar; res.worst_stage = k; res.worst_eq_type = 6; }
                 }
             } else {
                 // ── (T) Terminal x-stationarity ───────────────────
-                // q̃^x_N + H̄^xx_N·Δx_N - ν_N = 0
+                // Use MODIFIED gradient q̃x (same as Riccati recursion).
                 for (int i = 0; i < NX; ++i) {
                     double res_i = qx_tilde[i];
                     for (int j = 0; j < NX; ++j) res_i += rs.Qxx(i,j) * dx_k[j];
                     res_i -= nu_k[i];  // -ν_N
+                    if (params_.enable_preconditioner)
+                        res_i /= prec_.inv_Lx(N)[i];
                     double ar = std::fabs(res_i);
                     if (ar > res.max_stat_term_res) { res.max_stat_term_res = ar; res.worst_stage = k; res.worst_eq_type = 3; }
                 }
@@ -1785,17 +2143,15 @@ private:
         Stage* s = prob_->stages;
 
         for (int k = 0; k <= N; ++k) {
-            // ── Start with cost Hessian ───────────────────────────────
+            // ── Start with cost Hessian (already scaled by transform_qp) ──
             qxx_work_[k] = s[k].Qxx;
             quu_work_[k] = s[k].Quu;
             qux_work_[k] = s[k].Qux;
 
             if (prob_->constraints) {
                 // ── Barrier Hessian: H_bar = C^T·diag(λ/s)·C ────────
-                // Use λ/s weights (Lagrangian Hessian) for better
-                // conditioning.  The step is quasi-Newton (not exact
-                // Newton for barrier), so Dφ is clamped to −dz^T·H·dz
-                // below to ensure descent.
+                // Uses SCALED Cx/Cu (from transform_qp) so the barrier
+                // Hessian is consistent with the scaled cost Hessian.
                 for (int j = 0; j < NC; ++j) {
                     double sj = s[k].s[j];
                     double lj = s[k].lambda[j];
@@ -1805,16 +2161,24 @@ private:
                     for (int r = 0; r < NX; ++r) {
                         double cjr = s[k].Cx(j, r);
                         if (std::fabs(cjr) < 1e-30) continue;
-                        for (int c = 0; c < NX; ++c)
-                            qxx_work_[k](r, c) += ratio * cjr * s[k].Cx(j, c);
+                        for (int c = 0; c < NX; ++c) {
+                            double cjc = s[k].Cx(j, c);
+                            qxx_work_[k](r, c) += ratio * cjr * cjc;
+                        }
                         if (k < N)
-                            for (int c = 0; c < NU; ++c)
-                                qux_work_[k](c, r) += ratio * s[k].Cu(j, c) * cjr;
+                            for (int c = 0; c < NU; ++c) {
+                                double cujc = s[k].Cu(j, c);
+                                qux_work_[k](c, r) += ratio * cujc * cjr;
+                            }
                     }
                     if (k < N)
-                        for (int r = 0; r < NU; ++r)
-                            for (int c = 0; c < NU; ++c)
-                                quu_work_[k](r, c) += ratio * s[k].Cu(j, r) * s[k].Cu(j, c);
+                        for (int r = 0; r < NU; ++r) {
+                            double cur = s[k].Cu(j, r);
+                            for (int c = 0; c < NU; ++c) {
+                                double cuc = s[k].Cu(j, c);
+                                quu_work_[k](r, c) += ratio * cur * cuc;
+                            }
+                        }
                 }
             }
 
@@ -1920,6 +2284,11 @@ private:
         for (int i = 0; i < NX; ++i)
             dx0[i] = prob_->x0[i] - prob_->stages[0].x[i];
 
+        // Scale dx0 for Riccati forward pass (dx̂0 = Lx·dx0)
+        if (params_.enable_preconditioner) {
+            prec_.scale_dx0(dx0);
+        }
+
         return Ricc::forward(riccati_stages_, riccati_ws_, dx0);
     }
 
@@ -1945,8 +2314,11 @@ private:
         constexpr double sigma_min = 0.3;
         constexpr double sigma_max = 0.8;
 
-        // Use the worst of primal infeasibility and stationarity
-        double worst = std::max(primal_inf_, stat_inf_);
+        // Use complementarity gap and primal infeasibility for sigma adaptation.
+        // Note: stat_inf_ is NOT used here because it is computed in scaled
+        // coordinates (after transform_qp) and is not scale-invariant.
+        // compl_inf_ = |s·λ − μ| is scale-invariant (both s and λ are physical).
+        double worst = std::max(primal_inf_, compl_inf_);
 
         // Map log10(worst) to [0, 1]:
         //   worst = 1.0   → log10 = 0   → t = 0/4 = 0.0   (not converged)
@@ -2521,15 +2893,23 @@ private:
     // ═════════════════════════════════════════════════════════════════════
 
     /// Compute θ = total constraint violation (ℓ₁) at current base iterate.
-    /// Uses the stored dynamics defect s[k].c and constraint values s[k].d.
+    /// Uses stages_scaled_ flag to handle both scaled and physical c.
     double compute_theta() const {
         const int N = HORIZON;
         Stage* s = prob_->stages;
         double theta_dyn = 0.0;
         double theta_ineq = 0.0;
-        for (int k = 0; k < N; ++k)
-            for (int i = 0; i < NX; ++i)
-                theta_dyn += std::fabs(s[k].c[i]);
+        if (stages_scaled_) {
+            // c was scaled by transform_qp (c *= Lx_{k+1}), so unscale for physical theta.
+            for (int k = 0; k < N; ++k)
+                for (int i = 0; i < NX; ++i)
+                    theta_dyn += std::fabs(s[k].c[i] * prec_.inv_Lx(k + 1)[i]);
+        } else {
+            // c is physical (from evaluate_model without transform_qp)
+            for (int k = 0; k < N; ++k)
+                for (int i = 0; i < NX; ++i)
+                    theta_dyn += std::fabs(s[k].c[i]);
+        }
         if (prob_->constraints) {
             for (int k = 0; k <= N; ++k)
                 for (int j = 0; j < NC; ++j)
@@ -2719,9 +3099,15 @@ private:
                     sv->soc_save_c_[k][i] = fk[i] - xkp1_t[i];
             }
 
-            // Replace dynamics defect with trial defect
-            for (int k = 0; k < N; ++k)
+            // Replace dynamics defect with trial defect (scaled for Riccati)
+            for (int k = 0; k < N; ++k) {
                 sv->riccati_stages_[k].c = sv->soc_save_c_[k];
+                if (sv->params_.enable_preconditioner) {
+                    const auto& lx_next = sv->prec_.Lx(k + 1);
+                    for (int i = 0; i < NX; ++i)
+                        sv->riccati_stages_[k].c[i] *= lx_next[i];
+                }
+            }
 
             Status st = Ricc::backward_rhs(sv->riccati_stages_, sv->riccati_ws_);
             if (st != Status::SUCCESS) {
@@ -2737,6 +3123,9 @@ private:
             Vec<NX> dx0_soc;
             for (int i = 0; i < NX; ++i)
                 dx0_soc[i] = sv->prob_->x0[i] - sv->prob_->stages[0].x[i];
+            if (sv->params_.enable_preconditioner) {
+                sv->prec_.scale_dx0(dx0_soc);
+            }
             st = Ricc::forward(sv->riccati_stages_, sv->riccati_ws_, dx0_soc);
             if (st != Status::SUCCESS) {
                 for (int k = 0; k <= N; ++k) {
@@ -2747,7 +3136,13 @@ private:
                 return false;
             }
 
+            // Recover physical SOC step from scaled solution.
+            // ds/dλ computed BEFORE primal recovery (scaled Cx·dx̂ = physical ds).
             sv->recover_inequality_steps(sv->sigma_);
+            if (sv->params_.enable_preconditioner) {
+                sv->prec_.recover_primal_step(sv->riccati_ws_);
+                sv->prec_.recover_dual_step(sv->riccati_ws_);
+            }
             double ap_soc, ad_soc_unused;
             sv->compute_ftb_limits(ap_soc, ad_soc_unused);
             double alpha_soc = std::min(alpha, ap_soc);
@@ -2788,6 +3183,9 @@ private:
     Vec<NX>      qx_work_[HORIZON + 1];
     Vec<NU>      qu_work_[HORIZON + 1];
 
+    // Preconditioner
+    Prec prec_;
+
     // Riccati stages and workspace
     StageData<NX, NU, NC> riccati_stages_[HORIZON + 1];
     WS            riccati_ws_;
@@ -2811,6 +3209,7 @@ private:
     double compl_inf_       = 0.0;  // complementarity: |s_j·λ_j − μ|
     double ineq_viol_       = 0.0;  // inequality: most-negative s_j or λ_j (≥0 = OK)
     bool   has_costates_    = false; // Riccati costates available (false until first solve)
+    bool   stages_scaled_   = false; // true after transform_qp, false after evaluate_model
 
     // Adaptive regularization: condition estimate from previous iteration
     double cond_estimate_   = 1.0;
@@ -2843,6 +3242,50 @@ private:
     Vec<NX> temp_corr_dx_[HORIZON + 1];                 // correction buffer (x)
     Vec<NU> temp_corr_du_[HORIZON];                     // correction buffer (u)
 
+    // Debug: scaled corrector step saved BEFORE recovery (for invariance testing)
+    Vec<NX> debug_scaled_dx_[HORIZON + 1];
+    Vec<NU> debug_scaled_du_[HORIZON];
+    Vec<NX> debug_scaled_p_[HORIZON + 1];
+    // Debug: physical corrector step saved AFTER recovery
+    Vec<NX> debug_phys_dx_[HORIZON + 1];
+    Vec<NU> debug_phys_du_[HORIZON];
+    Vec<NX> debug_phys_p_[HORIZON + 1];
+    // Debug: pristine Riccati stages right after KKT build (before SOC/LS)
+    StageData<NX, NU, NC> debug_pristine_stages_[HORIZON + 1];
+    // Debug: sigma and mu at corrector step
+    double debug_sigma_ = 0.0;
+    double debug_mu_ = 0.0;
+    double debug_primal_inf_ = 0.0;
+    double debug_compl_inf_ = 0.0;
+    // Debug: Riccati internals (P[N], S_fact[0], d[0], K[0])
+    SymMat<NX> debug_P_term_;
+    SymMat<NU> debug_S_fact0_;
+    Vec<NU> debug_d0_;
+    Mat<NU, NX> debug_K0_;
+
+public:
+    const Vec<NX>* debug_scaled_dx() const { return debug_scaled_dx_; }
+    const Vec<NU>* debug_scaled_du() const { return debug_scaled_du_; }
+    const Vec<NX>* debug_scaled_p()  const { return debug_scaled_p_; }
+    const Vec<NX>* debug_phys_dx() const { return debug_phys_dx_; }
+    const Vec<NU>* debug_phys_du() const { return debug_phys_du_; }
+    const Vec<NX>* debug_phys_p()  const { return debug_phys_p_; }
+    const Stage* debug_riccati_stages() const { return riccati_stages_; }
+    const Stage* debug_pristine_stages() const { return debug_pristine_stages_; }
+    double debug_sigma() const { return debug_sigma_; }
+    double debug_mu() const { return debug_mu_; }
+    double debug_primal_inf() const { return debug_primal_inf_; }
+    double debug_compl_inf() const { return debug_compl_inf_; }
+    const SymMat<NX>& debug_P_term() const { return debug_P_term_; }
+    const SymMat<NU>& debug_S_fact0() const { return debug_S_fact0_; }
+    const Vec<NU>& debug_d0() const { return debug_d0_; }
+    const Mat<NU, NX>& debug_K0() const { return debug_K0_; }
+    // Preconditioner scaling factors (for invariance testing)
+    const Vec<NX>* debug_prec_Lx() const { return prec_.debug_Lx(); }
+    const Vec<NU>* debug_prec_Lu() const { return prec_.debug_Lu(); }
+    const Vec<NX>* debug_prec_inv_Lx() const { return prec_.debug_inv_Lx(); }
+    const Vec<NU>* debug_prec_inv_Lu() const { return prec_.debug_inv_Lu(); }
+    bool debug_precond_enabled() const { return params_.enable_preconditioner; }
 };
 
 } // namespace nmpc

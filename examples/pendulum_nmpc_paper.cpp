@@ -137,6 +137,7 @@ int main() {
     // Matched tolerances for fair comparison vs acados.
     pp.mu_min=1e-4;
     pp.tol_primal=1e-4; pp.tol_compl=1e-4; pp.tol_ineq=1e-4; pp.tol_stat = 0.02;
+    pp.enable_preconditioner = true;  // diagonal Jacobi preconditioner
     pp.verbosity=2;
     solver.configure(pp);
 

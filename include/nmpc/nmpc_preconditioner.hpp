@@ -1,14 +1,30 @@
 #pragma once
 /**
  * @file    nmpc_preconditioner.hpp
- * @brief   Block-diagonal Cholesky preconditioner for the per-stage Hessian.
+ * @brief   Diagonal Jacobi preconditioner for the per-stage Hessian.
  *
- * Factorizes the FINAL Hessian blocks (cost + barrier) at each stage:
+ * Computes scaling factors from the Hessian diagonal ONCE per MPC solve:
  *
- *     Qxx_k = Lx_k · Lx_k^T,    Quu_k = Lu_k · Lu_k^T
+ *     Lx_i = sqrt(max(Qxx_ii, floor))    floor = (1e-4 * max_j(sqrt(Qxx_jj)))^2
+ *     Lu_i = sqrt(max(Quu_ii, floor))
  *
- * Provides L, L^{-1}, and scaling utilities for the solver to apply
- * left/right preconditioning to the KKT system.
+ * Every Newton iteration, transform_qp() applies the FIXED scaling to fresh
+ * derivatives from evaluate_model().  The Riccati solver sees only scaled data
+ * and is completely unaware of scaling (IPOPT-style separation).
+ *
+ * Convention: dx = inv_Lx · dx̂, i.e., dx̂ = Lx · dx.
+ *
+ * Transform table:
+ *   Qxx ← inv_Lx · Qxx · inv_Lx     qx ← inv_Lx · qx
+ *   Quu ← inv_Lu · Quu · inv_Lu     qu ← inv_Lu · qu
+ *   Qux ← inv_Lu · Qux · inv_Lx
+ *   A   ← Lx_{k+1} · A · inv_Lx_k   c ← Lx_{k+1} · c
+ *   B   ← Lx_{k+1} · B · inv_Lu_k
+ *   Cx  ← Cx · inv_Lx               Cu ← Cu · inv_Lu
+ *
+ * Recovery:
+ *   Primal:  dx = inv_Lx · dx̂,  du = inv_Lu · dû
+ *   Dual:    ν = Lx · ν̂  (costate),  λ = λ̂  (constraint multiplier, invariant)
  */
 
 #include "nmpc_core.hpp"
@@ -16,27 +32,62 @@
 #include "nmpc_riccati.hpp"
 #include <cmath>
 #include <cstdio>
+#include <algorithm>
 
 namespace nmpc {
 
 template <int NX, int NU, int HORIZON>
 class HessianPreconditioner {
 public:
-    using Stage = StageData<NX, NU, 1>;  // NC irrelevant for preconditioner
-
-    HessianPreconditioner() = default;
+    HessianPreconditioner() {
+        // Initialize to identity (no scaling) so inv_Lx/inv_Lu return 1.0
+        // when preconditioner is not computed.
+        for (int k = 0; k <= HORIZON; ++k) {
+            for (int i = 0; i < NX; ++i) {
+                Lx_[k][i] = 1.0;
+                inv_Lx_[k][i] = 1.0;
+            }
+            if (k < HORIZON) {
+                for (int i = 0; i < NU; ++i) {
+                    Lu_[k][i] = 1.0;
+                    inv_Lu_[k][i] = 1.0;
+                }
+            }
+        }
+    }
 
     // ═══════════════════════════════════════════════════════════════════
-    //  Compute Cholesky factors of the final Hessian blocks (Qxx, Quu).
-    //  Call AFTER build_kkt_lhs() has filled stages with cost + barrier.
+    //  Compute diagonal scaling from Hessian diagonal.
+    //  Call ONCE per MPC solve (outside Newton loop).
+    //  Lx, Lu are FIXED for the entire solve.
     // ═══════════════════════════════════════════════════════════════════
 
     template <int NC_>
     void compute(const StageData<NX, NU, NC_> stages[]) {
         for (int k = 0; k <= HORIZON; ++k) {
-            factorize_spd(stages[k].Qxx, Lx_[k], inv_Lx_[k]);
+            // Find max diagonal for relative floor
+            double max_d = 0.0;
+            for (int i = 0; i < NX; ++i)
+                max_d = std::max(max_d, stages[k].Qxx(i, i));
+            double floor_val = 1e-8 * max_d;  // (1e-4 * sqrt(max))^2 = 1e-8 * max
+
+            for (int i = 0; i < NX; ++i) {
+                double d = std::max(stages[k].Qxx(i, i), floor_val);
+                Lx_[k][i] = std::sqrt(d);
+                inv_Lx_[k][i] = 1.0 / Lx_[k][i];
+            }
+
             if (k < HORIZON) {
-                factorize_spd(stages[k].Quu, Lu_[k], inv_Lu_[k]);
+                double max_du = 0.0;
+                for (int i = 0; i < NU; ++i)
+                    max_du = std::max(max_du, stages[k].Quu(i, i));
+                double floor_u = 1e-8 * max_du;
+
+                for (int i = 0; i < NU; ++i) {
+                    double d = std::max(stages[k].Quu(i, i), floor_u);
+                    Lu_[k][i] = std::sqrt(d);
+                    inv_Lu_[k][i] = 1.0 / Lu_[k][i];
+                }
             }
         }
         computed_ = true;
@@ -46,173 +97,152 @@ public:
     //  Accessors
     // ═══════════════════════════════════════════════════════════════════
 
-    /// Cholesky factor L such that H = L·L^T
-    const Mat<NX, NX>& Lx(int k) const { return Lx_[k]; }
-    const Mat<NU, NU>& Lu(int k) const { return Lu_[k]; }
-
-    /// Inverse of L (lower triangular)
-    const Mat<NX, NX>& inv_Lx(int k) const { return inv_Lx_[k]; }
-    const Mat<NU, NU>& inv_Lu(int k) const { return inv_Lu_[k]; }
-
+    const Vec<NX>& Lx(int k) const { return Lx_[k]; }
+    const Vec<NU>& Lu(int k) const { return Lu_[k]; }
+    const Vec<NX>& inv_Lx(int k) const { return inv_Lx_[k]; }
+    const Vec<NU>& inv_Lu(int k) const { return inv_Lu_[k]; }
     bool is_computed() const { return computed_; }
 
-    // ═══════════════════════════════════════════════════════════════════
-    //  Scaling utilities — apply L^{-1}, L^{-T}, L, L^T to vectors
-    // ═══════════════════════════════════════════════════════════════════
-
-    /// v ← Lx_k^{-1} · v
-    void scale_x(int k, Vec<NX>& v) const { apply_left(v, inv_Lx_[k]); }
-    /// v ← Lu_k^{-1} · v
-    void scale_u(int k, Vec<NU>& v) const { apply_left(v, inv_Lu_[k]); }
-
-    /// v ← Lx_k^{-T} · v
-    void scale_x_invT(int k, Vec<NX>& v) const { apply_left_transpose(v, inv_Lx_[k]); }
-    /// v ← Lu_k^{-T} · v
-    void scale_u_invT(int k, Vec<NU>& v) const { apply_left_transpose(v, inv_Lu_[k]); }
-
-    /// v ← Lx_k · v
-    void unscale_x(int k, Vec<NX>& v) const { apply_left(v, Lx_[k]); }
-    /// v ← Lu_k · v
-    void unscale_u(int k, Vec<NU>& v) const { apply_left(v, Lu_[k]); }
-
-    /// v ← Lx_k^T · v
-    void unscale_x_T(int k, Vec<NX>& v) const { apply_left_transpose(v, Lx_[k]); }
-    /// v ← Lu_k^T · v
-    void unscale_u_T(int k, Vec<NU>& v) const { apply_left_transpose(v, Lu_[k]); }
+    // Array accessors for debug exposure (returns pointer to stage 0)
+    const Vec<NX>* debug_Lx() const { return Lx_; }
+    const Vec<NU>* debug_Lu() const { return Lu_; }
+    const Vec<NX>* debug_inv_Lx() const { return inv_Lx_; }
+    const Vec<NU>* debug_inv_Lu() const { return inv_Lu_; }
 
     // ═══════════════════════════════════════════════════════════════════
-    //  Matrix scaling: congruence and sandwich products
+    //  Transform QP derivatives to scaled space.
+    //  Call every Newton iteration AFTER evaluate_model().
+    //  Modifies ONLY derivatives (Q, q, A, B, c, Cx, Cu), NOT primal/dual.
     // ═══════════════════════════════════════════════════════════════════
 
-    /// Symmetric congruence: M ← T · M · T^T
-    template <int N>
-    void sandwich_symmetric(Mat<N, N>& M, const Mat<N, N>& T) const {
-        Mat<N, N> tmp;
-        tmp.zero();
-        for (int r = 0; r < N; ++r)
-            for (int c = 0; c < N; ++c) {
-                double sum = 0.0;
-                for (int m = 0; m < N; ++m)
-                    sum += T(r, m) * M(m, c);
-                tmp(r, c) = sum;
-            }
-        M.zero();
-        for (int r = 0; r < N; ++r)
-            for (int c = 0; c < N; ++c) {
-                double sum = 0.0;
-                for (int m = 0; m < N; ++m)
-                    sum += tmp(r, m) * T(c, m);
-                M(r, c) = sum;
-            }
-    }
-
-    /// Rectangular sandwich: M ← T_left · M · T_right^T
-    template <int NR, int NC, int NL>
-    void sandwich_rectangular(Mat<NR, NC>& M,
-                               const Mat<NR, NR>& T_left,
-                               const Mat<NC, NC>& T_right) const {
-        Mat<NR, NC> tmp;
-        tmp.zero();
-        for (int r = 0; r < NR; ++r)
-            for (int c = 0; c < NC; ++c) {
-                double sum = 0.0;
-                for (int m = 0; m < NL; ++m)
-                    sum += T_left(r, m) * M(m, c);
-                tmp(r, c) = sum;
-            }
-        M.zero();
-        for (int r = 0; r < NR; ++r)
-            for (int c = 0; c < NC; ++c) {
-                double sum = 0.0;
-                for (int m = 0; m < NC; ++m)
-                    sum += tmp(r, m) * T_right(c, m);
-                M(r, c) = sum;
-            }
-    }
-
-    /// v ← T · v
-    template <int N>
-    void apply_left(Vec<N>& v, const Mat<N, N>& T) const {
-        Vec<N> tmp;
-        for (int i = 0; i < N; ++i) {
-            double sum = 0.0;
-            for (int j = 0; j < N; ++j)
-                sum += T(i, j) * v[j];
-            tmp[i] = sum;
-        }
-        v = tmp;
-    }
-
-    /// v ← T^T · v
-    template <int N>
-    void apply_left_transpose(Vec<N>& v, const Mat<N, N>& T) const {
-        Vec<N> tmp;
-        for (int i = 0; i < N; ++i) {
-            double sum = 0.0;
-            for (int j = 0; j < N; ++j)
-                sum += T(j, i) * v[j];
-            tmp[i] = sum;
-        }
-        v = tmp;
-    }
-
-    // ═══════════════════════════════════════════════════════════════════
-    //  Diagnostics
-    // ═══════════════════════════════════════════════════════════════════
-
-    // ═══════════════════════════════════════════════════════════════════
-    //  Solver integration methods
-    // ═══════════════════════════════════════════════════════════════════
-
-    /// Transform Riccati stages in-place for the scaled KKT system.
-    /// Under variable change x̃ = Lx^{-T}·x, ũ = Lu^{-T}·u:
-    ///   Hessian: Qxx→I, Quu→I, Qux→0
-    ///   Dynamics: A→Lx^{-1}·A·Lx, B→Lx^{-1}·B·Lu, c→Lx^{-1}·c
     template <int NC_>
-    void transform_stages(StageData<NX, NU, NC_> stages[]) const {
+    void transform_qp(StageData<NX, NU, NC_> stages[]) const {
         for (int k = 0; k <= HORIZON; ++k) {
-            // Hessian blocks: sandwich with L^{-1}
-            sandwich_symmetric(stages[k].Qxx, inv_Lx_[k]);
+            const Vec<NX>& ilx = inv_Lx_[k];
+
+            // Qxx ← inv_Lx · Qxx · inv_Lx  (element-wise: Qxx(i,j) *= inv_Lx[i]*inv_Lx[j])
+            for (int r = 0; r < NX; ++r)
+                for (int c = 0; c < NX; ++c)
+                    stages[k].Qxx(r, c) *= ilx[r] * ilx[c];
+
+            // qx ← inv_Lx · qx
+            for (int i = 0; i < NX; ++i)
+                stages[k].qx[i] *= ilx[i];
+
             if (k < HORIZON) {
-                sandwich_symmetric(stages[k].Quu, inv_Lu_[k]);
-                sandwich_rectangular<NU, NX, NX>(stages[k].Qux,
-                                                  inv_Lu_[k], inv_Lx_[k]);
-                // Dynamics: left by inv_Lx, right by Lx
-                sandwich_rectangular<NX, NX, NX>(stages[k].A,
-                                                  inv_Lx_[k], Lx_[k]);
-                sandwich_rectangular<NX, NU, NX>(stages[k].B,
-                                                  inv_Lx_[k], Lu_[k]);
+                const Vec<NU>& ilu = inv_Lu_[k];
+                const Vec<NX>& ilx_next = inv_Lx_[k + 1];
+                const Vec<NX>& lx_next = Lx_[k + 1];
+
+                // Quu ← inv_Lu · Quu · inv_Lu
+                for (int r = 0; r < NU; ++r)
+                    for (int c = 0; c < NU; ++c)
+                        stages[k].Quu(r, c) *= ilu[r] * ilu[c];
+
+                // Qux ← inv_Lu · Qux · inv_Lx
+                for (int r = 0; r < NU; ++r)
+                    for (int c = 0; c < NX; ++c)
+                        stages[k].Qux(r, c) *= ilu[r] * ilx[c];
+
+                // Qxu = Qux^T — recompute from transformed Qux
+                for (int r = 0; r < NX; ++r)
+                    for (int c = 0; c < NU; ++c)
+                        stages[k].Qxu(r, c) = stages[k].Qux(c, r);
+
+                // qu ← inv_Lu · qu
+                for (int i = 0; i < NU; ++i)
+                    stages[k].qu[i] *= ilu[i];
+
+                // A ← Lx_{k+1} · A · inv_Lx_k
+                //   A(i,j) *= Lx_{k+1}[i] * inv_Lx_k[j]
+                for (int r = 0; r < NX; ++r)
+                    for (int c = 0; c < NX; ++c)
+                        stages[k].A(r, c) *= lx_next[r] * ilx[c];
+
+                // B ← Lx_{k+1} · B · inv_Lu_k
+                for (int r = 0; r < NX; ++r)
+                    for (int c = 0; c < NU; ++c)
+                        stages[k].B(r, c) *= lx_next[r] * ilu[c];
+
+                // Constraint Jacobians: column scaling only.
+                // d is NOT scaled — the linearization convention is
+                //   g(x̄,ū) + Cx·Δx + Cu·Δu + s + ds = 0
+                // where Δx,Δu are step directions.  Since Cx·inv_Lx·(Lx·dx_phys)=Cx·dx_phys,
+                // using scaled Cx with scaled dx̂ (before recovery) gives the correct physical ds.
+                if (NC_ > 0) {
+                    // Cx ← Cx · inv_Lx_k  (each column j scaled by inv_Lx[j])
+                    for (int r = 0; r < NC_; ++r)
+                        for (int c = 0; c < NX; ++c)
+                            stages[k].Cx(r, c) *= ilx[c];
+
+                    // Cu ← Cu · inv_Lu_k
+                    for (int r = 0; r < NC_; ++r)
+                        for (int c = 0; c < NU; ++c)
+                            stages[k].Cu(r, c) *= ilu[c];
+                }
             }
-            // c ← inv_Lx · c
-            apply_left(stages[k].c, inv_Lx_[k]);
+
+            // c ← Lx_{k+1} · c  (use next stage's Lx for dynamics)
+            // For terminal stage (k == HORIZON), no dynamics — but c is unused.
+            if (k < HORIZON) {
+                const Vec<NX>& lx_next = Lx_[k + 1];
+                for (int i = 0; i < NX; ++i)
+                    stages[k].c[i] *= lx_next[i];
+            }
+
+            // Terminal stage: scale Cx only (no Cu, no d — d is physical)
+            if (k == HORIZON && NC_ > 0) {
+                for (int r = 0; r < NC_; ++r)
+                    for (int c = 0; c < NX; ++c)
+                        stages[k].Cx(r, c) *= ilx[c];
+            }
         }
     }
 
-    /// Scale gradient vectors: v ← L^{-T}·v
-    template <int NC_>
-    void scale_rhs(StageData<NX, NU, NC_> stages[]) const {
+    // ═══════════════════════════════════════════════════════════════════
+    //  Recover physical primal step from scaled step.
+    //  dx = inv_Lx · dx̂,  du = inv_Lu · dû
+    // ═══════════════════════════════════════════════════════════════════
+
+    void recover_primal_step(RiccatiWorkspace<NX, NU, HORIZON>& ws) const {
         for (int k = 0; k <= HORIZON; ++k) {
-            scale_x_invT(k, stages[k].qx);
-            if (k < HORIZON)
-                scale_u_invT(k, stages[k].qu);
+            for (int i = 0; i < NX; ++i)
+                ws.dx[k][i] *= inv_Lx_[k][i];
+            if (k < HORIZON) {
+                for (int i = 0; i < NU; ++i)
+                    ws.du[k][i] *= inv_Lu_[k][i];
+            }
         }
     }
 
-    /// Unscale Riccati steps: v ← L^T·v
-    void unscale_riccati_steps(RiccatiWorkspace<NX, NU, HORIZON>& ws) const {
+    // ═══════════════════════════════════════════════════════════════════
+    //  Recover physical dual variables from scaled duals.
+    //  Costate:    ν = Lx · ν̂   (stored in ws.p)
+    //  Constraint: λ = λ̂        (invariant — no scaling needed)
+    // ═══════════════════════════════════════════════════════════════════
+
+    void recover_dual_step(RiccatiWorkspace<NX, NU, HORIZON>& ws) const {
         for (int k = 0; k <= HORIZON; ++k) {
-            unscale_x_T(k, ws.dx[k]);
-            if (k < HORIZON)
-                unscale_u_T(k, ws.du[k]);
+            for (int i = 0; i < NX; ++i)
+                ws.p[k][i] *= Lx_[k][i];
+            // λ is invariant — no operation needed
         }
     }
 
-    /// Scale initial state residual: v ← Lx^T·v
+    // ═══════════════════════════════════════════════════════════════════
+    //  Scale initial state residual for forward pass.
+    //  dx̂0 = Lx · dx0
+    // ═══════════════════════════════════════════════════════════════════
+
     void scale_dx0(Vec<NX>& dx0) const {
-        unscale_x_T(0, dx0);
+        for (int i = 0; i < NX; ++i)
+            dx0[i] *= Lx_[0][i];
     }
 
-    /// Estimate condition number from the Hessian diagonal ratios.
+    // ═══════════════════════════════════════════════════════════════════
+    //  Diagnostics: condition number estimate from Hessian diagonal
+    // ═══════════════════════════════════════════════════════════════════
+
     template <int NC_>
     double condition_estimate(const StageData<NX, NU, NC_> stages[]) const {
         double max_diag = 0.0, min_diag = 1e100;
@@ -236,67 +266,13 @@ public:
 
 private:
     // ═══════════════════════════════════════════════════════════════════
-    //  Cholesky factorization via LDLT → L_chol = L_ldlt · sqrt(D).
-    //  Falls back to Jacobi (diagonal sqrt) on failure.
+    //  Data — diagonal scaling stored as vectors (not full matrices)
     // ═══════════════════════════════════════════════════════════════════
 
-    template <int N>
-    void factorize_spd(const Mat<N, N>& M, Mat<N, N>& L_out, Mat<N, N>& inv_L_out) {
-        SymMat<N> S;
-        for (int c = 0; c < N; ++c)
-            for (int r = c; r < N; ++r)
-                S(r, c) = M(r, c);
-
-        bool ok = S.ldlt_factorize(1e-14);
-
-        if (!ok) {
-            L_out.zero();
-            inv_L_out.zero();
-            for (int i = 0; i < N; ++i) {
-                double d = M(i, i);
-                double s = (d > 1e-14) ? std::sqrt(d) : 1.0;
-                L_out(i, i) = s;
-                inv_L_out(i, i) = 1.0 / s;
-            }
-            return;
-        }
-
-        L_out.zero();
-        for (int j = 0; j < N; ++j) {
-            double sqrt_d = std::sqrt(std::max(S(j, j), 1e-14));
-            L_out(j, j) = sqrt_d;
-            for (int i = j + 1; i < N; ++i)
-                L_out(i, j) = S(i, j) * sqrt_d;
-        }
-
-        compute_triangular_inverse(L_out, inv_L_out);
-    }
-
-    template <int N>
-    void compute_triangular_inverse(const Mat<N, N>& L, Mat<N, N>& inv_L) {
-        inv_L.zero();
-        for (int col = 0; col < N; ++col) {
-            double x[N] = {};
-            x[col] = 1.0;
-            for (int i = col; i < N; ++i) {
-                double sum = x[i];
-                for (int j = col; j < i; ++j)
-                    sum -= L(i, j) * x[j];
-                x[i] = sum / L(i, i);
-            }
-            for (int i = col; i < N; ++i)
-                inv_L(i, col) = x[i];
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════
-    //  Data
-    // ═══════════════════════════════════════════════════════════════════
-
-    Mat<NX, NX> Lx_[HORIZON + 1];       // Cholesky factor: Qxx = Lx · Lx^T
-    Mat<NU, NU> Lu_[HORIZON];            // Cholesky factor: Quu = Lu · Lu^T
-    Mat<NX, NX> inv_Lx_[HORIZON + 1];   // Lx^{-1}
-    Mat<NU, NU> inv_Lu_[HORIZON];        // Lu^{-1}
+    Vec<NX> Lx_[HORIZON + 1];      // sqrt of Qxx diagonal (with floor)
+    Vec<NU> Lu_[HORIZON];           // sqrt of Quu diagonal (with floor)
+    Vec<NX> inv_Lx_[HORIZON + 1];  // 1 / Lx
+    Vec<NU> inv_Lu_[HORIZON];       // 1 / Lu
     bool computed_ = false;
 };
 

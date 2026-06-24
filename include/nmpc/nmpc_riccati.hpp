@@ -76,7 +76,7 @@ struct RiccatiSolver {
 
         ws.P[N].copy_lower_from(stages[N].Qxx);
         for (int i = 0; i < NX; ++i)
-            ws.P[N](i, i) += reg_base;
+            ws.P[N](i, i) += reg_base * std::max(std::fabs(ws.P[N](i, i)), 1e-14);  // scale-invariant
         reg_used = reg_base;
 
         for (int k = N - 1; k >= 0; --k) {
@@ -118,12 +118,12 @@ struct RiccatiSolver {
             ws.Qux_plus_BtPA_stages[k] = ws.Qux_plus_BtPA;
 
             // Regularize & factorize S
-            // Scale-aware regularization floor (Layer 2C)
-            double s_max_abs = 0.0;
+            // Scale-aware regularization floor
+            // Use max diagonal (not max abs entry) for scale invariance:
+            // max_diag(inv_Lu·S·inv_Lu) = inv_Lu^2 · max_diag(S) which scales correctly.
+            double s_max_diag = 0.0;
             for (int i = 0; i < NU; ++i)
-                for (int j = 0; j <= i; ++j)
-                    if (std::fabs(ws.S(i, j)) > s_max_abs)
-                        s_max_abs = std::fabs(ws.S(i, j));
+                s_max_diag = std::max(s_max_diag, std::fabs(ws.S(i, i)));
 
             double min_diag = 1e100;
             for (int i = 0; i < NU; ++i)
@@ -131,7 +131,11 @@ struct RiccatiSolver {
             double reg = reg_base;
             if (min_diag < 0.0)
                 reg = std::max(reg, -min_diag * 1.1);
-            reg = std::max(reg, 1e-10 * s_max_abs);
+            // NOTE: removed "reg = max(reg, 1e-10 * s_max_diag)" floor.
+            // That floor was NOT scale-invariant: s_max_diag changes under
+            // diagonal scaling, so the relative perturbation reg differed
+            // between physical and scaled spaces, breaking the similarity
+            // transform property of the preconditioner.
 
             // Save original S for clean restore on each retry
             SymMat<NU> S_save = ws.S;
@@ -139,7 +143,10 @@ struct RiccatiSolver {
             bool factored = false;
             for (int attempt = 0; attempt < 6; ++attempt) {
                 ws.S = S_save;  // full restore before each attempt
-                for (int i = 0; i < NU; ++i) ws.S(i, i) += reg;
+                // Scale-invariant regularization: reg * |S(i,i)| instead of reg * 1
+                // This ensures reg·diag(S) transforms correctly under diagonal scaling.
+                for (int i = 0; i < NU; ++i)
+                    ws.S(i, i) += reg * std::max(std::fabs(S_save(i, i)), 1e-14);
                 double d_min = 0.0;
                 if (ws.S.ldlt_factorize(1e-14, &d_min)) { factored = true; break; }
                 // Layer 2A: informed bump from actual indefiniteness magnitude
@@ -284,7 +291,7 @@ private:
         }
 
         for (int i = 0; i < NX; ++i)
-            Pk(i, i) += reg;
+            Pk(i, i) += reg * std::max(std::fabs(Pk(i, i)), 1e-14);  // scale-invariant
     }
 
     // ── p_k = qx + A^T (p_{k+1} + P_{k+1} * c) - Qup^T * d ─────────────

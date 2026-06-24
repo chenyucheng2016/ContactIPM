@@ -225,8 +225,23 @@ int main() {
     pp.kappa_eps = 5.0;  pp.max_same_mu = 5;  // Faster mu reduction
     pp.tau = 0.99;
     pp.soc_max = 4;             // enable SOC (layer 2)
+    pp.enable_preconditioner = true;  // diagonal Jacobi preconditioner
     pp.verbosity = 2;
     solver.configure(pp);
+
+    // ── Debug: single verbose solve ───────
+    {
+        Status dbg_st = solver.solve(prob);
+        printf("\n=== DEBUG SOLVE ===\n");
+        printf("Status: %s\n", status_string(dbg_st));
+        printf("Iterations: %d\n", solver.last_stats().inner_iterations);
+        printf("Cost: %.4f\n", solver.last_stats().cost);
+    }
+
+    // Reset for timing loop
+    for (int k = 0; k <= N; ++k) prob.stages[k].x = x0;
+    for (int k = 0; k <= N; ++k) prob.stages[k].u = u_hover;
+    prob.stages[N].u.zero();
 
     // ── Warm in-process timing loop (mirrors acados NTIMINGS=5) ───────
     StageData<NX, NU, NC> guess[N + 1];

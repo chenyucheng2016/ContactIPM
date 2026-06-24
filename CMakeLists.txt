@@ -40,6 +40,9 @@ if(NMPC_BUILD_EXAMPLES)
     add_executable(quadrotor_2d_nmpc examples/quadrotor_2d_nmpc.cpp)
     target_link_libraries(quadrotor_2d_nmpc PRIVATE nmpc_solver)
 
+    add_executable(test_lqr_invariance examples/test_lqr_invariance.cpp)
+    target_link_libraries(test_lqr_invariance PRIVATE nmpc_solver)
+
     add_executable(chain_mass_nmpc examples/chain_mass_nmpc.cpp)
     target_link_libraries(chain_mass_nmpc PRIVATE nmpc_solver)
 
@@ -86,4 +89,9 @@ if(NMPC_BUILD_TESTS)
     add_executable(test_preconditioner tests/test_preconditioner.cpp)
     target_link_libraries(test_preconditioner PRIVATE nmpc_solver)
     add_test(NAME Preconditioner COMMAND test_preconditioner)
+
+    # Preconditioner invariance regression test
+    add_executable(test_precond_invariance tests/test_precond_invariance.cpp)
+    target_link_libraries(test_precond_invariance PRIVATE nmpc_solver)
+    add_test(NAME PrecondInvariance COMMAND test_precond_invariance)
 endif()
