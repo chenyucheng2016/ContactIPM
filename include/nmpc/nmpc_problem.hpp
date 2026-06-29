@@ -28,6 +28,12 @@ struct StageData {
     Vec<NC> s;       // slack for inequalities
     Vec<NC> lambda;  // dual multiplier for g(x,u)+s=0
 
+    // Bound multipliers (for variable bounds, populated during solve)
+    // These are separate from NC coupling constraints — they handle
+    // simple bounds like |u| <= 1 without slack/multiplier coupling.
+    Vec<NU> z_L_u, z_U_u;   // lower/upper bound multipliers for controls
+    Vec<NX> z_L_x, z_U_x;   // lower/upper bound multipliers for states
+
     // Sensitivity matrices for Riccati (populated by Hessian evaluation)
     Mat<NX, NX> Qxx;  // ∂²L/∂x²
     Mat<NU, NU> Quu;  // ∂²L/∂u²
@@ -177,6 +183,16 @@ struct NMPCProblem {
     // Initial state
     Vec<NX> x0;
 
+    // Variable bounds (separate from coupling constraints)
+    // Use -1e20 / 1e20 to indicate "free" (no bound).
+    // These are handled via log-barrier directly on variables — no slacks,
+    // no multipliers in the NC constraint channel. This matches IPOPT's
+    // x_L/x_U formulation and avoids slack-primal desynchronization.
+    Vec<NX> x_lb, x_ub;    // state bounds (-1e20 = free)
+    Vec<NU> u_lb, u_ub;    // control bounds (-1e20 = free)
+    int n_bound_u = 0;      // number of bounded controls (for diagnostics)
+    int n_bound_x = 0;      // number of bounded states
+
     // Initial guess for primal variables (all stages)
     StageData<NX, NU, NC> stages[HORIZON + 1];  // 0..N-1 + terminal
     // Terminal stage uses x only, with terminal constraints
@@ -190,6 +206,18 @@ struct NMPCProblem {
         if (!cost)        return Status::BAD_ARGUMENT;
         // constraints can be nullptr (unconstrained case)
         return Status::SUCCESS;
+    }
+
+    // Initialize bound arrays to "free" (no bounds)
+    void init_bounds_free() {
+        for (int i = 0; i < NX; ++i) {
+            x_lb[i] = -1e20; x_ub[i] = 1e20;
+        }
+        for (int i = 0; i < NU; ++i) {
+            u_lb[i] = -1e20; u_ub[i] = 1e20;
+        }
+        n_bound_x = 0;
+        n_bound_u = 0;
     }
 };
 

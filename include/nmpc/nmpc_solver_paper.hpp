@@ -70,6 +70,11 @@ public:
     auto debug_prec_inv_Lu() const { return ipm_.debug_prec_inv_Lu(); }
     bool debug_precond_enabled() const { return ipm_.debug_precond_enabled(); }
 
+    // ── Diagnostic instrumentation pass-through ──
+    void enable_diag_csv(const char* filename) { ipm_.enable_diag_csv(filename); }
+    void disable_diag_csv() { ipm_.disable_diag_csv(); }
+    const IterDiag& last_diagnostic() const { return ipm_.last_diagnostic(); }
+
     void get_first_control(const Problem& prob, Vec<NU>& u0) const {
         u0 = prob.stages[0].u;
     }

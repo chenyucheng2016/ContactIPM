@@ -95,3 +95,56 @@ if(NMPC_BUILD_TESTS)
     target_link_libraries(test_precond_invariance PRIVATE nmpc_solver)
     add_test(NAME PrecondInvariance COMMAND test_precond_invariance)
 endif()
+
+# ── Diagnostics ──
+add_executable(diag_verbose benchmarks/fatrop_contactipm/diag_verbose.cpp)
+target_include_directories(diag_verbose PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/quadcopter_mpc
+)
+target_link_libraries(diag_verbose PRIVATE nmpc_solver)
+
+add_executable(bench_quadcopter_mpc benchmarks/fatrop_contactipm/bench_quadcopter_mpc.cpp)
+target_include_directories(bench_quadcopter_mpc PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/quadcopter_mpc
+)
+target_link_libraries(bench_quadcopter_mpc PRIVATE nmpc_solver)
+
+# ── FATROP benchmarks ──
+set(FATROP_BENCHMARKS
+    cart_pendulum_mpc
+    cart_pendulum_time
+    quadcopter_mpc
+    quadcopter_p2p
+    quadcopter_one_obs
+    quadcopter_three_obs
+    truck_trailer_time
+    hanging_chain_2d
+    hanging_chain_3d
+)
+
+foreach(bench ${FATROP_BENCHMARKS})
+    add_executable(fatrop_${bench} benchmarks/fatrop_contactipm/bench_${bench}.cpp)
+    target_include_directories(fatrop_${bench} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/${bench}
+    )
+    target_link_libraries(fatrop_${bench} PRIVATE nmpc_solver)
+endforeach()
+
+# Diagnostic executable for cart_pendulum_mpc
+add_executable(diag_cart_pendulum_mpc benchmarks/fatrop_contactipm/diag_cart_pendulum_mpc.cpp)
+target_include_directories(diag_cart_pendulum_mpc PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/cart_pendulum_mpc
+)
+target_link_libraries(diag_cart_pendulum_mpc PRIVATE nmpc_solver)
+
+# Diagnostic executable for hanging_chain_2d
+add_executable(diag_hanging_chain_2d benchmarks/fatrop_contactipm/diag_hanging_chain_2d.cpp)
+target_include_directories(diag_hanging_chain_2d PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/hanging_chain_2d
+)
+target_link_libraries(diag_hanging_chain_2d PRIVATE nmpc_solver)

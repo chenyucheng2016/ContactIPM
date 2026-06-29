@@ -141,6 +141,22 @@ int main() {
     pp.verbosity=2;
     solver.configure(pp);
 
+    // ── Debug: single verbose solve ───────
+    {
+        Status dbg_st = solver.solve(prob);
+        printf("\n=== DEBUG SOLVE ===\n");
+        printf("Status: %s\n", status_string(dbg_st));
+        printf("Iterations: %d\n", solver.last_stats().inner_iterations);
+        printf("Cost: %.4f\n", solver.last_stats().cost);
+    }
+
+    // Reset for timing loop
+    prob.x0 = x0;
+    for(int k=0;k<=N;++k){
+        prob.stages[k].x = x0;
+        prob.stages[k].u.zero();
+    }
+
     // ── Warm in-process timing loop (mirrors acados NTIMINGS=5) ───────
     StageData<NX, NU, NC> guess[N + 1];
     Vec<NX> x0_saved = prob.x0;

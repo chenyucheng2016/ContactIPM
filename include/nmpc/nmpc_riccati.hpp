@@ -8,7 +8,7 @@
  * The Riccati recursion solves this in O(N·(nx+nu)³) time and O(N·nx²) memory.
  *
  * Key numerical safeguards:
- *   - Levenberg-Marquardt regularization on the control Hessian S matrix
+ *   - Adaptive regularization on the control Hessian S matrix
  *   - Pivot monitoring on LDL^T factorization
  *   - Condition number estimation with adaptive regularization
  */
@@ -37,20 +37,15 @@ struct RiccatiWorkspace {
     SymMat<NU> S_fact[HORIZON];   // S factorization per stage (for RHS reuse)
     Mat<NU, NX> Qux_plus_BtPA;   // Qux + B^T P A
 
-    Mat<NX, NU> BtP;             // B^T P
-    Mat<NU, NX> K_times_S;       // K^T S (temporary for P update)
+    Mat<NU, NX> BtP;             // B^T P (NU rows × NX cols)
 
     // Per-stage cached values (stored in backward_lhs, reused in backward_rhs/compute_pk)
-    Mat<NX, NU> BtP_stages[HORIZON];
+    Mat<NU, NX> BtP_stages[HORIZON];
     Mat<NU, NX> Qux_plus_BtPA_stages[HORIZON];
 
     // Forward pass
     Vec<NX> dx[HORIZON + 1];     // state step
     Vec<NU> du[HORIZON];         // control step
-
-    // Regularization
-    double reg_S      = 1e-8;    // base regularization for S
-    double reg_adaptive = 1e-8;  // current adapted value
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -152,6 +147,7 @@ struct RiccatiSolver {
                 // Layer 2A: informed bump from actual indefiniteness magnitude
                 reg = std::max(reg * 10.0, 2.0 * std::fabs(d_min) + 1e-12);
             }
+
             if (!factored) return Status::KKT_SINGULAR;
             if (reg > reg_used) reg_used = reg;
 
@@ -180,11 +176,20 @@ struct RiccatiSolver {
     //  Requires backward_lhs() already called (P_k, K_k, S factorization).
     // ═════════════════════════════════════════════════════════════════
 
+    // Schur residual diagnostic: max ||S·d - rhs|| over all stages
+    static inline double schur_residual = 0.0;
+
+    // Direct Riccati stationarity residual: ||qu + Huu·du + Hux·dx + B^T·(p + P·dx_{k+1})||
+    static inline double riccati_direct_stationarity = 0.0;
+    // Corrected version: accounts for regularization perturbation
+    static inline double riccati_direct_stationarity_corr = 0.0;
+
     static Status backward_rhs(Stage stages[], WS& ws)
     {
         const int N = HORIZON;
 
         ws.p[N] = stages[N].qx;
+        schur_residual = 0.0;
 
         for (int k = N - 1; k >= 0; --k) {
             Stage& s = stages[k];
@@ -205,8 +210,38 @@ struct RiccatiSolver {
                     for (int m = 0; m < NX; ++m) btpc += ws.BtP(r, m) * s.c[m];
                     rhs_vec[r] = s.qu[r] + btp + btpc;
                 }
+                // Save rhs before solve (ldlt_solve overwrites in-place)
+                Vec<NU> rhs_save = rhs_vec;
                 ws.S_fact[k].ldlt_solve(rhs_vec);
                 ws.d[k] = rhs_vec;
+
+                // Schur residual: ||S·d - rhs||
+                // S_fact[k] contains LDLT factorization, so S·d = L·D·L^T·d
+                // Step 1: y = L^T · d
+                Vec<NU> y;
+                for (int r = 0; r < NU; ++r) {
+                    double sum = ws.d[k][r];  // L^T has 1 on diagonal
+                    for (int c = r + 1; c < NU; ++c)
+                        sum += ws.S_fact[k](c, r) * ws.d[k][c];  // L^T(r,c) = L(c,r)
+                    y[r] = sum;
+                }
+                // Step 2: z = D · y  (D is diagonal, stored in S_fact(i,i))
+                Vec<NU> z;
+                for (int r = 0; r < NU; ++r)
+                    z[r] = ws.S_fact[k](r, r) * y[r];
+                // Step 3: Sd = L · z
+                Vec<NU> Sd;
+                for (int r = 0; r < NU; ++r) {
+                    double sum = z[r];  // L has 1 on diagonal
+                    for (int c = 0; c < r; ++c)
+                        sum += ws.S_fact[k](r, c) * z[c];
+                    Sd[r] = sum;
+                }
+                // Compute residual
+                for (int r = 0; r < NU; ++r) {
+                    double res = std::fabs(Sd[r] - rhs_save[r]);
+                    if (res > schur_residual) schur_residual = res;
+                }
             }
 
             compute_pk(ws, s, p_next, k);
@@ -234,6 +269,9 @@ struct RiccatiSolver {
 
         ws.dx[0] = dx0;
 
+        riccati_direct_stationarity = 0.0;
+        riccati_direct_stationarity_corr = 0.0;
+
         for (int k = 0; k < N; ++k) {
             // Δu_k = -K_k Δx_k - d_k
             for (int r = 0; r < NU; ++r) {
@@ -252,6 +290,67 @@ struct RiccatiSolver {
                 for (int c = 0; c < NU; ++c)
                     bu += stages[k].B(r, c) * ws.du[k][c];
                 ws.dx[k + 1][r] = ax + bu + stages[k].c[r];
+            }
+
+            // ── Direct Riccati stationarity check ────────────────────
+            const Vec<NX>& p_next = ws.p[k + 1];
+            const SymMat<NX>& P_next = ws.P[k + 1];
+
+            // Precompute PB = P_{k+1}·B_k  (NX×NU)
+            Mat<NX, NU> PB;
+            for (int r = 0; r < NX; ++r)
+                for (int c = 0; c < NU; ++c) {
+                    double sum = 0.0;
+                    for (int m = 0; m < NX; ++m)
+                        sum += P_next(r, m) * stages[k].B(m, c);
+                    PB(r, c) = sum;
+                }
+
+            for (int i = 0; i < NU; ++i) {
+                double res_i = stages[k].qu[i];
+                for (int j = 0; j < NU; ++j)
+                    res_i += stages[k].Quu(i, j) * ws.du[k][j];
+                for (int j = 0; j < NX; ++j)
+                    res_i += stages[k].Qux(i, j) * ws.dx[k][j];
+                for (int m = 0; m < NX; ++m)
+                    res_i += stages[k].B(m, i) * p_next[m];
+                for (int m = 0; m < NX; ++m) {
+                    double Pdx_m = 0.0;
+                    for (int l = 0; l < NX; ++l)
+                        Pdx_m += P_next(m, l) * ws.dx[k + 1][l];
+                    res_i += stages[k].B(m, i) * Pdx_m;
+                }
+                double ar = std::fabs(res_i);
+                if (ar > riccati_direct_stationarity)
+                    riccati_direct_stationarity = ar;
+
+                // Compute ΔS(i,j) = S_reg(i,j) - S_orig(i,j)
+                auto dS = [&](int ii, int jj) -> double {
+                    double BtPB_ij = 0.0;
+                    for (int m = 0; m < NX; ++m)
+                        BtPB_ij += stages[k].B(m, ii) * PB(m, jj);
+                    return ws.S_fact[k](ii, jj)
+                         - (stages[k].Quu(ii, jj) + BtPB_ij);
+                };
+
+                double deltaSd_i = 0.0;
+                for (int j = 0; j < NU; ++j)
+                    deltaSd_i += dS(i, j) * ws.d[k][j];
+
+                // ΔS·K·dx: compute K·dx, then multiply by ΔS
+                double dSKdx_i = 0.0;
+                for (int j = 0; j < NU; ++j) {
+                    double Kdx_j = 0.0;
+                    for (int l = 0; l < NX; ++l)
+                        Kdx_j += ws.K[k](j, l) * ws.dx[k][l];
+                    dSKdx_i += dS(i, j) * Kdx_j;
+                }
+
+                // Corrected: rdir_corr = rdir - ΔS·d + ΔS·K·dx ≈ 0
+                double res_corr_i = res_i - deltaSd_i + dSKdx_i;
+                double ar_corr = std::fabs(res_corr_i);
+                if (ar_corr > riccati_direct_stationarity_corr)
+                    riccati_direct_stationarity_corr = ar_corr;
             }
         }
 
