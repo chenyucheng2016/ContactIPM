@@ -25,16 +25,16 @@ using namespace nmpc;
 
 constexpr int NX = 4;   // [x, θ, ẋ, θ̇]
 constexpr int NU = 1;   // [F]
-constexpr int NC = 4;   // x_min, x_max, F_min, F_max
+constexpr int NC = 1;   // no explicit constraints; bounds via variable bounds
 constexpr int N  = 20;  // horizon
 
 using VecX = Vec<NX>;
 using VecU = Vec<NU>;
-using VecC = Vec<NC>;
+using VecC = Vec<1>;   // dummy (NC=1 but template needs >0)
 using MatXX = Mat<NX, NX>;
 using MatXU = Mat<NX, NU>;
-using MatCX = Mat<NC, NX>;
-using MatCU = Mat<NC, NU>;
+using MatCX = Mat<1, NX>;
+using MatCU = Mat<1, NU>;
 
 // ── Simplified cart-pole dynamics (same as before) ──────────────────────────
 
@@ -95,31 +95,24 @@ struct CartPoleCost : CostModel<NX, NU> {
     }
 };
 
-struct CartPoleCons : ConstraintModel<NX, NU, NC> {
-    Status evaluate(const VecX& x, const VecU& u, int, VecC& g) override {
-        g[0]=-2.0-x[0]; g[1]=x[0]-2.0; g[2]=-30.0-u[0]; g[3]=u[0]-30.0; return Status::SUCCESS;
-    }
-    Status evaluate_terminal(const VecX& x, VecC& g) override {
-        g[0]=-2.0-x[0]; g[1]=x[0]-2.0; g[2]=-1e10; g[3]=-1e10; return Status::SUCCESS;
-    }
-    Status jacobian(const VecX&, const VecU&, int, MatCX& Cx, MatCU& Cu) override {
-        Cx.zero(); Cx(0,0)=-1; Cx(1,0)=1; Cu.zero(); Cu(2,0)=-1; Cu(3,0)=1; return Status::SUCCESS;
-    }
-    Status jacobian_terminal(const VecX&, MatCX& Cx) override {
-        Cx.zero(); Cx(0,0)=-1; Cx(1,0)=1; return Status::SUCCESS;
-    }
-};
 
 int main() {
     printf("═══════════════════════════════════════════════════════\n");
     printf("  Inverted Pendulum NMPC — Cart-Pole Swing-Up\n");
     printf("═══════════════════════════════════════════════════════\n\n");
 
-    CartPoleDyn dyn; CartPoleCost cost; CartPoleCons cons;
+    CartPoleDyn dyn; CartPoleCost cost;
 
     using Problem = NMPCProblem<NX, NU, NC, N>;
     Problem prob;
-    prob.dynamics=&dyn; prob.cost=&cost; prob.constraints=&cons; prob.dt=DT;
+    prob.dynamics=&dyn; prob.cost=&cost; prob.constraints=nullptr; prob.dt=DT;
+
+    // Variable bounds: |x| <= 2, |u| <= 30
+    prob.init_bounds_free();
+    prob.x_lb[0] = -2.0; prob.x_ub[0] = 2.0;
+    prob.n_bound_x = 1;
+    prob.u_lb[0] = -30.0; prob.u_ub[0] = 30.0;
+    prob.n_bound_u = 1;
 
     // Initial state: slightly off upright, at rest
     VecX x0;

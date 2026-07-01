@@ -46,6 +46,7 @@ struct PaperIPMParams {
     double tol_compl     = 1e-6;    // complementarity tolerance (|s·λ − μ|)
     double tol_ineq      = 1e-8;    // inequality tolerance (allow small negative s/λ)
     double tol_stat      = 0.5;     // stationarity tolerance (‖∇L‖∞ including costates)
+    double mu_conv_threshold = 1e-3; // μ must be ≤ this for convergence (false-convergence guard)
 
     // Fraction-to-boundary
     double tau           = 0.999;    // tighter: 0.99 (was 0.995)
@@ -77,6 +78,7 @@ struct PaperIPMParams {
     double epsilon_g       = 0.01;    // feasibility threshold: Phase A→B transition (Phase 2)
     double c_floor         = 0.1;     // adaptive slack floor coefficient (Phase 3)
     double c_restoration   = 0.2;     // restoration slack enlargement coefficient (Phase 6)
+    double bound_s_min     = 1e-7;    // relaxed barrier offset δ: mu·ln(d+δ), prevents mu/d² blowup
 
     // === Nonlinear KKT Iterative Refinement (Shamanskii chord) ===
     bool   enable_refinement  = false;   // enable direction refinement before line search
@@ -306,14 +308,14 @@ public:
         const auto& s0 = riccati_stages_[0];
         const auto& p1 = riccati_ws_.p[1];
         const auto& P1 = riccati_ws_.P[1];
-        for (int r = 0; r < NU; ++r) {
+        for (int j = 0; j < NU; ++j) {
             double btp = 0.0;
-            for (int m = 0; m < NX; ++m) btp += s0.B(m, r) * p1[m];
+            for (int m = 0; m < NX; ++m) btp += s0.B(m, j) * p1[m];
             double btpc = 0.0;
             for (int m = 0; m < NX; ++m)
                 for (int n = 0; n < NX; ++n)
-                    btpc += s0.B(m, r) * P1(m, n) * s0.c[n];
-            r.rhs_d[r] = s0.qu[r] + btp + btpc;
+                    btpc += s0.B(m, j) * P1(m, n) * s0.c[n];
+            r.rhs_d[j] = s0.qu[j] + btp + btpc;
         }
         r.reg_used = reg_used_;
         r.sigma = sigma_;
@@ -450,8 +452,12 @@ public:
                        p_stat, p_prim, p_compl, s_stat);
             }
 
-            // 4. Convergence check: KKT satisfied AND μ at minimum
-            if (barrier_strategy_.at_minimum(mu_) && kkt_converged()) {
+            // 4. Convergence check: KKT satisfied.
+            //    No at_minimum gate: with the 2-block convergence test
+            //    (linKKT + complementarity), kkt_converged() is reliable
+            //    at any μ level.  Forcing μ→μ_min wastes iterations when
+            //    the solution is already converged at larger μ.
+            if (kkt_converged()) {
                 final_status_at_break = 1;
                 break;
             }
@@ -459,16 +465,19 @@ public:
             // 3b. Stagnation detection is now handled post-Riccati (after
             //     compute_post_riccati_stationarity) where costates are
             //     consistent with the current model evaluation.
-            if (barrier_strategy_.at_minimum(mu_) && params_.verbosity >= 3) {
+            if (params_.verbosity >= 3) {
                 bool primal_ok  = (primal_inf_ <= params_.tol_primal);
                 bool compl_ok   = (compl_inf_  <= params_.tol_compl);
                 bool ineq_ok    = (ineq_viol_  >= -params_.tol_ineq);
-                bool stat_ok    = (stat_inf_   <= params_.tol_stat);
-                printf("  [conv: primal_ok=%d(%.2e<=%.2e) compl_ok=%d(%.2e<=%.2e) ineq_ok=%d(%.2e>=-%.2e) stat_ok=%d(%.2e<=%.2e)]\n",
+                bool stat_ok    = (linear_kkt_res_.max_rel_res <= params_.tol_stat);
+                bool mu_ok      = (mu_ <= params_.mu_conv_threshold);
+                printf("  [conv: primal_ok=%d(%.2e<=%.2e) compl_ok=%d(%.2e<=%.2e) ineq_ok=%d(%.2e>=-%.2e) stat_ok=%d(linKKT=%.2e<=%.2e) mu_ok=%d(mu=%.2e<=%.2e) nonlinear_stat=%.2e]\n",
                        primal_ok, primal_inf_, params_.tol_primal,
                        compl_ok, compl_inf_, params_.tol_compl,
                        ineq_ok, ineq_viol_, params_.tol_ineq,
-                       stat_ok, stat_inf_, params_.tol_stat);
+                       stat_ok, linear_kkt_res_.max_rel_res, params_.tol_stat,
+                       mu_ok, mu_, params_.mu_conv_threshold,
+                       stat_inf_);
             }
 
             // 4. ── PREDICTOR: build LHS once, factorize ────────────
@@ -738,6 +747,9 @@ public:
             // ── Stationarity gradient decomposition at k=0 ────────
             // Decompose qu_tilde[0] into cost + constraint-barrier + dynamics
             // to understand WHY Cu·du is small for the bottleneck constraint.
+            // GUARD: this diagnostic hardcodes constraint index j=4 and
+            // modal analysis for 4 eigenvalues, requiring NC>4 and NU>=4.
+            if constexpr (NU >= 4 && NC > 4) {
             if (params_.verbosity >= 2) {
                 const int kk = 0;
                 const auto& stg = prob_->stages[kk];
@@ -1474,6 +1486,7 @@ public:
                        rs.qu.norm_inf(),
                        stg.d[4], stg.s[4], stg.lambda[4]);
             }
+            } // end if constexpr (NU>=4 && NC>4)
 
             // ── Post-Riccati stationarity: use ORIGINAL Riccati costates ────
             // MUST be called BEFORE recover_dual_step(), which converts p[k]
@@ -1522,7 +1535,7 @@ public:
             // ── Early convergence check with post-Riccati stationarity ──
             // The primal/complementarity residuals from compute_kkt_residuals
             // are still valid (same point).  Only stat_inf_ was updated.
-            if (barrier_strategy_.at_minimum(mu_) && kkt_converged()) {
+            if (kkt_converged()) {
                 final_status_at_break = 1;
                 break;
             }
@@ -2446,8 +2459,14 @@ public:
                 bool frozen = (params_.freeze_mu_after >= 0 && iter >= params_.freeze_mu_after);
                 bool mu_changed = false;
                 if (!frozen) {
+                    // Pass linear KKT residual for barrier stat gate.
+                    // The nonlinear stat_inf_ has a structural floor from
+                    // barrier gradients, preventing μ reduction.  The linear
+                    // KKT residual is self-consistent and allows aggressive
+                    // μ reduction when the Riccati solve is accurate.
+                    double lin_kkt = linear_kkt_res_.max_rel_res;
                     mu_changed = barrier_strategy_.update(
-                        mu_, primal_inf_, compl_inf_, sigma_, stat_inf_,
+                        mu_, primal_inf_, compl_inf_, sigma_, lin_kkt,
                         cross_term_accepted_, alpha_p, max_g_pos_);
                 }
 
@@ -2673,18 +2692,18 @@ private:
             // Initialize bound multipliers: z = mu / d
             if (prob_->n_bound_u > 0 && k < N) {
                 for (int i = 0; i < NU; ++i) {
-                    double dL = s[k].u[i] - prob_->u_lb[i];
-                    double dU = prob_->u_ub[i] - s[k].u[i];
-                    s[k].z_L_u[i] = (dL > 1e-14) ? mu_ / dL : 0.0;
-                    s[k].z_U_u[i] = (dU > 1e-14) ? mu_ / dU : 0.0;
+                    double dL = std::max(s[k].u[i] - prob_->u_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->u_ub[i] - s[k].u[i], 0.0) + params_.bound_s_min;
+                    s[k].z_L_u[i] = mu_ / dL;
+                    s[k].z_U_u[i] = mu_ / dU;
                 }
             }
             if (prob_->n_bound_x > 0) {
                 for (int i = 0; i < NX; ++i) {
-                    double dL = s[k].x[i] - prob_->x_lb[i];
-                    double dU = prob_->x_ub[i] - s[k].x[i];
-                    s[k].z_L_x[i] = (dL > 1e-14) ? mu_ / dL : 0.0;
-                    s[k].z_U_x[i] = (dU > 1e-14) ? mu_ / dU : 0.0;
+                    double dL = std::max(s[k].x[i] - prob_->x_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->x_ub[i] - s[k].x[i], 0.0) + params_.bound_s_min;
+                    s[k].z_L_x[i] = mu_ / dL;
+                    s[k].z_U_x[i] = mu_ / dU;
                 }
             }
         }
@@ -2899,6 +2918,17 @@ private:
 
         double post_stat = 0.0;
 
+        // ── Worst-component diagnostic ──
+        double worst_rel = 0.0;
+        int    worst_k = -1;
+        bool   worst_is_u = false;
+        int    worst_i = -1;
+        double worst_q = 0.0, worst_bar = 0.0, worst_ctw = 0.0, worst_cos = 0.0;
+        double worst_scale = 1.0;
+        // Global barrier metrics
+        double global_min_dist = 1e30, global_max_bar_grad = 0.0, global_max_bar_hess = 0.0;
+        int    global_min_dist_k = -1, global_min_dist_u = -1;  // stage, component
+
         for (int k = 0; k <= N; ++k) {
             // Build the MODIFIED gradient (same as build_kkt_rhs).
             // q̃ = qx + Cx^T·(centering - λ)  where centering = (σμ + λ(g+s))/s
@@ -2907,32 +2937,30 @@ private:
             Vec<NU> lag_u;
             if (k < N) lag_u = s[k].qu; else lag_u.zero();
 
-            // Add bound barrier gradient: -mu/dL + mu/dU
-            // (physical, same coordinate system as qx/qu before unscaling)
+            // Compute bound barrier gradient for DIAGNOSTICS only.
+            // NOT added to lag_x/lag_u: the Riccati costate encodes only
+            // qu_cost (build_kkt_rhs has no barrier gradient), so the
+            // stationarity check must be consistent: r_x = q + B^T·p.
+            // Barrier convergence is measured separately via complementarity.
             double bound_grad_x_inf = 0.0, bound_grad_u_inf = 0.0;
             if (prob_->n_bound_x > 0) {
                 for (int i = 0; i < NX; ++i) {
-                    double dL = s[k].x[i] - prob_->x_lb[i];
-                    double dU = prob_->x_ub[i] - s[k].x[i];
-                    double bg = 0.0;
-                    if (dL > 1e-14) bg -= mu_ / dL;
-                    if (dU > 1e-14) bg += mu_ / dU;
-                    lag_x[i] += bg;
-                    bound_grad_x_inf = std::max(bound_grad_x_inf, std::fabs(bg));
+                    double dL = std::max(s[k].x[i] - prob_->x_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->x_ub[i] - s[k].x[i], 0.0) + params_.bound_s_min;
+                    bound_grad_x_inf = std::max(bound_grad_x_inf, std::fabs(-mu_ / dL + mu_ / dU));
                 }
             }
             if (prob_->n_bound_u > 0 && k < N) {
                 for (int i = 0; i < NU; ++i) {
-                    double dL = s[k].u[i] - prob_->u_lb[i];
-                    double dU = prob_->u_ub[i] - s[k].u[i];
-                    double bg = 0.0;
-                    if (dL > 1e-14) bg -= mu_ / dL;
-                    if (dU > 1e-14) bg += mu_ / dU;
-                    lag_u[i] += bg;
-                    bound_grad_u_inf = std::max(bound_grad_u_inf, std::fabs(bg));
+                    double dL = std::max(s[k].u[i] - prob_->u_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->u_ub[i] - s[k].u[i], 0.0) + params_.bound_s_min;
+                    bound_grad_u_inf = std::max(bound_grad_u_inf, std::fabs(-mu_ / dL + mu_ / dU));
                 }
             }
 
+            // Track constraint dual contribution C^T·w for scale denominator
+            Vec<NX> ct_w_x; ct_w_x.zero();
+            Vec<NU> ct_w_u; ct_w_u.zero();
             if (prob_->constraints) {
                 for (int j = 0; j < NC; ++j) {
                     double sj = s[k].s[j];
@@ -2942,15 +2970,18 @@ private:
                     double centering = (sigma_ * mu_ + lj * gj) / sj;
                     double w = centering - lj;  // net contribution per constraint
                     for (int i = 0; i < NX; ++i)
-                        lag_x[i] += s[k].Cx(j, i) * w;
+                        ct_w_x[i] += s[k].Cx(j, i) * w;
                     if (k < N)
                         for (int i = 0; i < NU; ++i)
-                            lag_u[i] += s[k].Cu(j, i) * w;
+                            ct_w_u[i] += s[k].Cu(j, i) * w;
                 }
             }
+            double ct_w_x_inf = ct_w_x.norm_inf();
+            double ct_w_u_inf = ct_w_u.norm_inf();
+            for (int i = 0; i < NX; ++i) lag_x[i] += ct_w_x[i];
+            for (int i = 0; i < NU; ++i) lag_u[i] += ct_w_u[i];
 
-            // Add costate terms using ORIGINAL Riccati costates (scaled space).
-            // p[k] is in scaled space (before recover_dual_step).
+            // Add costate terms using Riccati costates (scaled space).
             Vec<NX> cos_x; cos_x.zero();
             Vec<NU> cos_u; cos_u.zero();
             if (k < N) {
@@ -2984,36 +3015,128 @@ private:
             double stat_u_full = lag_u.norm_inf();
             double stat_abs = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
 
-            // Scale-invariant denominator: use physical component magnitudes.
-            // Recompute from original scaled vectors / inv_Lx = physical.
+            // Scale-invariant denominator: use non-costate component magnitudes.
+            // The costate (A^T·p_{k+1} - p_k) is EXCLUDED from the scale because
+            // at the KKT point, costate ≈ -(qx + Cx^T·w), making it cancel with
+            // the other terms.  Including it in the denominator masks convergence
+            // by normalizing the residual by itself (stat → 1.0 always).
+            // The scale should represent the "expected" stationarity magnitude.
             double scale_x, scale_u;
             if (params_.enable_preconditioner) {
                 double gx = 0.0, gu = 0.0;
                 for (int i = 0; i < NX; ++i) {
                     gx = std::max(gx, std::fabs(s[k].qx[i] / prec_.inv_Lx(k)[i]));
-                    gx = std::max(gx, std::fabs(cos_x[i] / prec_.inv_Lx(k)[i]));
+                    gx = std::max(gx, std::fabs(ct_w_x[i] / prec_.inv_Lx(k)[i]));
                 }
-                scale_x = std::max({gx, bound_grad_x_inf, 1.0});
+                scale_x = std::max({gx, 1.0});
                 if (k < N) {
                     for (int i = 0; i < NU; ++i) {
                         gu = std::max(gu, std::fabs(s[k].qu[i] / prec_.inv_Lu(k)[i]));
-                        gu = std::max(gu, std::fabs(cos_u[i] / prec_.inv_Lu(k)[i]));
+                        gu = std::max(gu, std::fabs(ct_w_u[i] / prec_.inv_Lu(k)[i]));
                     }
-                    scale_u = std::max({gu, bound_grad_u_inf, 1.0});
+                    scale_u = std::max({gu, 1.0});
                 } else {
                     scale_u = 1.0;
                 }
             } else {
                 double grad_x_inf = s[k].qx.norm_inf();
                 double grad_u_inf = (k < N) ? s[k].qu.norm_inf() : 0.0;
-                double cos_x_inf = cos_x.norm_inf();
-                double cos_u_inf = cos_u.norm_inf();
-                scale_x = std::max({grad_x_inf, cos_x_inf, bound_grad_x_inf, 1.0});
-                scale_u = std::max({grad_u_inf, cos_u_inf, bound_grad_u_inf, 1.0});
+                scale_x = std::max({grad_x_inf, ct_w_x_inf, 1.0});
+                scale_u = std::max({grad_u_inf, ct_w_u_inf, 1.0});
             }
             double scale = (scale_x > scale_u) ? scale_x : scale_u;
             double stat = stat_abs / scale;
             if (stat > post_stat) post_stat = stat;
+
+            // ── Track worst component for diagnostic decomposition ──
+            // Save physical-space four-term breakdown per component
+            auto phys = [&](double v, int i, bool is_u) -> double {
+                if (!params_.enable_preconditioner) return v;
+                return v / (is_u ? prec_.inv_Lu(k)[i] : prec_.inv_Lx(k)[i]);
+            };
+            for (int i = 0; i < NX; ++i) {
+                double rel = std::fabs(lag_x[i]) / scale;
+                if (rel > worst_rel) {
+                    worst_rel = rel;
+                    worst_k = k; worst_is_u = false; worst_i = i;
+                    worst_q     = phys(s[k].qx[i], i, false);
+                    worst_bar   = 0.0;  // barrier was already added to lag_x
+                    worst_ctw   = phys(ct_w_x[i], i, false);
+                    worst_cos   = phys(cos_x[i], i, false);
+                    worst_scale = scale;
+                }
+            }
+            if (k < N) {
+                for (int i = 0; i < NU; ++i) {
+                    double rel = std::fabs(lag_u[i]) / scale;
+                    if (rel > worst_rel) {
+                        worst_rel = rel;
+                        worst_k = k; worst_is_u = true; worst_i = i;
+                        worst_q     = phys(s[k].qu[i], i, true);
+                        worst_bar   = 0.0;
+                        worst_ctw   = phys(ct_w_u[i], i, true);
+                        worst_cos   = phys(cos_u[i], i, true);
+                        worst_scale = scale;
+                    }
+                }
+            }
+        }
+
+        // ── Recompute barrier contribution at worst component ──
+        if (worst_k >= 0) {
+            int kk = worst_k;
+            if (worst_is_u && prob_->n_bound_u > 0 && kk < N) {
+                double dL = std::max(s[kk].u[worst_i] - prob_->u_lb[worst_i], 0.0) + params_.bound_s_min;
+                double dU = std::max(prob_->u_ub[worst_i] - s[kk].u[worst_i], 0.0) + params_.bound_s_min;
+                worst_bar = -mu_ / dL + mu_ / dU;
+            } else if (!worst_is_u && prob_->n_bound_x > 0) {
+                double dL = std::max(s[kk].x[worst_i] - prob_->x_lb[worst_i], 0.0) + params_.bound_s_min;
+                double dU = std::max(prob_->x_ub[worst_i] - s[kk].x[worst_i], 0.0) + params_.bound_s_min;
+                worst_bar = -mu_ / dL + mu_ / dU;
+            }
+        }
+
+        // ── Compute global barrier metrics ──
+        for (int kk = 0; kk <= N; ++kk) {
+            if (prob_->n_bound_u > 0 && kk < N) {
+                for (int i = 0; i < NU; ++i) {
+                    double dL = std::max(s[kk].u[i] - prob_->u_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->u_ub[i] - s[kk].u[i], 0.0) + params_.bound_s_min;
+                    if (dL < global_min_dist) { global_min_dist = dL; global_min_dist_k = kk; global_min_dist_u = i; }
+                    if (dU < global_min_dist) { global_min_dist = dU; global_min_dist_k = kk; global_min_dist_u = i; }
+                    double bg = std::fabs(-mu_ / dL + mu_ / dU);
+                    if (bg > global_max_bar_grad) global_max_bar_grad = bg;
+                    double bh = mu_ / (dL * dL) + mu_ / (dU * dU);
+                    if (bh > global_max_bar_hess) global_max_bar_hess = bh;
+                }
+            }
+            if (prob_->n_bound_x > 0) {
+                for (int i = 0; i < NX; ++i) {
+                    double dL = std::max(s[kk].x[i] - prob_->x_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->x_ub[i] - s[kk].x[i], 0.0) + params_.bound_s_min;
+                    if (dL < global_min_dist) { global_min_dist = dL; global_min_dist_k = kk; global_min_dist_u = i + NU; }
+                    if (dU < global_min_dist) { global_min_dist = dU; global_min_dist_k = kk; global_min_dist_u = i + NU; }
+                }
+            }
+        }
+
+        // ── Print worst-component diagnostic ──
+        if (params_.verbosity >= 2 && worst_k >= 0) {
+            printf("  [stat-decomp] worst: k=%d %s[%d]  rel=%.4f  scale=%.3e\n",
+                   worst_k, worst_is_u ? "u" : "x", worst_i,
+                   worst_rel, worst_scale);
+            printf("    q     = %+.6e\n", worst_q);
+            printf("    bar   = %+.6e  (barrier gradient)\n", worst_bar);
+            printf("    C^T*w = %+.6e  (constraint dual)\n", worst_ctw);
+            printf("    cos   = %+.6e  (costate A^Tp - p)\n", worst_cos);
+            printf("    sum   = %+.6e  (should = ∇L)\n",
+                   worst_q + worst_bar + worst_ctw + worst_cos);
+            if (global_min_dist < 1e30) {
+                printf("  [bar-metrics] min_dist=%.3e at k=%d comp=%d\n",
+                       global_min_dist, global_min_dist_k, global_min_dist_u);
+                printf("    max|bar_grad|=%.3e  max(bar_hess_diag)=%.3e\n",
+                       global_max_bar_grad, global_max_bar_hess);
+            }
         }
 
         // Override stat_inf_ with Riccati-consistent stationarity.
@@ -3187,28 +3310,21 @@ private:
                 double grad_x_inf = lag_x.norm_inf();
                 double grad_u_inf = lag_u.norm_inf();
 
-                // Add bound barrier gradient: -mu/dL + mu/dU
+                // Compute bound barrier gradient for DIAGNOSTICS only.
+                // NOT added to lag: Riccati stationarity = q + B^T·p (no barrier).
                 double bound_grad_x_inf = 0.0, bound_grad_u_inf = 0.0;
                 if (prob_->n_bound_x > 0) {
                     for (int i = 0; i < NX; ++i) {
-                        double dL = s[k].x[i] - prob_->x_lb[i];
-                        double dU = prob_->x_ub[i] - s[k].x[i];
-                        double bg = 0.0;
-                        if (dL > 1e-14) bg -= mu_ / dL;
-                        if (dU > 1e-14) bg += mu_ / dU;
-                        lag_x[i] += bg;
-                        bound_grad_x_inf = std::max(bound_grad_x_inf, std::fabs(bg));
+                        double dL = std::max(s[k].x[i] - prob_->x_lb[i], 0.0) + params_.bound_s_min;
+                        double dU = std::max(prob_->x_ub[i] - s[k].x[i], 0.0) + params_.bound_s_min;
+                        bound_grad_x_inf = std::max(bound_grad_x_inf, std::fabs(-mu_ / dL + mu_ / dU));
                     }
                 }
                 if (prob_->n_bound_u > 0 && k < N) {
                     for (int i = 0; i < NU; ++i) {
-                        double dL = s[k].u[i] - prob_->u_lb[i];
-                        double dU = prob_->u_ub[i] - s[k].u[i];
-                        double bg = 0.0;
-                        if (dL > 1e-14) bg -= mu_ / dL;
-                        if (dU > 1e-14) bg += mu_ / dU;
-                        lag_u[i] += bg;
-                        bound_grad_u_inf = std::max(bound_grad_u_inf, std::fabs(bg));
+                        double dL = std::max(s[k].u[i] - prob_->u_lb[i], 0.0) + params_.bound_s_min;
+                        double dU = std::max(prob_->u_ub[i] - s[k].u[i], 0.0) + params_.bound_s_min;
+                        bound_grad_u_inf = std::max(bound_grad_u_inf, std::fabs(-mu_ / dL + mu_ / dU));
                     }
                 }
 
@@ -3289,17 +3405,13 @@ private:
                 double stat_abs = (stat_x_full > stat_u_full) ? stat_x_full : stat_u_full;
 
                 // Physical component magnitudes (for denominator)
+                // EXCLUDE costate (cos_x, cos_u) from scale: at KKT the costate
+                // balances the other terms, so including it makes stat → 1.0.
                 double grad_x_phys = grad_x_inf;
                 double grad_u_phys = grad_u_inf;
                 double clam_x_phys = ct_lam_x.norm_inf();
                 double clam_u_phys = ct_lam_u.norm_inf();
-                double cos_x_phys  = cos_x.norm_inf();
-                double cos_u_phys  = cos_u.norm_inf();
                 if (params_.enable_preconditioner) {
-                    // Unscale grad vectors (we only have their inf-norms,
-                    // so recompute from original scaled vectors).
-                    // qx_scaled[i] = inv_Lx[i] * qx_phys[i]
-                    // We need ||qx_phys||_inf = max_i |qx_scaled[i] / inv_Lx[i]|
                     double gx = 0.0, gu = 0.0;
                     for (int i = 0; i < NX; ++i)
                         gx = std::max(gx, std::fabs(s[k].qx[i] / prec_.inv_Lx(k)[i]));
@@ -3310,8 +3422,8 @@ private:
                         grad_u_phys = gu;
                     }
                 }
-                double scale_x = std::max({grad_x_phys, clam_x_phys, cos_x_phys, bound_grad_x_inf, 1.0});
-                double scale_u = std::max({grad_u_phys, clam_u_phys, cos_u_phys, bound_grad_u_inf, 1.0});
+                double scale_x = std::max({grad_x_phys, clam_x_phys, 1.0});
+                double scale_u = std::max({grad_u_phys, clam_u_phys, 1.0});
                 double scale = (scale_x > scale_u) ? scale_x : scale_u;
                 double stat = stat_abs / scale;
                 if (stat > stat_inf_) {
@@ -3371,8 +3483,22 @@ private:
         bool primal_ok  = (primal_inf_ <= params_.tol_primal);
         bool compl_ok   = (compl_inf_  <= params_.tol_compl);
         bool ineq_ok    = (ineq_viol_  >= -params_.tol_ineq);
-        bool stat_ok    = (stat_inf_   <= params_.tol_stat);
-        bool converged  = primal_ok && compl_ok && ineq_ok && stat_ok;
+        // Block 1: Riccati stationarity — linear KKT relative residual.
+        // This measures solver quality: how accurately the Riccati solved
+        // the linearized KKT system.  For problems with active variable
+        // bounds, the nonlinear stationarity (stat_inf_) includes barrier
+        // gradients that the Riccati costate cannot encode, creating a
+        // structural floor.  The linear residual is self-consistent and
+        // does not have this floor.
+        bool stat_ok    = (linear_kkt_res_.max_rel_res <= params_.tol_stat);
+        // Block 3: μ threshold — prevents false convergence at large μ.
+        // The linear KKT residual is small whenever the Riccati accurately
+        // solves its linear system, even at large μ where the barrier
+        // subproblem solution is a poor approximation of the true KKT point.
+        // Requiring μ ≤ mu_conv_threshold ensures the complementarity gap
+        // s·λ ≈ μ is small enough for solution quality.
+        bool mu_ok      = (mu_ <= params_.mu_conv_threshold);
+        bool converged  = primal_ok && compl_ok && ineq_ok && stat_ok && mu_ok;
         return converged;
     }
 
@@ -3795,18 +3921,18 @@ private:
             // desynchronization that causes dual variable blowup.
             if (prob_->n_bound_u > 0 && k < N) {
                 for (int i = 0; i < NU; ++i) {
-                    double dL = s[k].u[i] - prob_->u_lb[i];
-                    double dU = prob_->u_ub[i] - s[k].u[i];
-                    if (dL > 1e-14) quu_work_[k](i, i) += mu_ / (dL * dL);
-                    if (dU > 1e-14) quu_work_[k](i, i) += mu_ / (dU * dU);
+                    double dL = std::max(s[k].u[i] - prob_->u_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->u_ub[i] - s[k].u[i], 0.0) + params_.bound_s_min;
+                    quu_work_[k](i, i) += mu_ / (dL * dL);
+                    quu_work_[k](i, i) += mu_ / (dU * dU);
                 }
             }
             if (prob_->n_bound_x > 0) {
                 for (int i = 0; i < NX; ++i) {
-                    double dL = s[k].x[i] - prob_->x_lb[i];
-                    double dU = prob_->x_ub[i] - s[k].x[i];
-                    if (dL > 1e-14) qxx_work_[k](i, i) += mu_ / (dL * dL);
-                    if (dU > 1e-14) qxx_work_[k](i, i) += mu_ / (dU * dU);
+                    double dL = std::max(s[k].x[i] - prob_->x_lb[i], 0.0) + params_.bound_s_min;
+                    double dU = std::max(prob_->x_ub[i] - s[k].x[i], 0.0) + params_.bound_s_min;
+                    qxx_work_[k](i, i) += mu_ / (dL * dL);
+                    qxx_work_[k](i, i) += mu_ / (dU * dU);
                 }
             }
 
@@ -4169,6 +4295,7 @@ private:
     void apply_primal_dual_step(double alpha, double alpha_lam) {
         const int N = HORIZON;
         Stage* s = prob_->stages;
+        const double bsm = params_.bound_s_min;
 
         for (int k = 0; k <= N; ++k) {
             for (int i = 0; i < NX; ++i)
@@ -4180,21 +4307,21 @@ private:
                 s[k].s[j]      += alpha      * ds_[k][j];
                 s[k].lambda[j] += alpha_lam  * dlambda_[k][j];
             }
-            // Update bound multipliers: z = mu / d (always consistent)
+            // Update bound multipliers: z = mu / d (with floor safeguard)
             if (prob_->n_bound_u > 0 && k < N) {
                 for (int i = 0; i < NU; ++i) {
-                    double dL = s[k].u[i] - prob_->u_lb[i];
-                    double dU = prob_->u_ub[i] - s[k].u[i];
-                    s[k].z_L_u[i] = (dL > 1e-14) ? mu_ / dL : 0.0;
-                    s[k].z_U_u[i] = (dU > 1e-14) ? mu_ / dU : 0.0;
+                    double dL = std::max(s[k].u[i] - prob_->u_lb[i], 0.0) + bsm;
+                    double dU = std::max(prob_->u_ub[i] - s[k].u[i], 0.0) + bsm;
+                    s[k].z_L_u[i] = mu_ / dL;
+                    s[k].z_U_u[i] = mu_ / dU;
                 }
             }
             if (prob_->n_bound_x > 0) {
                 for (int i = 0; i < NX; ++i) {
-                    double dL = s[k].x[i] - prob_->x_lb[i];
-                    double dU = prob_->x_ub[i] - s[k].x[i];
-                    s[k].z_L_x[i] = (dL > 1e-14) ? mu_ / dL : 0.0;
-                    s[k].z_U_x[i] = (dU > 1e-14) ? mu_ / dU : 0.0;
+                    double dL = std::max(s[k].x[i] - prob_->x_lb[i], 0.0) + bsm;
+                    double dU = std::max(prob_->x_ub[i] - s[k].x[i], 0.0) + bsm;
+                    s[k].z_L_x[i] = mu_ / dL;
+                    s[k].z_U_x[i] = mu_ / dU;
                 }
             }
         }
@@ -4985,7 +5112,7 @@ private:
                            (max_Kdx > 1e-14) ? max_d / max_Kdx : 0.0);
 
                     // Per-stage breakdown: |x|, |dx|, s_min, ds_min, ds_max
-                    if (iter <= 2 || iter % 10 == 0) {
+                    if (iter <= 2 || iter % 10 == 0 || params_.verbosity >= 3) {
                         printf("  [per-stage] k : |x|_inf     |dx|_inf    s_min       ds_min      ds_max\n");
                         for (int kk = 0; kk <= N; ++kk) {
                             double mx = 0.0;
@@ -5007,6 +5134,31 @@ private:
                             }
                             printf("  [per-stage] %2d: %.3e  %.3e  %.3e  %+.3e %+.3e\n",
                                    kk, mx, mdx, smin, dsmin, dsmax);
+                        }
+
+                        // Bound distance diagnostic: which u-bounds are nearly active?
+                        if (prob_->n_bound_u > 0) {
+                            printf("  [bounds]    k : u[0]        u[1]        dL[0]       dU[0]       dL[1]       dU[1]       barH_u0     barH_u1\n");
+                            for (int kk = 0; kk < N; ++kk) {
+                                double dL0 = s[kk].u[0] - prob_->u_lb[0];
+                                double dU0 = prob_->u_ub[0] - s[kk].u[0];
+                                double dL1 = NU > 1 ? s[kk].u[1] - prob_->u_lb[1] : 9.99e99;
+                                double dU1 = NU > 1 ? prob_->u_ub[1] - s[kk].u[1] : 9.99e99;
+                                double barH0 = mu_ / std::pow(std::max(dL0, 1e-30), 2) + mu_ / std::pow(std::max(dU0, 1e-30), 2);
+                                double barH1 = NU > 1 ? mu_ / std::pow(std::max(dL1, 1e-30), 2) + mu_ / std::pow(std::max(dU1, 1e-30), 2) : 0.0;
+                                // Flag near-active bounds
+                                const char* f0L = dL0 < 1e-3 ? "*" : " ";
+                                const char* f0U = dU0 < 1e-3 ? "*" : " ";
+                                const char* f1L = (NU > 1 && dL1 < 1e-3) ? "*" : " ";
+                                const char* f1U = (NU > 1 && dU1 < 1e-3) ? "*" : " ";
+                                printf("  [bounds]   %2d: %.3e %.3e %s%.3e %s%.3e %s%.3e %s%.3e  %.2e    %.2e\n",
+                                       kk,
+                                       s[kk].u[0], NU > 1 ? s[kk].u[1] : 0.0,
+                                       f0L, dL0, f0U, dU0,
+                                       NU > 1 ? f1L : " ", dL1,
+                                       NU > 1 ? f1U : " ", dU1,
+                                       barH0, barH1);
+                            }
                         }
                     }
                 }

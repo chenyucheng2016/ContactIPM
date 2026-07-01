@@ -1,6 +1,6 @@
 /**
  * @file    bench_hanging_chain_2d.cpp
- * @brief   Fatrop Benchmark: HangingChain2DMPC (ContactIPM) with IPOPT warm-start
+ * @brief   Fatrop Benchmark: HangingChain2DMPC (ContactIPM) COLD START
  *   NX=26, NU=2, NC=4, N=25, dt=0.16
  *   |u|<=1 handled as VARIABLE BOUNDS (not path constraints) to avoid
  *   slack-primal desynchronization.
@@ -14,7 +14,7 @@ constexpr int NO_MASSES = 6;
 constexpr int DIM = 2;
 
 int main() {
-    printf("=== HangingChain2DMPC (ContactIPM, IPOPT warm-start) ===\n");
+    printf("=== HangingChain2DMPC (ContactIPM, COLD START) ===\n");
 
     nmpc::CodegenDynamics<NX, NU> dyn;
     dyn.set_functions(f_expl, f_jac_x, f_jac_u);
@@ -117,13 +117,11 @@ int main() {
     };
 
     prob.x0 = x0;
-    // Warm-start from IPOPT optimal solution
+    // Cold start: x=x0 everywhere, u=0
     for (int k = 0; k <= N; ++k) {
-        for (int i = 0; i < NX; ++i)
-            prob.stages[k].x[i] = ipopt_x[k][i];
+        prob.stages[k].x = x0;
         if (k < N) {
-            prob.stages[k].u[0] = ipopt_u[k][0];
-            prob.stages[k].u[1] = ipopt_u[k][1];
+            prob.stages[k].u.zero();
         }
     }
 
@@ -131,6 +129,29 @@ int main() {
     pp.s_min_init  = 1e-6;
     pp.delta_slack = 1e-6;
     pp.verbosity = 3;  // High verbosity for debugging
-    fatrop_bench::run_benchmark(prob, pp, "hanging_chain_2d", 3);
+    auto result = fatrop_bench::run_benchmark(prob, pp, "hanging_chain_2d", 3);
+
+    // Save trajectory to CSV for comparison
+    if (std::string(result.status) == "Success") {
+        FILE* fp = fopen("contactipm_hc_trajectory.csv", "w");
+        if (fp) {
+            fprintf(fp, "k");
+            for (int i = 0; i < NX; i++) fprintf(fp, ",x%d", i);
+            for (int i = 0; i < NU; i++) fprintf(fp, ",u%d", i);
+            fprintf(fp, "\n");
+            for (int k = 0; k <= N; k++) {
+                fprintf(fp, "%d", k);
+                for (int i = 0; i < NX; i++) fprintf(fp, ",%.15e", prob.stages[k].x.data[i]);
+                if (k < N)
+                    for (int i = 0; i < NU; i++) fprintf(fp, ",%.15e", prob.stages[k].u.data[i]);
+                else
+                    for (int i = 0; i < NU; i++) fprintf(fp, ",0.0");
+                fprintf(fp, "\n");
+            }
+            fclose(fp);
+            printf("Trajectory saved to contactipm_hc_trajectory.csv\n");
+        }
+    }
+
     return 0;
 }

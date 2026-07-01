@@ -211,8 +211,6 @@ struct ChainCons : ConstraintModel<NX, NU, NC> {
     }
 };
 
-// ── Main ────────────────────────────────────────────────────────────────────
-
 int main() {
     printf("═══════════════════════════════════════════════════════\n");
     printf("  Chain-of-Masses NMPC — nx=%d, nu=%d, nc=%d, N=%d\n",

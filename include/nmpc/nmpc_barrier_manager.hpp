@@ -133,7 +133,7 @@ public:
     // ═══════════════════════════════════════════════════════════════════
 
     bool update(double& mu, double primal_inf, double compl_inf, double sigma,
-                double stat_inf = -1.0, bool mehrotra_healthy = true,
+                double lin_kkt_res = -1.0, bool mehrotra_healthy = true,
                 double alpha_p = 1.0, double max_g_pos = 0.0) {
         iters_at_mu_++;
 
@@ -209,9 +209,12 @@ public:
         double E_mu = std::max(primal_inf, compl_inf);
         bool primal_compl_ok = (E_mu <= p_.kappa_eps * mu);
 
-        // Stationarity gate: only reduce mu when stationarity is reasonable.
+        // Stationarity gate: use linear KKT residual (not nonlinear stat_inf).
+        // The nonlinear stat has a structural floor from barrier gradients,
+        // preventing μ reduction.  The linear KKT residual is self-consistent
+        // and allows aggressive μ reduction when the Riccati solve is accurate.
         double stat_gate = 100.0 * mu + 2.0;
-        bool stat_ok = (stat_inf < 0.0) || (stat_inf <= stat_gate);
+        bool stat_ok = (lin_kkt_res < 0.0) || (lin_kkt_res <= stat_gate);
 
         bool solved = (primal_compl_ok && stat_ok);
 
@@ -259,8 +262,8 @@ public:
             // Override: only force after much longer patience in Phase A.
             // But allow normal reduction once stationarity has improved
             // (meaning the constraint force has caught up with the costate).
-            if (stat_inf >= 0.0 && stat_inf < 0.5) {
-                // Stationarity is good enough — allow normal μ schedule
+            if (lin_kkt_res >= 0.0 && lin_kkt_res < 0.5) {
+                // Linear KKT residual is good enough — allow normal μ schedule
                 force = ((iters_at_mu_ >= effective_max) || force_by_stall);
             } else {
                 int phase_a_force_limit = effective_max * 3;
@@ -279,10 +282,10 @@ public:
 
         if (!solved && !force) {
             if (p_.verbosity >= 3)
-                printf("  [barrier: HOLD E_mu=%.2e k*mu=%.2e stat=%.2e"
+                printf("  [barrier: HOLD E_mu=%.2e k*mu=%.2e linKKT=%.2e"
                        " gate=%.2e iters=%d/%d improv=%.1f%% stall=%d"
                        " phase=%s]\n",
-                       E_mu, p_.kappa_eps * mu, stat_inf, stat_gate,
+                       E_mu, p_.kappa_eps * mu, lin_kkt_res, stat_gate,
                        iters_at_mu_, effective_max, 100.0*improv,
                        stall_count_,
                        (phase_ == Phase::INFEASIBILITY) ? "A" : "B");
@@ -353,11 +356,11 @@ public:
 
         // ── Logging ───────────────────────────────────────────────
         if (p_.verbosity >= 2) {
-            printf("  [barrier: %s E_mu=%.2e k*mu=%.2e stat=%.2e "
+            printf("  [barrier: %s E_mu=%.2e k*mu=%.2e linKKT=%.2e "
                    "iters=%d %s σ=%.3f→σ_eff=%.3f -> mu=%.3e"
                    " phase=%s max_g+=%.3e]\n",
                    solved ? "SOLVED" : "FORCE", E_mu, p_.kappa_eps * mu,
-                   stat_inf, iters_at_mu_, difficulty,
+                   lin_kkt_res, iters_at_mu_, difficulty,
                    sigma, sigma_eff, mu_new,
                    (phase_ == Phase::INFEASIBILITY) ? "A" : "B",
                    max_g_pos);

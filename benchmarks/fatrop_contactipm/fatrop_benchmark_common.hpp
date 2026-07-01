@@ -50,9 +50,8 @@ BenchResult<NX, NU, NC, N> run_benchmark(
     {
         prob.x0 = x0_saved;
         for (int k = 0; k <= N; ++k) prob.stages[k] = guess[k];
-        nmpc::PaperIPMParams verbose_pp = pp;
-        verbose_pp.verbosity = 1;
-        solver->configure(verbose_pp);
+        // Use requested verbosity for diagnostic run (preserve user setting)
+        solver->configure(pp);
         solver->solve(prob);
         printf("\n--- Timing runs (verbosity=0) ---\n");
     }
@@ -123,6 +122,7 @@ inline nmpc::PaperIPMParams default_params() {
     pp.tol_compl = 1e-4;
     pp.tol_ineq = 1e-4;
     pp.tol_stat = 0.02;
+    pp.mu_conv_threshold = 1e-3;  // μ must be ≤ this for convergence
     pp.enable_preconditioner = true;  // diagonal Jacobi preconditioner
     pp.verbosity = 2;
     return pp;
