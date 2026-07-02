@@ -1,19 +1,19 @@
 /**
  * @file    bench_hanging_chain_3d.cpp
- * @brief   Fatrop Benchmark: HangingChain3DMPC (ContactIPM)
- *   NX=39, NU=3, NC=6, N=25, dt=0.08
+ * @brief   Fatrop Benchmark: HangingChain3DMPC (ContactIPM) COLD START
+ *   NX=39, NU=3, NC=6, N=40, dt=2.0/40
  *   |u|<=1 handled as VARIABLE BOUNDS (not path constraints)
  */
 #include "fatrop_benchmark_common.hpp"
 #include "hanging_chain_3d.c"
 
-constexpr int NX = 39, NU = 3, NC = 6, N = 25;
-constexpr double DT = 2.0 / 25;
+constexpr int NX = 39, NU = 3, NC = 6, N = 40;
+constexpr double DT = 2.0 / 40;
 constexpr int NO_MASSES = 6;
 constexpr int DIM = 3;
 
 int main() {
-    printf("=== HangingChain3DMPC (ContactIPM) ===\n");
+    printf("=== HangingChain3DMPC (ContactIPM, COLD START) ===\n");
 
     nmpc::CodegenDynamics<NX, NU> dyn;
     dyn.set_functions(f_expl, f_jac_x, f_jac_u);
@@ -61,10 +61,13 @@ int main() {
     }
 
     prob.x0 = x0;
-    for (int k = 0; k <= N; ++k) {
-        prob.stages[k].x = x0;
+    // Cold start: forward-simulate from x0 with u=0 (matches IPOPT initialization)
+    prob.stages[0].x = x0;
+    for (int k = 0; k < N; ++k) {
         prob.stages[k].u.zero();
+        dyn.discrete_step(prob.stages[k].x, prob.stages[k].u, DT, prob.stages[k+1].x);
     }
+    prob.stages[N].u.zero();
 
     fatrop_bench::run_benchmark(prob, fatrop_bench::default_params(),
                                 "hanging_chain_3d", 1);

@@ -22,6 +22,8 @@ elseif(MSVC)
         /EHsc                     # Keep EH for MSVC compat, but don't throw
     )
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG")
+    # Increase stack size to 10MB for large NMPC problems (default is 1MB)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000")
 endif()
 
 # ── Header-only library ──
