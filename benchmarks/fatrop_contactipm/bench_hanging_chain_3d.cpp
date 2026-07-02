@@ -50,18 +50,18 @@ int main() {
     prob.u_lb[2] = -1.0; prob.u_ub[2] = 1.0;
     prob.n_bound_u = 3;
 
-    // Initial state: linear interpolation from ground [0,0,0] to endpoint [1,0,0]
+    // Initial state
     nmpc::Vec<NX> x0;
     x0.zero();
     for (int i = 0; i < NO_MASSES + 1; ++i) {
         double frac = (double)(i + 1) / (NO_MASSES + 1);
-        x0[i * DIM] = frac;       // x-component
-        x0[i * DIM + 1] = 0.0;    // y-component
-        x0[i * DIM + 2] = 0.0;    // z-component
+        x0[i * DIM] = frac;
+        x0[i * DIM + 1] = 0.0;
+        x0[i * DIM + 2] = 0.0;
     }
 
     prob.x0 = x0;
-    // Cold start: forward-simulate from x0 with u=0 (matches IPOPT initialization)
+    // Cold start: forward-simulate from x0 with u=0
     prob.stages[0].x = x0;
     for (int k = 0; k < N; ++k) {
         prob.stages[k].u.zero();

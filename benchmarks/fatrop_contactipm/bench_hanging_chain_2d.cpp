@@ -59,7 +59,7 @@ int main() {
     }
 
     prob.x0 = x0;
-    // Cold start: forward-simulate from x0 with u=0 (matches IPOPT initialization)
+    // Cold start: forward-simulate from x0 with u=0
     prob.stages[0].x = x0;
     for (int k = 0; k < N; ++k) {
         prob.stages[k].u.zero();
