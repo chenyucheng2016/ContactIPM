@@ -2,6 +2,7 @@
  * @file    bench_hanging_chain_3d.cpp
  * @brief   Fatrop Benchmark: HangingChain3DMPC (ContactIPM)
  *   NX=39, NU=3, NC=6, N=25, dt=0.08
+ *   |u|<=1 handled as VARIABLE BOUNDS (not path constraints)
  */
 #include "fatrop_benchmark_common.hpp"
 #include "hanging_chain_3d.c"
@@ -38,8 +39,16 @@ int main() {
     nmpc::NMPCProblem<NX, NU, NC, N> prob;
     prob.dynamics = &dyn;
     prob.cost = &cost;
-    prob.constraints = &cons;
+    // NO path constraints: |u|<=1 as variable bounds instead
+    prob.constraints = nullptr;
     prob.dt = DT;
+
+    // Variable bounds: |u| <= 1
+    prob.init_bounds_free();
+    prob.u_lb[0] = -1.0; prob.u_ub[0] = 1.0;
+    prob.u_lb[1] = -1.0; prob.u_ub[1] = 1.0;
+    prob.u_lb[2] = -1.0; prob.u_ub[2] = 1.0;
+    prob.n_bound_u = 3;
 
     // Initial state: linear interpolation from ground [0,0,0] to endpoint [1,0,0]
     nmpc::Vec<NX> x0;

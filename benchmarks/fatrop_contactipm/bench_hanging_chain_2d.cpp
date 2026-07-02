@@ -117,7 +117,7 @@ int main() {
     };
 
     prob.x0 = x0;
-    // Cold start: x=x0 everywhere, u=0
+    // Cold start: x=x0 everywhere, u=0 (matches IPOPT initialization)
     for (int k = 0; k <= N; ++k) {
         prob.stages[k].x = x0;
         if (k < N) {
