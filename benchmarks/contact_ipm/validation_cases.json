@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "description": "Cartesian initial-state and target sweeps at the frozen source horizon and physical parameters.",
+  "problems": {
+    "cartpole_soft_walls": {
+      "expected_count": 15,
+      "axes": {
+        "initial_state": [
+          {"id": "source", "value": [0.0, 3.14159, 0.0, 2.8]},
+          {"id": "cart_left", "value": [-0.15, 3.14159, 0.0, 2.8]},
+          {"id": "cart_right", "value": [0.15, 3.14159, 0.0, 2.8]},
+          {"id": "angle_minus", "value": [0.0, 3.04159, 0.0, 2.8]},
+          {"id": "angle_plus", "value": [0.0, 3.24159, 0.0, 2.8]}
+        ],
+        "target_state": [
+          {"id": "target_left", "value": [-0.1, 0.0, 0.0, 0.0]},
+          {"id": "source", "value": [0.0, 0.0, 0.0, 0.0]},
+          {"id": "target_right", "value": [0.1, 0.0, 0.0, 0.0]}
+        ]
+      }
+    },
+    "push_box": {
+      "expected_count": 25,
+      "axes": {
+        "initial_state": [
+          {"id": "source", "value": [0.0, 0.0, 0.0]},
+          {"id": "box_left", "value": [-0.1, 0.0, 0.0]},
+          {"id": "box_right", "value": [0.1, 0.0, 0.0]},
+          {"id": "angle_minus", "value": [0.0, 0.0, -0.1]},
+          {"id": "angle_plus", "value": [0.0, 0.0, 0.1]}
+        ],
+        "target_state": [
+          {"id": "segment_10", "value": [-2.8190778623577253, -1.026060429977006, 3.490658503988659]},
+          {"id": "segment_11", "value": [-2.298133329356935, -1.9283628290596169, 3.8397243543875246]},
+          {"id": "source", "value": [-1.5000000000000013, -2.5980762113533156, 4.1887902047863905]},
+          {"id": "segment_13", "value": [-0.520944533000791, -2.954423259036624, 4.537856055185257]},
+          {"id": "segment_14", "value": [0.5209445330007899, -2.9544232590366244, 4.886921905584122]}
+        ]
+      }
+    },
+    "transport": {
+      "expected_count": 15,
+      "axes": {
+        "initial_state": [
+          {"id": "source", "value": [3.5, 3.0, -4.0, -4.0, 0.0, 0.0]},
+          {"id": "start_left", "value": [3.0, 2.5, -4.0, -4.0, 0.0, 0.0]},
+          {"id": "start_right", "value": [4.0, 3.5, -4.0, -4.0, 0.0, 0.0]},
+          {"id": "velocity_slow", "value": [3.5, 3.0, -3.5, -3.5, 0.0, 0.0]},
+          {"id": "velocity_fast", "value": [3.5, 3.0, -4.5, -4.5, 0.0, 0.0]}
+        ],
+        "target_state": [
+          {"id": "target_left", "value": [-0.75, -0.25, -2.0, -2.0, 0.0, 0.0]},
+          {"id": "source", "value": [-0.5, 0.0, -2.0, -2.0, 0.0, 0.0]},
+          {"id": "target_right", "value": [-0.25, 0.25, -2.0, -2.0, 0.0, 0.0]}
+        ]
+      }
+    }
+  }
+}

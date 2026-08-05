@@ -1,0 +1,4173 @@
+{
+  "case_source": {
+    "path": "benchmarks/impact_comparison/impact_cases.json",
+    "sha256": "b684de6aed631ab3395c8dada092bb601e78c70b8518e8e0b6f6ad797724b02d"
+  },
+  "created_utc": "2026-07-30T10:01:14.631459+00:00",
+  "formulation": {
+    "complementarity": "a*b <= 0 (exact with nonnegative sides)",
+    "globalization": "MERIT_BACKTRACKING",
+    "hessian": "exact cost Hessian; Gauss-Newton omission of dynamics/constraint second derivatives",
+    "initialization": "matched to the corresponding competitor",
+    "nlp_solver": "SQP",
+    "qp_solver": "PARTIAL_CONDENSING_HPIPM",
+    "relaxation_used": false,
+    "side_constraints": "a >= 0, b >= 0"
+  },
+  "machine": {
+    "cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "mode": "timing",
+  "protocol": {
+    "cpu_affinity": [
+      0
+    ],
+    "eligibility": "acados status 0 and independent audited success",
+    "paper_reported_times_used": false,
+    "repetitions": 20,
+    "seed": 2027,
+    "solver_time": "acados time_tot; generation and compilation excluded",
+    "warmups": 1
+  },
+  "revision": {
+    "acados": "dc6668f8538e49831f03a36ddf755de6e92d38ea",
+    "contactipm": "756a12cc457f775b33e5cab55495909bdc54e830"
+  },
+  "schema_version": 1,
+  "suite": "impact",
+  "summary": {
+    "cart_transport": {
+      "audited_feasible": 20,
+      "audited_success": 20,
+      "audited_task_success": 20,
+      "eligible": 0,
+      "iterations_all": {
+        "count": 20,
+        "iqr": 0.0,
+        "median": 300.0,
+        "p90": 300.0,
+        "q1": 300.0,
+        "q3": 300.0
+      },
+      "objective_audited_success": {
+        "count": 20,
+        "iqr": 0.0,
+        "median": 1.081441663382303e-05,
+        "p90": 1.081441663382303e-05,
+        "q1": 1.081441663382303e-05,
+        "q3": 1.081441663382303e-05
+      },
+      "reported_converged": 0,
+      "solver_seconds_all": {
+        "count": 20,
+        "iqr": 0.09199175000000004,
+        "median": 2.0639700000000003,
+        "p90": 2.2117223,
+        "q1": 2.017553,
+        "q3": 2.10954475
+      },
+      "solver_seconds_eligible": {
+        "count": 0,
+        "iqr": null,
+        "median": null,
+        "p90": null,
+        "q1": null,
+        "q3": null
+      },
+      "trials": 20,
+      "worst_complementarity": 8.857527178198535e-12,
+      "worst_equality": 3.1701395105329384e-12,
+      "worst_side_violation": 0.0
+    },
+    "push_box": {
+      "audited_feasible": 20,
+      "audited_success": 0,
+      "audited_task_success": 0,
+      "eligible": 0,
+      "iterations_all": {
+        "count": 20,
+        "iqr": 0.0,
+        "median": 2.0,
+        "p90": 2.0,
+        "q1": 2.0,
+        "q3": 2.0
+      },
+      "objective_audited_success": {
+        "count": 0,
+        "iqr": null,
+        "median": null,
+        "p90": null,
+        "q1": null,
+        "q3": null
+      },
+      "reported_converged": 20,
+      "solver_seconds_all": {
+        "count": 20,
+        "iqr": 0.0005942499999999999,
+        "median": 0.001425,
+        "p90": 0.0021016000000000003,
+        "q1": 0.00127625,
+        "q3": 0.0018705
+      },
+      "solver_seconds_eligible": {
+        "count": 0,
+        "iqr": null,
+        "median": null,
+        "p90": null,
+        "q1": null,
+        "q3": null
+      },
+      "trials": 20,
+      "worst_complementarity": 1.520631284882622e-16,
+      "worst_equality": 9.355640154377859e-24,
+      "worst_side_violation": 4.0069517925791033e-16
+    },
+    "push_t": {
+      "audited_feasible": 20,
+      "audited_success": 0,
+      "audited_task_success": 0,
+      "eligible": 0,
+      "iterations_all": {
+        "count": 20,
+        "iqr": 0.0,
+        "median": 300.0,
+        "p90": 300.0,
+        "q1": 300.0,
+        "q3": 300.0
+      },
+      "objective_audited_success": {
+        "count": 0,
+        "iqr": null,
+        "median": null,
+        "p90": null,
+        "q1": null,
+        "q3": null
+      },
+      "reported_converged": 0,
+      "solver_seconds_all": {
+        "count": 20,
+        "iqr": 0.07941749999999992,
+        "median": 1.9002445,
+        "p90": 1.9586661,
+        "q1": 1.8593715,
+        "q3": 1.9387889999999999
+      },
+      "solver_seconds_eligible": {
+        "count": 0,
+        "iqr": null,
+        "median": null,
+        "p90": null,
+        "q1": null,
+        "q3": null
+      },
+      "trials": 20,
+      "worst_complementarity": 2.229600581683148e-11,
+      "worst_equality": 2.9766814013676424e-13,
+      "worst_side_violation": 2.811659682686934e-11
+    }
+  },
+  "trials": [
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00000_push_box_official_00_r13/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001864,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00000_push_box_official_00_r13/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 0,
+      "problem": "push_box",
+      "repetition": 13,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00001_cart_transport_official_00_r14/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 1.8800270000000001,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00001_cart_transport_official_00_r14/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 1,
+      "problem": "cart_transport",
+      "repetition": 14,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00002_cart_transport_official_00_r04/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.086078,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00002_cart_transport_official_00_r04/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 2,
+      "problem": "cart_transport",
+      "repetition": 4,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00003_push_box_official_00_r02/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001268,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00003_push_box_official_00_r02/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 3,
+      "problem": "push_box",
+      "repetition": 2,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00004_cart_transport_official_00_r03/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 1.976312,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00004_cart_transport_official_00_r03/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 4,
+      "problem": "cart_transport",
+      "repetition": 3,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00005_cart_transport_official_00_r16/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.113474,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00005_cart_transport_official_00_r16/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 5,
+      "problem": "cart_transport",
+      "repetition": 16,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00006_push_box_official_00_r09/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001357,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00006_push_box_official_00_r09/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 6,
+      "problem": "push_box",
+      "repetition": 9,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00007_cart_transport_official_00_r06/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.232533,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00007_cart_transport_official_00_r06/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 7,
+      "problem": "cart_transport",
+      "repetition": 6,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00008_push_t_official_00_r15/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 2.045427,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00008_push_t_official_00_r15/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 8,
+      "problem": "push_t",
+      "repetition": 15,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00009_cart_transport_official_00_r07/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.095869,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00009_cart_transport_official_00_r07/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 9,
+      "problem": "cart_transport",
+      "repetition": 7,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00010_push_box_official_00_r15/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001209,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00010_push_box_official_00_r15/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 10,
+      "problem": "push_box",
+      "repetition": 15,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00011_push_box_official_00_r08/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001427,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00011_push_box_official_00_r08/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 11,
+      "problem": "push_box",
+      "repetition": 8,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00012_push_t_official_00_r17/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.949026,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00012_push_t_official_00_r17/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 12,
+      "problem": "push_t",
+      "repetition": 17,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00013_cart_transport_official_00_r09/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.26982,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00013_cart_transport_official_00_r09/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 13,
+      "problem": "cart_transport",
+      "repetition": 9,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00014_cart_transport_official_00_r02/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.136767,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00014_cart_transport_official_00_r02/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 14,
+      "problem": "cart_transport",
+      "repetition": 2,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00015_push_box_official_00_r01/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.002323,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00015_push_box_official_00_r01/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 15,
+      "problem": "push_box",
+      "repetition": 1,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00016_cart_transport_official_00_r19/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.20941,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00016_cart_transport_official_00_r19/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 16,
+      "problem": "cart_transport",
+      "repetition": 19,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00017_push_box_official_00_r03/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001279,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00017_push_box_official_00_r03/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 17,
+      "problem": "push_box",
+      "repetition": 3,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00018_cart_transport_official_00_r18/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.108235,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00018_cart_transport_official_00_r18/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 18,
+      "problem": "cart_transport",
+      "repetition": 18,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00019_push_t_official_00_r14/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.923787,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00019_push_t_official_00_r14/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 19,
+      "problem": "push_t",
+      "repetition": 14,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00020_push_t_official_00_r10/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.929789,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00020_push_t_official_00_r10/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 20,
+      "problem": "push_t",
+      "repetition": 10,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00021_cart_transport_official_00_r17/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.0304159999999998,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00021_cart_transport_official_00_r17/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 21,
+      "problem": "cart_transport",
+      "repetition": 17,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00022_push_t_official_00_r04/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.9074140000000002,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00022_push_t_official_00_r04/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 22,
+      "problem": "push_t",
+      "repetition": 4,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00023_push_t_official_00_r13/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.8940329999999999,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00023_push_t_official_00_r13/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 23,
+      "problem": "push_t",
+      "repetition": 13,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00024_push_box_official_00_r12/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.002603,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00024_push_box_official_00_r12/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 24,
+      "problem": "push_box",
+      "repetition": 12,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00025_push_box_official_00_r07/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.002077,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00025_push_box_official_00_r07/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 25,
+      "problem": "push_box",
+      "repetition": 7,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00026_cart_transport_official_00_r05/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.030234,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00026_cart_transport_official_00_r05/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 26,
+      "problem": "cart_transport",
+      "repetition": 5,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00027_push_t_official_00_r06/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.938704,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00027_push_t_official_00_r06/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 27,
+      "problem": "push_t",
+      "repetition": 6,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00028_push_t_official_00_r11/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.7725360000000001,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00028_push_t_official_00_r11/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 28,
+      "problem": "push_t",
+      "repetition": 11,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00029_push_t_official_00_r08/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.862385,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00029_push_t_official_00_r08/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 29,
+      "problem": "push_t",
+      "repetition": 8,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00030_push_t_official_00_r03/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.861424,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00030_push_t_official_00_r03/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 30,
+      "problem": "push_t",
+      "repetition": 3,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00031_push_box_official_00_r10/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001206,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00031_push_box_official_00_r10/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 31,
+      "problem": "push_box",
+      "repetition": 10,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00032_push_box_official_00_r14/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001223,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00032_push_box_official_00_r14/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 32,
+      "problem": "push_box",
+      "repetition": 14,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00033_push_t_official_00_r12/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.939044,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00033_push_t_official_00_r12/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 33,
+      "problem": "push_t",
+      "repetition": 12,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00034_push_t_official_00_r07/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.853214,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00034_push_t_official_00_r07/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 34,
+      "problem": "push_t",
+      "repetition": 7,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00035_push_t_official_00_r16/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.9450889999999998,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00035_push_t_official_00_r16/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 35,
+      "problem": "push_t",
+      "repetition": 16,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00036_push_box_official_00_r16/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001423,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00036_push_box_official_00_r16/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 36,
+      "problem": "push_box",
+      "repetition": 16,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00037_cart_transport_official_00_r15/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 1.997753,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00037_cart_transport_official_00_r15/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 37,
+      "problem": "cart_transport",
+      "repetition": 15,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00038_push_box_official_00_r19/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001473,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00038_push_box_official_00_r19/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 38,
+      "problem": "push_box",
+      "repetition": 19,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00039_push_t_official_00_r01/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.906456,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00039_push_t_official_00_r01/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 39,
+      "problem": "push_t",
+      "repetition": 1,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00040_cart_transport_official_00_r11/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.024153,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00040_cart_transport_official_00_r11/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 40,
+      "problem": "cart_transport",
+      "repetition": 11,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00041_push_box_official_00_r04/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001366,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00041_push_box_official_00_r04/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 41,
+      "problem": "push_box",
+      "repetition": 4,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00042_push_t_official_00_r19/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.8756629999999999,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00042_push_t_official_00_r19/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 42,
+      "problem": "push_t",
+      "repetition": 19,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00043_push_box_official_00_r18/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001219,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00043_push_box_official_00_r18/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 43,
+      "problem": "push_box",
+      "repetition": 18,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00044_push_box_official_00_r17/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001731,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00044_push_box_official_00_r17/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 44,
+      "problem": "push_box",
+      "repetition": 17,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00045_cart_transport_official_00_r08/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 1.9406020000000002,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00045_cart_transport_official_00_r08/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 45,
+      "problem": "cart_transport",
+      "repetition": 8,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00046_push_t_official_00_r18/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 2.101323,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00046_push_t_official_00_r18/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 46,
+      "problem": "push_t",
+      "repetition": 18,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00047_push_t_official_00_r02/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.83282,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00047_push_t_official_00_r02/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 47,
+      "problem": "push_t",
+      "repetition": 2,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00048_cart_transport_official_00_r13/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.063664,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00048_cart_transport_official_00_r13/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 48,
+      "problem": "cart_transport",
+      "repetition": 13,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00049_cart_transport_official_00_r12/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.064276,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00049_cart_transport_official_00_r12/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 49,
+      "problem": "cart_transport",
+      "repetition": 12,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00050_push_box_official_00_r11/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.00189,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00050_push_box_official_00_r11/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 50,
+      "problem": "push_box",
+      "repetition": 11,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00051_cart_transport_official_00_r00/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 1.992151,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00051_cart_transport_official_00_r00/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 51,
+      "problem": "cart_transport",
+      "repetition": 0,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00052_push_t_official_00_r05/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.8859059999999999,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00052_push_t_official_00_r05/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 52,
+      "problem": "push_t",
+      "repetition": 5,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00053_cart_transport_official_00_r10/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.046282,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00053_cart_transport_official_00_r10/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 53,
+      "problem": "cart_transport",
+      "repetition": 10,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00054_push_t_official_00_r00/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.849038,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00054_push_t_official_00_r00/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 54,
+      "problem": "push_t",
+      "repetition": 0,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 0.0,
+          "audited_success": true,
+          "complementarity": 8.857527178198535e-12,
+          "equality": 3.1701395105329384e-12,
+          "feasible": true,
+          "objective": 1.081441663382303e-05,
+          "position_error": 7.364855442711155e-06,
+          "raw": {
+            "audited_success": true,
+            "complementarity": 8.857527178198535e-12,
+            "control_cost": 1.0543211154252207e-05,
+            "dynamics_defect": 3.3306690738754696e-16,
+            "equality_violation": 3.1701395105329384e-12,
+            "feasible": true,
+            "force_effort": 0.7246612483802806,
+            "initial_state_error": 0.0,
+            "objective": 1.081441663382303e-05,
+            "peak_force": 0.21646951017134933,
+            "position_error": 7.364855442711155e-06,
+            "problem": "cart_transport",
+            "side_violation": 0.0,
+            "solver": "contactipm",
+            "task_success": true,
+            "terminal_cost": 2.712054795708229e-07,
+            "total_tracking_error": 179.835353316177,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00055_cart_transport_official_00_r01/acados_cart_transport.txt",
+            "velocity_error": 4.713093028899731e-10
+          },
+          "side_violation": 0.0,
+          "task_success": true,
+          "velocity_error": 4.713093028899731e-10
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 1.081441663382303e-05,
+        "reported_success": false,
+        "residuals": [
+          0.04670919579921671,
+          3.3306690738754696e-16,
+          8.890207127368805e-12,
+          5.3093774136641e-07
+        ],
+        "solver_seconds": 2.107425,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00055_cart_transport_official_00_r01/acados_cart_transport.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "index": 55,
+      "problem": "cart_transport",
+      "repetition": 1,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00056_push_box_official_00_r00/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001978,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00056_push_box_official_00_r00/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 56,
+      "problem": "push_box",
+      "repetition": 0,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00057_push_box_official_00_r05/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001405,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00057_push_box_official_00_r05/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 57,
+      "problem": "push_box",
+      "repetition": 5,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.5707999994863648,
+          "audited_success": false,
+          "complementarity": 2.229600581683148e-11,
+          "equality": 2.9766814013676424e-13,
+          "feasible": true,
+          "objective": 247.26281213969827,
+          "position_error": 0.07071067514737904,
+          "raw": {
+            "angular_error": 1.5707999994863648,
+            "audited_success": false,
+            "complementarity": 2.229600581683148e-11,
+            "control_cost": 0.02154834308209433,
+            "dynamics_defect": 1.2522736407289156e-19,
+            "equality_violation": 2.9766814013676424e-13,
+            "feasible": true,
+            "force_effort": 5.735807419213548e-17,
+            "initial_state_error": 0.0,
+            "objective": 247.26281213969827,
+            "peak_force": 1.0718104390645352e-09,
+            "problem": "push_t",
+            "side_violation": 2.811659682686934e-11,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 247.24126379661618,
+            "total_tracking_error": 126.0930445881422,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00058_push_t_official_00_r09/acados_push_t.txt",
+            "translation_error": 0.07071067514737904
+          },
+          "side_violation": 2.811659682686934e-11,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 300,
+        "objective": 247.26281213969827,
+        "reported_success": false,
+        "residuals": [
+          5.836111168733282e-05,
+          1.3207373120783983e-19,
+          2.8117006201839158e-11,
+          4.130089008421534e-07
+        ],
+        "solver_seconds": 1.780599,
+        "status": 2,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00058_push_t_official_00_r09/acados_push_t.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.05,
+        0.05,
+        1.5708
+      ],
+      "index": 58,
+      "problem": "push_t",
+      "repetition": 9,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "acados": {
+        "audit": {
+          "angular_error": 1.0,
+          "audited_success": false,
+          "complementarity": 1.520631284882622e-16,
+          "equality": 9.355640154377859e-24,
+          "feasible": true,
+          "objective": 101.99999999999987,
+          "position_error": 0.14142135623730462,
+          "raw": {
+            "angular_error": 1.0,
+            "audited_success": false,
+            "complementarity": 1.520631284882622e-16,
+            "control_cost": 4.059556777698551e-20,
+            "dynamics_defect": 9.355640154377859e-24,
+            "equality_violation": 0.0,
+            "feasible": true,
+            "force_effort": 2.5107868554824142e-29,
+            "initial_state_error": 0.0,
+            "objective": 101.99999999999987,
+            "peak_force": 7.08630635995615e-16,
+            "problem": "push_box",
+            "side_violation": 4.0069517925791033e-16,
+            "solver": "contactipm",
+            "task_success": false,
+            "terminal_cost": 101.99999999999987,
+            "total_tracking_error": 52.01999999999991,
+            "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00059_push_box_official_00_r06/acados_push_box.txt",
+            "translation_error": 0.14142135623730462
+          },
+          "side_violation": 4.0069517925791033e-16,
+          "task_success": false,
+          "velocity_error": 0.0
+        },
+        "eligible": false,
+        "error": null,
+        "iterations": 2,
+        "objective": 101.99999999999987,
+        "reported_success": true,
+        "residuals": [
+          8.534384843272846e-08,
+          9.355640154377859e-24,
+          4.0069517925791033e-16,
+          1.0847827833309106e-14
+        ],
+        "solver_seconds": 0.001443,
+        "status": 0,
+        "trajectory": "benchmarks/acados_comparison/results/2026-07-30_impact_timing_20x_raw/trials/00059_push_box_official_00_r06/acados_push_box.txt"
+      },
+      "case_id": "official_00",
+      "goal": [
+        0.1,
+        0.1,
+        1.0
+      ],
+      "index": 59,
+      "problem": "push_box",
+      "repetition": 6,
+      "segment": null,
+      "start": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

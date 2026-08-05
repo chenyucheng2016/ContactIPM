@@ -1,0 +1,892 @@
+{
+  "created_utc": "2026-07-28T11:29:17.387134+00:00",
+  "description": "Matched objective-weight sweep; not a timing study.",
+  "effort_scales": [
+    0.1,
+    0.25,
+    0.5,
+    1.0,
+    2.0,
+    4.0,
+    10.0
+  ],
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "points": [
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 16.286362823028746,
+        "dominant_contact_mode_changes": 3,
+        "peak_contact_force_norm": 8.359374999227471
+      },
+      "angular_error": 0.010179502225301285,
+      "effort_cost": 6.735324136192044,
+      "effort_scale": 0.1,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 6.735324136192044,
+        "terminal_tracking": 0.09877647652983779
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 2.61981292078778e-13,
+      "position_error": 0.029734533790585386,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.09877647652983779,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.4314103070064448
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 27.286544885267563,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 17.082712956612873
+      },
+      "angular_error": 0.001433519046011078,
+      "effort_cost": 18.910158082906943,
+      "effort_scale": 0.1,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 18.910158082906943,
+        "terminal_tracking": 0.024436871360488284
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 1.0264198697381778e-06,
+      "position_error": 0.015566429801004672,
+      "problem": "push_box",
+      "returncode": 1,
+      "solver": "ContactIPM",
+      "solver_converged": false,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.024436871360488284,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 1.9234000349970302
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 16.25540340494163,
+        "dominant_contact_mode_changes": 3,
+        "peak_contact_force_norm": 8.34374999920965
+      },
+      "angular_error": 0.012232605622368276,
+      "effort_cost": 6.709883691085359,
+      "effort_scale": 0.25,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 6.709883691085359,
+        "terminal_tracking": 0.14209808359807644
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 7.483676739522297e-14,
+      "position_error": 0.03565591389472956,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.14209808359807644,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.7108408909989521
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 27.311728738168355,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 14.702377325959848
+      },
+      "angular_error": 0.0033470680234080064,
+      "effort_cost": 18.85244121748646,
+      "effort_scale": 0.25,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 18.85244121748646,
+        "terminal_tracking": 0.008209081664884639
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 5.676098938771259e-07,
+      "position_error": 0.008419498339896862,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.008209081664884639,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 1.6257709330093348
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 16.05038766042349,
+        "dominant_contact_mode_changes": 3,
+        "peak_contact_force_norm": 8.24023437467376
+      },
+      "angular_error": 0.024926623178437524,
+      "effort_cost": 6.542629367435313,
+      "effort_scale": 0.5,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 6.542629367435313,
+        "terminal_tracking": 0.6265435662739406
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 6.512257868862027e-14,
+      "position_error": 0.07512721956561141,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.6265435662739406,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.49919697899895255
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 27.264288104357387,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 14.675452170368112
+      },
+      "angular_error": 0.006705629713881223,
+      "effort_cost": 18.786970384217167,
+      "effort_scale": 0.5,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 18.786970384217167,
+        "terminal_tracking": 0.03274609511754969
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 7.551760236517709e-07,
+      "position_error": 0.01680760189068655,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.03274609511754969,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.5008559699926991
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 16.177971774814427,
+        "dominant_contact_mode_changes": 3,
+        "peak_contact_force_norm": 8.30468749954498
+      },
+      "angular_error": 0.017102837004241422,
+      "effort_cost": 6.646454980384326,
+      "effort_scale": 1.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 6.646454980384326,
+        "terminal_tracking": 0.28432850923555386
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 6.088632975352488e-13,
+      "position_error": 0.05050522803395594,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.28432850923555386,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.5979154109954834
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 27.16975516302199,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 14.620492431032886
+      },
+      "angular_error": 0.013484632076152359,
+      "effort_cost": 18.656826891270125,
+      "effort_scale": 1.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 18.656826891270125,
+        "terminal_tracking": 0.13030218405372154
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 5.004072192465982e-07,
+      "position_error": 0.03348412367537813,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.13030218405372154,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.23260672700416762
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 16.147148069478796,
+        "dominant_contact_mode_changes": 3,
+        "peak_contact_force_norm": 8.289062499639414
+      },
+      "angular_error": 0.01909652130359074,
+      "effort_cost": 6.621300807357448,
+      "effort_scale": 2.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 6.621300807357448,
+        "terminal_tracking": 0.3545605641423078
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 7.518562114079394e-13,
+      "position_error": 0.056399720881619465,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.3545605641423078,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.4230411810131045
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 26.984798221008948,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 14.489029855272323
+      },
+      "angular_error": 0.027004331633780687,
+      "effort_cost": 18.403202733981242,
+      "effort_scale": 2.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 18.403202733981242,
+        "terminal_tracking": 0.5172487319049991
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 5.042170677174143e-07,
+      "position_error": 0.06665773317524969,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 0.5172487319049991,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.1756526440003654
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 15.652125649879627,
+        "dominant_contact_mode_changes": 3,
+        "peak_contact_force_norm": 8.039062499524746
+      },
+      "angular_error": 0.04831232811750308,
+      "effort_cost": 6.223790237085587,
+      "effort_scale": 4.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 6.223790237085587,
+        "terminal_tracking": 2.5711961652885353
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 2.3841343208911967e-14,
+      "position_error": 0.15289826880887852,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": false,
+      "task_successful": false,
+      "tracking_cost": 2.5711961652885353,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.36553570498654153
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 26.610808134317676,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 14.288773275650195
+      },
+      "angular_error": 0.054701736775464305,
+      "effort_cost": 17.896490295178392,
+      "effort_scale": 4.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 17.896490295178392,
+        "terminal_tracking": 2.0223261536676413
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 9.492459758104161e-07,
+      "position_error": 0.13126683332214664,
+      "problem": "push_box",
+      "returncode": 1,
+      "solver": "ContactIPM",
+      "solver_converged": false,
+      "successful": false,
+      "task_successful": false,
+      "tracking_cost": 2.0223261536676413,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.212980978001724
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 15.281937699296893,
+        "dominant_contact_mode_changes": 3,
+        "peak_contact_force_norm": 7.859374998933149
+      },
+      "angular_error": 0.06844984583670843,
+      "effort_cost": 5.935384741995559,
+      "effort_scale": 10.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 5.935384741995559,
+        "terminal_tracking": 5.572298075677511
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 3.696836325053288e-13,
+      "position_error": 0.22591502686122047,
+      "problem": "push_box",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": false,
+      "task_successful": false,
+      "tracking_cost": 5.572298075677511,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.34204748600313906
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 99,
+        "contact_impulse": 25.533432604150512,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 13.666618290172272
+      },
+      "angular_error": 0.14138765638868467,
+      "effort_cost": 16.47575866854878,
+      "effort_scale": 10.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 16.47575866854878,
+        "terminal_tracking": 11.905094830214026
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 7.363616538129891e-07,
+      "position_error": 0.3147387470951988,
+      "problem": "push_box",
+      "returncode": 1,
+      "solver": "ContactIPM",
+      "solver_converged": false,
+      "successful": false,
+      "task_successful": false,
+      "tracking_cost": 11.905094830214026,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.11602827100432478
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 39,
+        "contact_impulse": 2.160143643296949,
+        "dominant_contact_mode_changes": 35,
+        "peak_contact_force_norm": 17.63600318720348
+      },
+      "angular_error": 4.354269769493192e-05,
+      "effort_cost": 4.8257679201658,
+      "effort_scale": 0.1,
+      "feasible": false,
+      "objective_components": {
+        "force_effort": 4.8257679201658,
+        "running_tracking": 1.544842806650449,
+        "terminal_tracking": 1.353889537256568e-06
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 3.433223226838124e-05,
+      "position_error": 0.00010790240433938868,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": false,
+      "task_successful": true,
+      "tracking_cost": 1.544844160539986,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 10.312454040991724
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 1.8938789962343483,
+        "dominant_contact_mode_changes": 17,
+        "peak_contact_force_norm": 25.242158737752057
+      },
+      "angular_error": 1.9047273296948775e-05,
+      "effort_cost": 6.794735486469173,
+      "effort_scale": 0.1,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 6.794735486469173,
+        "running_tracking": 1.1036558456352332,
+        "terminal_tracking": 0.0003503601322200733
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 9.99699725034674e-07,
+      "position_error": 0.0018716940250961681,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 1.1040062057674533,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.44794978300342336
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 43,
+        "contact_impulse": 2.1370265689151684,
+        "dominant_contact_mode_changes": 18,
+        "peak_contact_force_norm": 17.652765260265966
+      },
+      "angular_error": 0.0010397876142720763,
+      "effort_cost": 4.269343456590046,
+      "effort_scale": 0.25,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 4.269343456590046,
+        "running_tracking": 1.7910211142850423,
+        "terminal_tracking": 0.0007412722054423847
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 2.804674487877779e-09,
+      "position_error": 0.002516259896973204,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 1.7917623864904846,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 5.320816250008647
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 2.036266925052522,
+        "dominant_contact_mode_changes": 21,
+        "peak_contact_force_norm": 22.208665527250425
+      },
+      "angular_error": 0.00011951006889971555,
+      "effort_cost": 5.429011113062608,
+      "effort_scale": 0.25,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 5.429011113062608,
+        "running_tracking": 1.4072503308264812,
+        "terminal_tracking": 0.0004954695348756473
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 1.0011007556927924e-06,
+      "position_error": 0.0022227039146510397,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 1.4077458003613568,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.37666680000256747
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 27,
+        "contact_impulse": 2.158623990796156,
+        "dominant_contact_mode_changes": 12,
+        "peak_contact_force_norm": 13.246182672728436
+      },
+      "angular_error": 0.0016200338466647,
+      "effort_cost": 2.9141812205467823,
+      "effort_scale": 0.5,
+      "feasible": false,
+      "objective_components": {
+        "force_effort": 2.9141812205467823,
+        "running_tracking": 2.1665052390185036,
+        "terminal_tracking": 0.013525089680923802
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 2.9276641693140968e-05,
+      "position_error": 0.01151635305635727,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": false,
+      "task_successful": true,
+      "tracking_cost": 2.180030328699427,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 5.2299069889995735
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 2.1401277347868843,
+        "dominant_contact_mode_changes": 19,
+        "peak_contact_force_norm": 12.172498732110812
+      },
+      "angular_error": 9.358820265994994e-06,
+      "effort_cost": 2.7057186925363625,
+      "effort_scale": 0.5,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 2.7057186925363625,
+        "running_tracking": 1.7438290465655935,
+        "terminal_tracking": 8.91704796454674e-06
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 9.996702731750578e-07,
+      "position_error": 0.00029846757299361156,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 1.743837963613558,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.5135545290104346
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 44,
+        "contact_impulse": 1.9426285663203129,
+        "dominant_contact_mode_changes": 10,
+        "peak_contact_force_norm": 9.883768107629406
+      },
+      "angular_error": 0.02505105435989648,
+      "effort_cost": 2.0714591193448406,
+      "effort_scale": 1.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 2.0714591193448406,
+        "running_tracking": 3.067930381549649,
+        "terminal_tracking": 0.5071115966379581
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 1.574811129172961e-07,
+      "position_error": 0.06666028393726242,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 3.575041978187607,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 4.726868280995404
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 2.2454584799044213,
+        "dominant_contact_mode_changes": 20,
+        "peak_contact_force_norm": 8.825913231904307
+      },
+      "angular_error": 6.987538461992841e-05,
+      "effort_cost": 1.7318646120802914,
+      "effort_scale": 1.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 1.7318646120802914,
+        "running_tracking": 2.5578869836461555,
+        "terminal_tracking": 0.00013269285691468196
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 9.632899871080974e-07,
+      "position_error": 0.0011498025916534646,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 2.5580196765030703,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.7310402199946111
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 1.540531291825395,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 7.781077932068509
+      },
+      "angular_error": 0.06795219853705493,
+      "effort_cost": 1.325180691623628,
+      "effort_scale": 2.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 1.325180691623628,
+        "running_tracking": 3.8309220320967707,
+        "terminal_tracking": 3.1459479405812294
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 2.3076269750831547e-16,
+      "position_error": 0.16384063788584183,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": false,
+      "task_successful": false,
+      "tracking_cost": 6.976869972678,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 1.325548211010755
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 2.112744212908798,
+        "dominant_contact_mode_changes": 12,
+        "peak_contact_force_norm": 6.50236450759266
+      },
+      "angular_error": 0.0011280220409146998,
+      "effort_cost": 1.2744117257643162,
+      "effort_scale": 2.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 1.2744117257643162,
+        "running_tracking": 3.038064981047749,
+        "terminal_tracking": 0.003779694343322983
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 9.99498997741719e-07,
+      "position_error": 0.006043551095454098,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 3.041844675391072,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 1.0391471269977046
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 1.5371254291905723,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 5.052269118659064
+      },
+      "angular_error": 0.07000243413238047,
+      "effort_cost": 0.8391807403068008,
+      "effort_scale": 4.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 0.8391807403068008,
+        "running_tracking": 4.94226005986211,
+        "terminal_tracking": 3.385354235829667
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 1.6233046355203036e-16,
+      "position_error": 0.17016228242075676,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": false,
+      "task_successful": false,
+      "tracking_cost": 8.327614295691777,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 1.3730159320111852
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 2.052207812893217,
+        "dominant_contact_mode_changes": 11,
+        "peak_contact_force_norm": 4.855829006918476
+      },
+      "angular_error": 0.0012323343536509938,
+      "effort_cost": 0.9299493062576364,
+      "effort_scale": 4.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 0.9299493062576364,
+        "running_tracking": 4.087477499903501,
+        "terminal_tracking": 0.020851350796373166
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 9.99639250534975e-07,
+      "position_error": 0.014387315948318304,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 4.108328850699873,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.6696783189981943
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 1.5333922624251066,
+        "dominant_contact_mode_changes": 0,
+        "peak_contact_force_norm": 3.070221046510457
+      },
+      "angular_error": 0.07224969780895128,
+      "effort_cost": 0.49984851099417915,
+      "effort_scale": 10.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 0.49984851099417915,
+        "running_tracking": 6.886666363263451,
+        "terminal_tracking": 3.55842564095733
+      },
+      "pareto_efficient": false,
+      "physical_mpcc": 3.4938458489377693e-15,
+      "position_error": 0.17425988608225668,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "CRISP",
+      "solver_converged": true,
+      "successful": false,
+      "task_successful": false,
+      "tracking_cost": 10.44509200422078,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.4613819660007721
+    },
+    {
+      "actuation": {
+        "active_contact_steps": 49,
+        "contact_impulse": 1.996674013112182,
+        "dominant_contact_mode_changes": 5,
+        "peak_contact_force_norm": 4.885042612947314
+      },
+      "angular_error": 0.0009409305310518565,
+      "effort_cost": 0.6905372203591593,
+      "effort_scale": 10.0,
+      "feasible": true,
+      "objective_components": {
+        "force_effort": 0.6905372203591593,
+        "running_tracking": 9.043692773884391,
+        "terminal_tracking": 0.3097745149986999
+      },
+      "pareto_efficient": true,
+      "physical_mpcc": 9.997964496678383e-07,
+      "position_error": 0.05564943665292627,
+      "problem": "push_t",
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "solver_converged": true,
+      "successful": true,
+      "task_successful": true,
+      "tracking_cost": 9.353467288883092,
+      "tracking_scale": 1.0,
+      "wall_time_seconds": 0.5208506799972383
+    }
+  ],
+  "problems": [
+    "push_box",
+    "push_t"
+  ],
+  "push_t_segment": 8,
+  "raw_artifacts": [
+    "push_box_effort_0p1.json",
+    "push_box_effort_0p25.json",
+    "push_box_effort_0p5.json",
+    "push_box_effort_1.json",
+    "push_box_effort_2.json",
+    "push_box_effort_4.json",
+    "push_box_effort_10.json",
+    "push_t_effort_0p1.json",
+    "push_t_effort_0p25.json",
+    "push_t_effort_0p5.json",
+    "push_t_effort_1.json",
+    "push_t_effort_2.json",
+    "push_t_effort_4.json",
+    "push_t_effort_10.json"
+  ],
+  "revision": {
+    "contactipm": "dde3b4476f8dfdba3a932f421cb57b4aff5b32c6",
+    "contactipm_source_sha256": {
+      "push_box": "101f7e0f2c4e4da462c7a451dc33fe16a30283d8dbde50a3395778db3006d9fb",
+      "push_t": "5b34641c6358e0ecba9f7dc02cbe2abbcd2a0687fdf1fce7df7e6086460238a2"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {
+      "push_box": "1a6438671b0f3c7d5b6b577519f550c79559289e718d0d31b353db0dd2099ed1",
+      "push_t": "4be959511e203571dfd86587798368e872887a5d2fbe365016e517a20fada543"
+    },
+    "crisp_tracked_dirty": true,
+    "crisp_tracked_patch": {
+      "files": [
+        "src/core/include/common/BasicTypes.h",
+        "src/examples/Transp/cpp/SolveTransp.cpp",
+        "src/examples/pushT/SolvePushT.cpp",
+        "src/examples/pushbot/cpp/SolvePushbot.cpp",
+        "src/examples/pushbox/SolvePushbox.cpp"
+      ],
+      "sha256": "cd455d0a33773f93df932ddd8e22e3e871662f38cb939a2f3bea194c073ea620"
+    }
+  },
+  "schema_version": 1,
+  "tracking_scale": 1.0
+}

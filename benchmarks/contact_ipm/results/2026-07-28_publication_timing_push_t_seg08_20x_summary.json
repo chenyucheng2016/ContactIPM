@@ -1,0 +1,427 @@
+{
+  "bootstrap": {
+    "samples": 10000,
+    "seed": 2027
+  },
+  "groups": [
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 49.0,
+          "median_ci95": [
+            49.0,
+            49.0
+          ],
+          "p90": 49.0,
+          "q1": 49.0,
+          "q3": 49.0
+        },
+        "contact_impulse": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 2.247526872833173,
+          "median_ci95": [
+            2.247526872833173,
+            2.247526872833173
+          ],
+          "p90": 2.247526872833173,
+          "q1": 2.247526872833173,
+          "q3": 2.247526872833173
+        },
+        "dominant_contact_mode_changes": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 23.0,
+          "median_ci95": [
+            23.0,
+            23.0
+          ],
+          "p90": 23.0,
+          "q1": 23.0,
+          "q3": 23.0
+        },
+        "peak_contact_force_norm": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 8.82565570323856,
+          "median_ci95": [
+            8.82565570323856,
+            8.82565570323856
+          ],
+          "p90": 8.82565570323856,
+          "q1": 8.82565570323856,
+          "q3": 8.82565570323856
+        }
+      },
+      "audited_trials": 20,
+      "instances": {
+        "attempted": 20,
+        "feasible": 20,
+        "successful": 20,
+        "task_successful": 20
+      },
+      "objective_components": {
+        "force_effort": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 1.7348204761795079,
+          "median_ci95": [
+            1.7348204761795079,
+            1.7348204761795079
+          ],
+          "p90": 1.7348204761795079,
+          "q1": 1.7348204761795079,
+          "q3": 1.7348204761795079
+        },
+        "running_tracking": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 2.5562432692870223,
+          "median_ci95": [
+            2.5562432692870223,
+            2.5562432692870223
+          ],
+          "p90": 2.5562432692870223,
+          "q1": 2.5562432692870223,
+          "q3": 2.5562432692870223
+        },
+        "terminal_tracking": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 0.00021220542675980485,
+          "median_ci95": [
+            0.00021220542675980485,
+            0.00021220542675980485
+          ],
+          "p90": 0.00021220542675980485,
+          "q1": 0.00021220542675980485,
+          "q3": 0.00021220542675980485
+        }
+      },
+      "objective_per_instance": {
+        "count": 20,
+        "iqr": 0.0,
+        "median": 4.29127595089329,
+        "median_ci95": [
+          4.29127595089329,
+          4.29127595089329
+        ],
+        "p90": 4.29127595089329,
+        "q1": 4.29127595089329,
+        "q3": 4.29127595089329
+      },
+      "problem": "push_t",
+      "process_successful_trials": 20,
+      "qualified_trials": 20,
+      "solver": "ContactIPM",
+      "timing_all_processes_seconds": {
+        "count": 20,
+        "iqr": 0.08297936774943082,
+        "median": 0.6901543360036158,
+        "median_ci95": [
+          0.6497399644977122,
+          0.7224181774981844
+        ],
+        "p90": 0.7926806356947055,
+        "q1": 0.6454820382496109,
+        "q3": 0.7284614059990417
+      },
+      "timing_qualified_seconds": {
+        "count": 20,
+        "iqr": 0.08297936774943082,
+        "median": 0.6901543360036158,
+        "median_ci95": [
+          0.6497399644977122,
+          0.7224181774981844
+        ],
+        "p90": 0.7926806356947055,
+        "q1": 0.6454820382496109,
+        "q3": 0.7284614059990417
+      },
+      "trials": 20,
+      "worst": {
+        "angular_error": 2.3879578201714893e-05,
+        "equality": 3.469446951953614e-17,
+        "physical_mpcc": 9.997619384759482e-07,
+        "position_error": 0.0014565315078442292,
+        "side_violation": 0.0,
+        "velocity_error": 0.0
+      }
+    },
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 44.0,
+          "median_ci95": [
+            44.0,
+            44.0
+          ],
+          "p90": 44.0,
+          "q1": 44.0,
+          "q3": 44.0
+        },
+        "contact_impulse": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 1.9426285663203129,
+          "median_ci95": [
+            1.9426285663203129,
+            1.9426285663203129
+          ],
+          "p90": 1.9426285663203129,
+          "q1": 1.9426285663203129,
+          "q3": 1.9426285663203129
+        },
+        "dominant_contact_mode_changes": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 10.0,
+          "median_ci95": [
+            10.0,
+            10.0
+          ],
+          "p90": 10.0,
+          "q1": 10.0,
+          "q3": 10.0
+        },
+        "peak_contact_force_norm": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 9.883768107629406,
+          "median_ci95": [
+            9.883768107629406,
+            9.883768107629406
+          ],
+          "p90": 9.883768107629406,
+          "q1": 9.883768107629406,
+          "q3": 9.883768107629406
+        }
+      },
+      "audited_trials": 20,
+      "instances": {
+        "attempted": 20,
+        "feasible": 20,
+        "successful": 20,
+        "task_successful": 20
+      },
+      "objective_components": {
+        "force_effort": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 2.0714591193448406,
+          "median_ci95": [
+            2.0714591193448406,
+            2.0714591193448406
+          ],
+          "p90": 2.0714591193448406,
+          "q1": 2.0714591193448406,
+          "q3": 2.0714591193448406
+        },
+        "running_tracking": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 3.067930381549649,
+          "median_ci95": [
+            3.067930381549649,
+            3.067930381549649
+          ],
+          "p90": 3.067930381549649,
+          "q1": 3.067930381549649,
+          "q3": 3.067930381549649
+        },
+        "terminal_tracking": {
+          "count": 20,
+          "iqr": 0.0,
+          "median": 0.5071115966379581,
+          "median_ci95": [
+            0.5071115966379581,
+            0.5071115966379581
+          ],
+          "p90": 0.5071115966379581,
+          "q1": 0.5071115966379581,
+          "q3": 0.5071115966379581
+        }
+      },
+      "objective_per_instance": {
+        "count": 20,
+        "iqr": 0.0,
+        "median": 5.646501097532448,
+        "median_ci95": [
+          5.646501097532448,
+          5.646501097532448
+        ],
+        "p90": 5.646501097532448,
+        "q1": 5.646501097532448,
+        "q3": 5.646501097532448
+      },
+      "problem": "push_t",
+      "process_successful_trials": 20,
+      "qualified_trials": 20,
+      "solver": "CRISP",
+      "timing_all_processes_seconds": {
+        "count": 20,
+        "iqr": 0.35041394750078325,
+        "median": 5.194186400000035,
+        "median_ci95": [
+          5.0033888750003825,
+          5.268714941499638
+        ],
+        "p90": 5.464205817301263,
+        "q1": 4.939479579503313,
+        "q3": 5.2898935270040965
+      },
+      "timing_qualified_seconds": {
+        "count": 20,
+        "iqr": 0.35041394750078325,
+        "median": 5.194186400000035,
+        "median_ci95": [
+          5.0033888750003825,
+          5.268714941499638
+        ],
+        "p90": 5.464205817301263,
+        "q1": 4.939479579503313,
+        "q3": 5.2898935270040965
+      },
+      "trials": 20,
+      "worst": {
+        "angular_error": 0.02505105435989648,
+        "equality": 3.4754894911846626e-06,
+        "physical_mpcc": 1.574811129172961e-07,
+        "position_error": 0.06666028393726242,
+        "side_violation": 7.485148608034161e-15,
+        "velocity_error": 0.0
+      }
+    }
+  ],
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "paired_comparisons": [
+    {
+      "all_process_speedup_crisp_over_contactipm": {
+        "count": 20,
+        "iqr": 0.6026918644255765,
+        "median": 7.532743316876173,
+        "median_ci95": [
+          7.224024753182743,
+          7.714766597196027
+        ],
+        "p90": 7.889843231536924,
+        "q1": 7.1532988955899555,
+        "q3": 7.755990760015532
+      },
+      "pairs": 20,
+      "problem": "push_t",
+      "publication_timing_ready": true,
+      "qualified_pairs": 20,
+      "qualified_speedup_crisp_over_contactipm": {
+        "count": 20,
+        "iqr": 0.6026918644255765,
+        "median": 7.532743316876173,
+        "median_ci95": [
+          7.224024753182743,
+          7.714766597196027
+        ],
+        "p90": 7.889843231536924,
+        "q1": 7.1532988955899555,
+        "q3": 7.755990760015532
+      },
+      "robustness_outcomes": {
+        "both": 20,
+        "contactipm_only": 0,
+        "crisp_only": 0,
+        "neither": 0
+      }
+    }
+  ],
+  "protocol": {
+    "case_suite": null,
+    "case_suite_sha256": null,
+    "contact_activity_tolerance": 1e-08,
+    "cpu_affinity": [
+      0
+    ],
+    "evaluation_order": [
+      "physical_feasibility",
+      "task_success",
+      "task_errors",
+      "objective_components",
+      "computational_performance",
+      "contact_behavior"
+    ],
+    "pairing": "contiguous (repetition, problem) blocks with randomized block and solver order",
+    "paper_reported_times_used": false,
+    "random_seed": 2027,
+    "repetitions": 20,
+    "source_case_manifest": "benchmarks/contact_ipm/source_cases.json",
+    "source_case_manifest_sha256": "f712a425b48c6246238253cc45a53f69d927a8d0ede86f32950c248ef5f1231e",
+    "threads": 1,
+    "timing": "process wall clock on this machine",
+    "trajectory_audit": "same independent audit for both solvers",
+    "warmups": 3
+  },
+  "readiness": {
+    "all_problem_timings_ready": true,
+    "issues": [],
+    "minimum_repetitions": 20,
+    "protocol_ready": true
+  },
+  "revision": {
+    "contactipm": "a2e639f670a2a9419a3dc08ce3234d5d99e7da6d",
+    "contactipm_source_sha256": {
+      "push_t": "b5fce706ed746b9a415e52f205915d0a759ba71ae98ec1b286e38f59fbf64996"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {
+      "push_t": "e13e2a0292b5fa74581b3f7c1d15b502564599350827838dc2aab1cffa0498e2"
+    },
+    "crisp_tracked_dirty": true,
+    "crisp_tracked_patch": {
+      "files": [
+        "src/core/include/common/BasicTypes.h",
+        "src/examples/Transp/cpp/SolveTransp.cpp",
+        "src/examples/pushT/SolvePushT.cpp",
+        "src/examples/pushbot/cpp/SolvePushbot.cpp",
+        "src/examples/pushbox/SolvePushbox.cpp"
+      ],
+      "sha256": "3f077d4fb81e34a1a536105b8e78b2cae18e6dbd20040644427b6065901ed821"
+    }
+  },
+  "schema_version": 1,
+  "source_created_utc": "2026-07-28T07:02:23.554708+00:00",
+  "source_schema_version": 5
+}

@@ -1,0 +1,841 @@
+{
+  "commands": [
+    {
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "command": [
+        "/tmp/contactipm-scaling-smoke/push_t_nodes_50/contactipm/contact_push_t",
+        "8"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_PUSH_T_SEGMENT": "8"
+      },
+      "executable_sha256": "2416db10be8585a8b4cbff3bed43c93b995485800bb78e00b82c337f6a639d52",
+      "problem": "push_t",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "command": [
+        "/tmp/contactipm-scaling-smoke/push_t_nodes_50/crisp/examples/pushT_example"
+      ],
+      "cwd": "/tmp/contactipm-scaling-smoke/push_t_nodes_50/crisp/examples",
+      "environment": {
+        "CONTACT_BENCHMARK_PUSH_T_SEGMENT": "8"
+      },
+      "executable_sha256": "a158ba59ccdbe0a27c86258d8b4e090407bf2ad83e4731426886fd88eb61221d",
+      "problem": "push_t",
+      "solver": "CRISP"
+    }
+  ],
+  "created_utc": "2026-07-28T12:58:04.363126+00:00",
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "protocol": {
+    "benchmark_objective_environment": {},
+    "case_suite": null,
+    "case_suite_sha256": null,
+    "contact_activity_tolerance": 1e-08,
+    "contactipm_environment": {},
+    "cpu_affinity": [
+      0
+    ],
+    "evaluation_order": [
+      "physical_feasibility",
+      "task_success",
+      "task_errors",
+      "objective_components",
+      "computational_performance",
+      "contact_behavior"
+    ],
+    "pairing": "contiguous (repetition, problem) blocks with randomized block and solver order",
+    "paper_reported_times_used": false,
+    "random_seed": 2027,
+    "repetitions": 5,
+    "scaling": {
+      "dt": 0.05,
+      "nodes": 50,
+      "physical_duration": 2.45,
+      "total_complementarity_pairs": 2107
+    },
+    "source_case_manifest": "benchmarks/contact_ipm/source_cases.json",
+    "source_case_manifest_sha256": "f712a425b48c6246238253cc45a53f69d927a8d0ede86f32950c248ef5f1231e",
+    "threads": 1,
+    "timing": "process wall clock on this machine",
+    "trajectory_audit": "same independent audit for both solvers",
+    "warmups": 1
+  },
+  "results": [
+    {
+      "block_index": 0,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 28,
+                "contact_impulse": 2.127412295440521,
+                "dominant_contact_mode_changes": 6,
+                "peak_contact_force_norm": 9.606936485786031
+              },
+              "angular_error": 0.006095312459902224,
+              "feasibility_ratios": {
+                "equality": 6.531360254088227e-09,
+                "physical_complementarity": 4.5556670548735495e-08,
+                "side": 2.961536021096184e-08
+              },
+              "feasible": true,
+              "max_equality": 6.531360254088227e-14,
+              "max_side_violation": 2.961536021096184e-16,
+              "objective": 4.973915033695922,
+              "objective_components": {
+                "force_effort": 2.16659629949546,
+                "running_tracking": 2.7095462706794855,
+                "terminal_tracking": 0.09777246352097656
+              },
+              "physical_mpcc": 4.55566705487355e-13,
+              "position_error": 0.03066874494095805,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 2.16659629949546,
+            "running_tracking": 2.7095462706794855,
+            "terminal_tracking": 0.09777246352097656
+          },
+          "objective_sum": 4.973915033695922,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.006095312459902224,
+          "worst_equality": 6.531360254088227e-14,
+          "worst_physical_mpcc": 4.55566705487355e-13,
+          "worst_position_error": 0.03066874494095805,
+          "worst_side_violation": 2.961536021096184e-16
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_t",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjectiveBenchmark is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 10879 pos_error: 0.0306687 radius_error_abs: 0.0197596\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_001_crisp_push_t_source",
+      "wall_time_seconds": 10.909888460999355
+    },
+    {
+      "block_index": 0,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "summary": {
+          "attempted_segments": 1,
+          "successful_segments": 1,
+          "total_iterations": 262,
+          "worst_angular_error": 7e-05,
+          "worst_dynamics": 5.551e-17,
+          "worst_physical_mpcc": 9.633e-07,
+          "worst_position_error": 0.00115,
+          "worst_side_violation": 0.0
+        },
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 49,
+                "contact_impulse": 2.2454584799044213,
+                "dominant_contact_mode_changes": 20,
+                "peak_contact_force_norm": 8.825913231904307
+              },
+              "angular_error": 6.987538461992841e-05,
+              "feasibility_ratios": {
+                "equality": 3.4694469519536138e-12,
+                "physical_complementarity": 0.09632899871080973,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.469446951953614e-17,
+              "max_side_violation": 0.0,
+              "objective": 4.2898842885833615,
+              "objective_components": {
+                "force_effort": 1.7318646120802914,
+                "running_tracking": 2.5578869836461555,
+                "terminal_tracking": 0.00013269285691468196
+              },
+              "physical_mpcc": 9.632899871080974e-07,
+              "position_error": 0.0011498025916534646,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 1.7318646120802914,
+            "running_tracking": 2.5578869836461555,
+            "terminal_tracking": 0.00013269285691468196
+          },
+          "objective_sum": 4.2898842885833615,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 6.987538461992841e-05,
+          "worst_equality": 3.469446951953614e-17,
+          "worst_physical_mpcc": 9.632899871080974e-07,
+          "worst_position_error": 0.0011498025916534646,
+          "worst_side_violation": 0.0
+        }
+      },
+      "order_in_block": 1,
+      "problem": "push_t",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 08: status=Success task=yes primal=5.55e-17 stat=3.23e-03 mpcc=9.63e-07 pos=0.0011 angle=0.0001\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 1/1\nTotal solve time:    0.736975 s\nTotal iterations:    262\nWorst dynamics:      5.551e-17\nWorst side violation:0.000e+00\nWorst physical MPCC: 9.633e-07\nWorst position error:0.001150\nWorst angular error: 0.000070\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_002_contactipm_push_t_source",
+      "wall_time_seconds": 0.7405890990048647
+    },
+    {
+      "block_index": 1,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 28,
+                "contact_impulse": 2.127412295440521,
+                "dominant_contact_mode_changes": 6,
+                "peak_contact_force_norm": 9.606936485786031
+              },
+              "angular_error": 0.006095312459902224,
+              "feasibility_ratios": {
+                "equality": 6.531360254088227e-09,
+                "physical_complementarity": 4.5556670548735495e-08,
+                "side": 2.961536021096184e-08
+              },
+              "feasible": true,
+              "max_equality": 6.531360254088227e-14,
+              "max_side_violation": 2.961536021096184e-16,
+              "objective": 4.973915033695922,
+              "objective_components": {
+                "force_effort": 2.16659629949546,
+                "running_tracking": 2.7095462706794855,
+                "terminal_tracking": 0.09777246352097656
+              },
+              "physical_mpcc": 4.55566705487355e-13,
+              "position_error": 0.03066874494095805,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 2.16659629949546,
+            "running_tracking": 2.7095462706794855,
+            "terminal_tracking": 0.09777246352097656
+          },
+          "objective_sum": 4.973915033695922,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.006095312459902224,
+          "worst_equality": 6.531360254088227e-14,
+          "worst_physical_mpcc": 4.55566705487355e-13,
+          "worst_position_error": 0.03066874494095805,
+          "worst_side_violation": 2.961536021096184e-16
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_t",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjectiveBenchmark is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 10466 pos_error: 0.0306687 radius_error_abs: 0.0197596\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_003_crisp_push_t_source",
+      "wall_time_seconds": 10.493984532993636
+    },
+    {
+      "block_index": 1,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "summary": {
+          "attempted_segments": 1,
+          "successful_segments": 1,
+          "total_iterations": 262,
+          "worst_angular_error": 7e-05,
+          "worst_dynamics": 5.551e-17,
+          "worst_physical_mpcc": 9.633e-07,
+          "worst_position_error": 0.00115,
+          "worst_side_violation": 0.0
+        },
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 49,
+                "contact_impulse": 2.2454584799044213,
+                "dominant_contact_mode_changes": 20,
+                "peak_contact_force_norm": 8.825913231904307
+              },
+              "angular_error": 6.987538461992841e-05,
+              "feasibility_ratios": {
+                "equality": 3.4694469519536138e-12,
+                "physical_complementarity": 0.09632899871080973,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.469446951953614e-17,
+              "max_side_violation": 0.0,
+              "objective": 4.2898842885833615,
+              "objective_components": {
+                "force_effort": 1.7318646120802914,
+                "running_tracking": 2.5578869836461555,
+                "terminal_tracking": 0.00013269285691468196
+              },
+              "physical_mpcc": 9.632899871080974e-07,
+              "position_error": 0.0011498025916534646,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 1.7318646120802914,
+            "running_tracking": 2.5578869836461555,
+            "terminal_tracking": 0.00013269285691468196
+          },
+          "objective_sum": 4.2898842885833615,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 6.987538461992841e-05,
+          "worst_equality": 3.469446951953614e-17,
+          "worst_physical_mpcc": 9.632899871080974e-07,
+          "worst_position_error": 0.0011498025916534646,
+          "worst_side_violation": 0.0
+        }
+      },
+      "order_in_block": 1,
+      "problem": "push_t",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 08: status=Success task=yes primal=5.55e-17 stat=3.23e-03 mpcc=9.63e-07 pos=0.0011 angle=0.0001\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 1/1\nTotal solve time:    0.734606 s\nTotal iterations:    262\nWorst dynamics:      5.551e-17\nWorst side violation:0.000e+00\nWorst physical MPCC: 9.633e-07\nWorst position error:0.001150\nWorst angular error: 0.000070\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_004_contactipm_push_t_source",
+      "wall_time_seconds": 0.7379867819981882
+    },
+    {
+      "block_index": 2,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "summary": {
+          "attempted_segments": 1,
+          "successful_segments": 1,
+          "total_iterations": 262,
+          "worst_angular_error": 7e-05,
+          "worst_dynamics": 5.551e-17,
+          "worst_physical_mpcc": 9.633e-07,
+          "worst_position_error": 0.00115,
+          "worst_side_violation": 0.0
+        },
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 49,
+                "contact_impulse": 2.2454584799044213,
+                "dominant_contact_mode_changes": 20,
+                "peak_contact_force_norm": 8.825913231904307
+              },
+              "angular_error": 6.987538461992841e-05,
+              "feasibility_ratios": {
+                "equality": 3.4694469519536138e-12,
+                "physical_complementarity": 0.09632899871080973,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.469446951953614e-17,
+              "max_side_violation": 0.0,
+              "objective": 4.2898842885833615,
+              "objective_components": {
+                "force_effort": 1.7318646120802914,
+                "running_tracking": 2.5578869836461555,
+                "terminal_tracking": 0.00013269285691468196
+              },
+              "physical_mpcc": 9.632899871080974e-07,
+              "position_error": 0.0011498025916534646,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 1.7318646120802914,
+            "running_tracking": 2.5578869836461555,
+            "terminal_tracking": 0.00013269285691468196
+          },
+          "objective_sum": 4.2898842885833615,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 6.987538461992841e-05,
+          "worst_equality": 3.469446951953614e-17,
+          "worst_physical_mpcc": 9.632899871080974e-07,
+          "worst_position_error": 0.0011498025916534646,
+          "worst_side_violation": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_t",
+      "repetition": 4,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 08: status=Success task=yes primal=5.55e-17 stat=3.23e-03 mpcc=9.63e-07 pos=0.0011 angle=0.0001\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 1/1\nTotal solve time:    0.903436 s\nTotal iterations:    262\nWorst dynamics:      5.551e-17\nWorst side violation:0.000e+00\nWorst physical MPCC: 9.633e-07\nWorst position error:0.001150\nWorst angular error: 0.000070\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_005_contactipm_push_t_source",
+      "wall_time_seconds": 0.9074794460029807
+    },
+    {
+      "block_index": 2,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 28,
+                "contact_impulse": 2.127412295440521,
+                "dominant_contact_mode_changes": 6,
+                "peak_contact_force_norm": 9.606936485786031
+              },
+              "angular_error": 0.006095312459902224,
+              "feasibility_ratios": {
+                "equality": 6.531360254088227e-09,
+                "physical_complementarity": 4.5556670548735495e-08,
+                "side": 2.961536021096184e-08
+              },
+              "feasible": true,
+              "max_equality": 6.531360254088227e-14,
+              "max_side_violation": 2.961536021096184e-16,
+              "objective": 4.973915033695922,
+              "objective_components": {
+                "force_effort": 2.16659629949546,
+                "running_tracking": 2.7095462706794855,
+                "terminal_tracking": 0.09777246352097656
+              },
+              "physical_mpcc": 4.55566705487355e-13,
+              "position_error": 0.03066874494095805,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 2.16659629949546,
+            "running_tracking": 2.7095462706794855,
+            "terminal_tracking": 0.09777246352097656
+          },
+          "objective_sum": 4.973915033695922,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.006095312459902224,
+          "worst_equality": 6.531360254088227e-14,
+          "worst_physical_mpcc": 4.55566705487355e-13,
+          "worst_position_error": 0.03066874494095805,
+          "worst_side_violation": 2.961536021096184e-16
+        }
+      },
+      "order_in_block": 1,
+      "problem": "push_t",
+      "repetition": 4,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjectiveBenchmark is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 10695 pos_error: 0.0306687 radius_error_abs: 0.0197596\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_006_crisp_push_t_source",
+      "wall_time_seconds": 10.72354090299632
+    },
+    {
+      "block_index": 3,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "summary": {
+          "attempted_segments": 1,
+          "successful_segments": 1,
+          "total_iterations": 262,
+          "worst_angular_error": 7e-05,
+          "worst_dynamics": 5.551e-17,
+          "worst_physical_mpcc": 9.633e-07,
+          "worst_position_error": 0.00115,
+          "worst_side_violation": 0.0
+        },
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 49,
+                "contact_impulse": 2.2454584799044213,
+                "dominant_contact_mode_changes": 20,
+                "peak_contact_force_norm": 8.825913231904307
+              },
+              "angular_error": 6.987538461992841e-05,
+              "feasibility_ratios": {
+                "equality": 3.4694469519536138e-12,
+                "physical_complementarity": 0.09632899871080973,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.469446951953614e-17,
+              "max_side_violation": 0.0,
+              "objective": 4.2898842885833615,
+              "objective_components": {
+                "force_effort": 1.7318646120802914,
+                "running_tracking": 2.5578869836461555,
+                "terminal_tracking": 0.00013269285691468196
+              },
+              "physical_mpcc": 9.632899871080974e-07,
+              "position_error": 0.0011498025916534646,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 1.7318646120802914,
+            "running_tracking": 2.5578869836461555,
+            "terminal_tracking": 0.00013269285691468196
+          },
+          "objective_sum": 4.2898842885833615,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 6.987538461992841e-05,
+          "worst_equality": 3.469446951953614e-17,
+          "worst_physical_mpcc": 9.632899871080974e-07,
+          "worst_position_error": 0.0011498025916534646,
+          "worst_side_violation": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_t",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 08: status=Success task=yes primal=5.55e-17 stat=3.23e-03 mpcc=9.63e-07 pos=0.0011 angle=0.0001\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 1/1\nTotal solve time:    0.754015 s\nTotal iterations:    262\nWorst dynamics:      5.551e-17\nWorst side violation:0.000e+00\nWorst physical MPCC: 9.633e-07\nWorst position error:0.001150\nWorst angular error: 0.000070\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_007_contactipm_push_t_source",
+      "wall_time_seconds": 0.7576158449955983
+    },
+    {
+      "block_index": 3,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 28,
+                "contact_impulse": 2.127412295440521,
+                "dominant_contact_mode_changes": 6,
+                "peak_contact_force_norm": 9.606936485786031
+              },
+              "angular_error": 0.006095312459902224,
+              "feasibility_ratios": {
+                "equality": 6.531360254088227e-09,
+                "physical_complementarity": 4.5556670548735495e-08,
+                "side": 2.961536021096184e-08
+              },
+              "feasible": true,
+              "max_equality": 6.531360254088227e-14,
+              "max_side_violation": 2.961536021096184e-16,
+              "objective": 4.973915033695922,
+              "objective_components": {
+                "force_effort": 2.16659629949546,
+                "running_tracking": 2.7095462706794855,
+                "terminal_tracking": 0.09777246352097656
+              },
+              "physical_mpcc": 4.55566705487355e-13,
+              "position_error": 0.03066874494095805,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 2.16659629949546,
+            "running_tracking": 2.7095462706794855,
+            "terminal_tracking": 0.09777246352097656
+          },
+          "objective_sum": 4.973915033695922,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.006095312459902224,
+          "worst_equality": 6.531360254088227e-14,
+          "worst_physical_mpcc": 4.55566705487355e-13,
+          "worst_position_error": 0.03066874494095805,
+          "worst_side_violation": 2.961536021096184e-16
+        }
+      },
+      "order_in_block": 1,
+      "problem": "push_t",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjectiveBenchmark is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 10346 pos_error: 0.0306687 radius_error_abs: 0.0197596\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_008_crisp_push_t_source",
+      "wall_time_seconds": 10.374992993994965
+    },
+    {
+      "block_index": 4,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 28,
+                "contact_impulse": 2.127412295440521,
+                "dominant_contact_mode_changes": 6,
+                "peak_contact_force_norm": 9.606936485786031
+              },
+              "angular_error": 0.006095312459902224,
+              "feasibility_ratios": {
+                "equality": 6.531360254088227e-09,
+                "physical_complementarity": 4.5556670548735495e-08,
+                "side": 2.961536021096184e-08
+              },
+              "feasible": true,
+              "max_equality": 6.531360254088227e-14,
+              "max_side_violation": 2.961536021096184e-16,
+              "objective": 4.973915033695922,
+              "objective_components": {
+                "force_effort": 2.16659629949546,
+                "running_tracking": 2.7095462706794855,
+                "terminal_tracking": 0.09777246352097656
+              },
+              "physical_mpcc": 4.55566705487355e-13,
+              "position_error": 0.03066874494095805,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 2.16659629949546,
+            "running_tracking": 2.7095462706794855,
+            "terminal_tracking": 0.09777246352097656
+          },
+          "objective_sum": 4.973915033695922,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.006095312459902224,
+          "worst_equality": 6.531360254088227e-14,
+          "worst_physical_mpcc": 4.55566705487355e-13,
+          "worst_position_error": 0.03066874494095805,
+          "worst_side_violation": 2.961536021096184e-16
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_t",
+      "repetition": 3,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjectiveBenchmark is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 10177 pos_error: 0.0306687 radius_error_abs: 0.0197596\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_009_crisp_push_t_source",
+      "wall_time_seconds": 10.202215179000632
+    },
+    {
+      "block_index": 4,
+      "case": {
+        "dt": 0.05,
+        "nodes": 50
+      },
+      "case_id": "source",
+      "metrics": {
+        "summary": {
+          "attempted_segments": 1,
+          "successful_segments": 1,
+          "total_iterations": 262,
+          "worst_angular_error": 7e-05,
+          "worst_dynamics": 5.551e-17,
+          "worst_physical_mpcc": 9.633e-07,
+          "worst_position_error": 0.00115,
+          "worst_side_violation": 0.0
+        },
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 49,
+                "contact_impulse": 2.2454584799044213,
+                "dominant_contact_mode_changes": 20,
+                "peak_contact_force_norm": 8.825913231904307
+              },
+              "angular_error": 6.987538461992841e-05,
+              "feasibility_ratios": {
+                "equality": 3.4694469519536138e-12,
+                "physical_complementarity": 0.09632899871080973,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.469446951953614e-17,
+              "max_side_violation": 0.0,
+              "objective": 4.2898842885833615,
+              "objective_components": {
+                "force_effort": 1.7318646120802914,
+                "running_tracking": 2.5578869836461555,
+                "terminal_tracking": 0.00013269285691468196
+              },
+              "physical_mpcc": 9.632899871080974e-07,
+              "position_error": 0.0011498025916534646,
+              "segment": 8,
+              "success": true,
+              "task_success": true
+            }
+          ],
+          "objective_component_sums": {
+            "force_effort": 1.7318646120802914,
+            "running_tracking": 2.5578869836461555,
+            "terminal_tracking": 0.00013269285691468196
+          },
+          "objective_sum": 4.2898842885833615,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 6.987538461992841e-05,
+          "worst_equality": 3.469446951953614e-17,
+          "worst_physical_mpcc": 9.632899871080974e-07,
+          "worst_position_error": 0.0011498025916534646,
+          "worst_side_violation": 0.0
+        }
+      },
+      "order_in_block": 1,
+      "problem": "push_t",
+      "repetition": 3,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 08: status=Success task=yes primal=5.55e-17 stat=3.23e-03 mpcc=9.63e-07 pos=0.0011 angle=0.0001\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 1/1\nTotal solve time:    0.731684 s\nTotal iterations:    262\nWorst dynamics:      5.551e-17\nWorst side violation:0.000e+00\nWorst physical MPCC: 9.633e-07\nWorst position error:0.001150\nWorst angular error: 0.000070\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_scaling_push_t_5x/push_t_nodes_50_trajectories/trial_010_contactipm_push_t_source",
+      "wall_time_seconds": 0.7349975050019566
+    }
+  ],
+  "revision": {
+    "contactipm": "a230e131f9d635981addac2c190a60a32506a2a2",
+    "contactipm_source_sha256": {
+      "push_t": "8a7d259e1f611a9c9fd12626f1d4afe64407d167d2a75c72a8b3e0b678242714"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {
+      "push_t": "b2973d8955f2f021be8fbeacf93fe85af450eff21e288713d8a93004f4725ba0"
+    },
+    "crisp_tracked_dirty": true,
+    "crisp_tracked_patch": {
+      "files": [
+        "src/core/include/common/BasicTypes.h",
+        "src/examples/Transp/cpp/SolveTransp.cpp",
+        "src/examples/pushT/SolvePushT.cpp",
+        "src/examples/pushbot/cpp/SolvePushbot.cpp",
+        "src/examples/pushbox/SolvePushbox.cpp"
+      ],
+      "sha256": "93679cc1d7c6bbe7ac9973f5bc14bf3aba6c26e18f804757ecc2cf37e581cc48"
+    }
+  },
+  "schema_version": 5
+}

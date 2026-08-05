@@ -1,0 +1,115 @@
+{
+    "case_suite":  "benchmarks/contact_ipm/validation_cases.json",
+    "configurations":  [
+                           {
+                               "artifact":  "benchmarks/contact_ipm/results/2026-07-28_push_box_ablation/full.json",
+                               "environment":  {
+
+                                               },
+                               "id":  "full",
+                               "metrics":  {
+                                               "attempted":  25,
+                                               "feasible":  22,
+                                               "median_successful_objective":  18.717078478987805,
+                                               "median_wall_time_seconds":  0.30316364600003,
+                                               "processes":  25,
+                                               "successful":  21,
+                                               "task_successful":  22,
+                                               "total_wall_time_seconds":  8.3334117460181,
+                                               "process_exit_successful":  21
+                                           }
+                           },
+                           {
+                               "artifact":  "benchmarks/contact_ipm/results/2026-07-28_push_box_ablation/no_recovery.json",
+                               "environment":  {
+                                                   "CONTACTIPM_PUSH_RECOVERY":  "0"
+                                               },
+                               "id":  "no_recovery",
+                               "metrics":  {
+                                               "attempted":  25,
+                                               "feasible":  4,
+                                               "median_successful_objective":  18.576939540703982,
+                                               "median_wall_time_seconds":  0.1794281860056799,
+                                               "processes":  25,
+                                               "successful":  3,
+                                               "task_successful":  11,
+                                               "total_wall_time_seconds":  4.624118453997653,
+                                               "process_exit_successful":  2
+                                           }
+                           },
+                           {
+                               "artifact":  "benchmarks/contact_ipm/results/2026-07-28_push_box_ablation/no_preconditioner.json",
+                               "environment":  {
+                                                   "CONTACTIPM_PUSH_PRECONDITIONER":  "0"
+                                               },
+                               "id":  "no_preconditioner",
+                               "metrics":  {
+                                               "attempted":  25,
+                                               "feasible":  19,
+                                               "median_successful_objective":  18.620339534513754,
+                                               "median_wall_time_seconds":  0.1883405769985984,
+                                               "processes":  25,
+                                               "successful":  18,
+                                               "task_successful":  21,
+                                               "total_wall_time_seconds":  5.4992548180307494,
+                                               "process_exit_successful":  18
+                                           }
+                           },
+                           {
+                               "artifact":  "benchmarks/contact_ipm/results/2026-07-28_push_box_ablation/gauss_newton_primary.json",
+                               "environment":  {
+                                                   "CONTACTIPM_PUSH_EXACT_HESSIAN":  "0"
+                                               },
+                               "id":  "gauss_newton_primary",
+                               "metrics":  {
+                                               "attempted":  25,
+                                               "feasible":  25,
+                                               "median_successful_objective":  18.642709490625197,
+                                               "median_wall_time_seconds":  0.21841697899799328,
+                                               "processes":  25,
+                                               "successful":  24,
+                                               "task_successful":  24,
+                                               "total_wall_time_seconds":  7.157536916012759,
+                                               "process_exit_successful":  24
+                                           }
+                           },
+                           {
+                               "artifact":  "benchmarks/contact_ipm/results/2026-07-28_push_box_ablation/recovery_mu_0p01.json",
+                               "environment":  {
+                                                   "CONTACTIPM_PUSH_RECOVERY_MU":  "0.01"
+                                               },
+                               "id":  "recovery_mu_0p01",
+                               "metrics":  {
+                                               "attempted":  25,
+                                               "feasible":  22,
+                                               "median_successful_objective":  18.717078478987805,
+                                               "median_wall_time_seconds":  0.384267498004192,
+                                               "processes":  25,
+                                               "successful":  21,
+                                               "task_successful":  21,
+                                               "total_wall_time_seconds":  10.398644498993235,
+                                               "process_exit_successful":  20
+                                           }
+                           },
+                           {
+                               "artifact":  "benchmarks/contact_ipm/results/2026-07-28_push_box_ablation/recovery_mu_1.json",
+                               "environment":  {
+                                                   "CONTACTIPM_PUSH_RECOVERY_MU":  "1.0"
+                                               },
+                               "id":  "recovery_mu_1",
+                               "metrics":  {
+                                               "attempted":  25,
+                                               "feasible":  25,
+                                               "median_successful_objective":  18.78856341621153,
+                                               "median_wall_time_seconds":  0.4144113779984764,
+                                               "processes":  25,
+                                               "successful":  25,
+                                               "task_successful":  25,
+                                               "total_wall_time_seconds":  9.90740863999963,
+                                               "process_exit_successful":  24
+                                           }
+                           }
+                       ],
+    "problem":  "push_box",
+    "schema_version":  1
+}

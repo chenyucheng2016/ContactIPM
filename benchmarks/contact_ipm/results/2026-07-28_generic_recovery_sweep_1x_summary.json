@@ -1,0 +1,972 @@
+{
+  "bootstrap": {
+    "samples": 10000,
+    "seed": 2027
+  },
+  "groups": [
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 15,
+          "iqr": 0.0,
+          "median": 99.0,
+          "median_ci95": [
+            99.0,
+            99.0
+          ],
+          "p90": 99.0,
+          "q1": 99.0,
+          "q3": 99.0
+        },
+        "contact_impulse": {
+          "count": 15,
+          "iqr": 2.8370424263831796e-07,
+          "median": 1.9422482445695736e-06,
+          "median_ci95": [
+            1.6789293529124286e-06,
+            2.0023749788732573e-06
+          ],
+          "p90": 2.10428632950396e-06,
+          "q1": 1.7649208233962675e-06,
+          "q3": 2.0486250660345855e-06
+        },
+        "peak_contact_force_norm": {
+          "count": 15,
+          "iqr": 1.7080315261889407e-06,
+          "median": 3.6428527735878942e-06,
+          "median_ci95": [
+            2.6296855030363975e-06,
+            4.535887134137024e-06
+          ],
+          "p90": 5.416501210838456e-06,
+          "q1": 2.6399024924380313e-06,
+          "q3": 4.347934018626972e-06
+        },
+        "peak_control_force": {
+          "count": 15,
+          "iqr": 0.45904379752192703,
+          "median": 10.113133661314166,
+          "median_ci95": [
+            10.052797463986833,
+            10.884086030000155
+          ],
+          "p90": 10.905323210293304,
+          "q1": 10.065149564878382,
+          "q3": 10.52419336240031
+        }
+      },
+      "audited_trials": 15,
+      "instances": {
+        "attempted": 15,
+        "feasible": 15,
+        "successful": 15,
+        "task_successful": 15
+      },
+      "objective_components": {
+        "control_effort": {
+          "count": 15,
+          "iqr": 0.17404049140846567,
+          "median": 2.621268931695933,
+          "median_ci95": [
+            2.541149802716829,
+            2.705753643230391
+          ],
+          "p90": 2.783420075161367,
+          "q1": 2.5484574527286865,
+          "q3": 2.722497944137152
+        },
+        "terminal_tracking": {
+          "count": 15,
+          "iqr": 0.014826515162781606,
+          "median": 0.09890254991780788,
+          "median_ci95": [
+            0.09264774719234732,
+            0.10498924736193824
+          ],
+          "p90": 0.11655094758409797,
+          "q1": 0.0938999481668199,
+          "q3": 0.10872646332960151
+        }
+      },
+      "objective_per_instance": {
+        "count": 15,
+        "iqr": 0.19185483057191854,
+        "median": 2.720171481613741,
+        "median_ci95": [
+          2.6278219019078337,
+          2.8442314924058523
+        ],
+        "p90": 2.899971022745465,
+        "q1": 2.6393695768948353,
+        "q3": 2.831224407466754
+      },
+      "problem": "cartpole_soft_walls",
+      "process_successful_trials": 15,
+      "qualified_trials": 15,
+      "solver": "ContactIPM",
+      "timing_all_processes_seconds": {
+        "count": 15,
+        "iqr": 0.015248535491991788,
+        "median": 0.021599785002763383,
+        "median_ci95": [
+          0.019472248997772112,
+          0.023780219999025576
+        ],
+        "p90": 0.10385239880124572,
+        "q1": 0.019444859004579484,
+        "q3": 0.03469339449657127
+      },
+      "timing_qualified_seconds": {
+        "count": 15,
+        "iqr": 0.015248535491991788,
+        "median": 0.021599785002763383,
+        "median_ci95": [
+          0.019472248997772112,
+          0.023780219999025576
+        ],
+        "p90": 0.10385239880124572,
+        "q1": 0.019444859004579484,
+        "q3": 0.03469339449657127
+      },
+      "trials": 15,
+      "worst": {
+        "angular_error": 0.04265799246499315,
+        "equality": 4.996003610813204e-16,
+        "physical_mpcc": 9.983740521916913e-07,
+        "position_error": 0.0062924893168170015,
+        "side_violation": 0.0,
+        "velocity_error": 0.00530919201916627
+      }
+    },
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 15,
+          "iqr": 0.0,
+          "median": 0.0,
+          "median_ci95": [
+            0.0,
+            0.0
+          ],
+          "p90": 0.0,
+          "q1": 0.0,
+          "q3": 0.0
+        },
+        "contact_impulse": {
+          "count": 15,
+          "iqr": 1.9106020840868716e-14,
+          "median": 1.7402174962508527e-14,
+          "median_ci95": [
+            1.0023194701835872e-14,
+            3.4771886117369806e-14
+          ],
+          "p90": 4.928633741136802e-14,
+          "q1": 1.0449835704134005e-14,
+          "q3": 2.955585654500272e-14
+        },
+        "peak_contact_force_norm": {
+          "count": 15,
+          "iqr": 7.432228912260035e-14,
+          "median": 4.1817970490011634e-14,
+          "median_ci95": [
+            1.531592290271681e-14,
+            6.915451123912163e-14
+          ],
+          "p90": 1.7671807070956916e-13,
+          "q1": 1.539334496865381e-14,
+          "q3": 8.971563409125415e-14
+        },
+        "peak_control_force": {
+          "count": 15,
+          "iqr": 0.08898198157198856,
+          "median": 10.114517485226507,
+          "median_ci95": [
+            10.079644883260116,
+            10.165905132928366
+          ],
+          "p90": 10.894018500445465,
+          "q1": 10.067506188523586,
+          "q3": 10.156488170095574
+        }
+      },
+      "audited_trials": 15,
+      "instances": {
+        "attempted": 15,
+        "feasible": 15,
+        "successful": 15,
+        "task_successful": 15
+      },
+      "objective_components": {
+        "control_effort": {
+          "count": 15,
+          "iqr": 0.14977425583991444,
+          "median": 2.6212285148033962,
+          "median_ci95": [
+            2.541102312644032,
+            2.7056351808127888
+          ],
+          "p90": 2.7478236082947705,
+          "q1": 2.548375398094622,
+          "q3": 2.6981496539345367
+        },
+        "terminal_tracking": {
+          "count": 15,
+          "iqr": 0.009875303374545175,
+          "median": 0.09894374299663915,
+          "median_ci95": [
+            0.09270099326544441,
+            0.10266514802999456
+          ],
+          "p90": 0.11408484057331185,
+          "q1": 0.09398486264169426,
+          "q3": 0.10386016601623943
+        }
+      },
+      "objective_per_instance": {
+        "count": 15,
+        "iqr": 0.1664018106993308,
+        "median": 2.7201722578000354,
+        "median_ci95": [
+          2.6278213856313832,
+          2.793329275086279
+        ],
+        "p90": 2.8588994157914223,
+        "q1": 2.6393693005972696,
+        "q3": 2.8057711112966004
+      },
+      "problem": "cartpole_soft_walls",
+      "process_successful_trials": 15,
+      "qualified_trials": 15,
+      "solver": "CRISP",
+      "timing_all_processes_seconds": {
+        "count": 15,
+        "iqr": 0.059403210994787514,
+        "median": 0.1716592659940943,
+        "median_ci95": [
+          0.13700905699806754,
+          0.1925999020022573
+        ],
+        "p90": 0.19863412879931275,
+        "q1": 0.13268279850308318,
+        "q3": 0.1920860094978707
+      },
+      "timing_qualified_seconds": {
+        "count": 15,
+        "iqr": 0.059403210994787514,
+        "median": 0.1716592659940943,
+        "median_ci95": [
+          0.12835654000809882,
+          0.1915721169934841
+        ],
+        "p90": 0.19863412879931275,
+        "q1": 0.13268279850308318,
+        "q3": 0.1920860094978707
+      },
+      "trials": 15,
+      "worst": {
+        "angular_error": 0.03248813830417739,
+        "equality": 1.6572569372375057e-07,
+        "physical_mpcc": 5.207168599149886e-14,
+        "position_error": 0.0026525737349484407,
+        "side_violation": 2.4638598331027234e-14,
+        "velocity_error": 0.005306798712935383
+      }
+    },
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 24,
+          "iqr": 0.0,
+          "median": 99.0,
+          "median_ci95": [
+            99.0,
+            99.0
+          ],
+          "p90": 99.0,
+          "q1": 99.0,
+          "q3": 99.0
+        },
+        "contact_impulse": {
+          "count": 24,
+          "iqr": 0.4878613246024699,
+          "median": 27.09359929099055,
+          "median_ci95": [
+            27.035570892952197,
+            27.486504877769086
+          ],
+          "p90": 28.401380203368998,
+          "q1": 27.031086958784222,
+          "q3": 27.518948283386692
+        },
+        "dominant_contact_mode_changes": {
+          "count": 24,
+          "iqr": 0.0,
+          "median": 0.0,
+          "median_ci95": [
+            0.0,
+            0.0
+          ],
+          "p90": 2.3999999999999986,
+          "q1": 0.0,
+          "q3": 0.0
+        },
+        "peak_contact_force_norm": {
+          "count": 24,
+          "iqr": 0.37980302285149037,
+          "median": 14.575087488039298,
+          "median_ci95": [
+            14.52357718961265,
+            14.834360035493766
+          ],
+          "p90": 15.93713129041831,
+          "q1": 14.517218907492719,
+          "q3": 14.89702193034421
+        }
+      },
+      "audited_trials": 25,
+      "instances": {
+        "attempted": 25,
+        "feasible": 25,
+        "successful": 24,
+        "task_successful": 24
+      },
+      "objective_components": {
+        "force_effort": {
+          "count": 24,
+          "iqr": 0.676330579515863,
+          "median": 18.551858068963384,
+          "median_ci95": [
+            18.47193928105802,
+            19.0948061686352
+          ],
+          "p90": 20.401921171475433,
+          "q1": 18.46581946287924,
+          "q3": 19.1421500423951
+        },
+        "terminal_tracking": {
+          "count": 24,
+          "iqr": 0.003498149576982107,
+          "median": 0.1304704141203159,
+          "median_ci95": [
+            0.13010459594738227,
+            0.13246593075012197
+          ],
+          "p90": 0.14244845367220324,
+          "q1": 0.1300725716634374,
+          "q3": 0.1335707212404195
+        }
+      },
+      "objective_per_instance": {
+        "count": 24,
+        "iqr": 0.6784239698664294,
+        "median": 18.68191186673096,
+        "median_ci95": [
+          18.60192082470502,
+          19.22727209938532
+        ],
+        "p90": 20.543105377088533,
+        "q1": 18.59596844777888,
+        "q3": 19.27439241764531
+      },
+      "problem": "push_box",
+      "process_successful_trials": 24,
+      "qualified_trials": 24,
+      "solver": "ContactIPM",
+      "timing_all_processes_seconds": {
+        "count": 25,
+        "iqr": 1.2238637440023012,
+        "median": 0.2988182510016486,
+        "median_ci95": [
+          0.18467031499312725,
+          0.9264460760023212
+        ],
+        "p90": 1.7017705609992846,
+        "q1": 0.1835034270043252,
+        "q3": 1.4073671710066264
+      },
+      "timing_qualified_seconds": {
+        "count": 24,
+        "iqr": 1.2528672244989139,
+        "median": 0.26808032199915033,
+        "median_ci95": [
+          0.18467031499312725,
+          0.9570825429982506
+        ],
+        "p90": 1.70872789099958,
+        "q1": 0.18062210975404014,
+        "q3": 1.433489334252954
+      },
+      "trials": 25,
+      "worst": {
+        "angular_error": 0.4718930067384397,
+        "equality": 4.440892098500626e-16,
+        "physical_mpcc": 9.998956868518318e-07,
+        "position_error": 1.1791968016724697,
+        "side_violation": 0.0,
+        "velocity_error": 0.0
+      }
+    },
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 19,
+          "iqr": 0.0,
+          "median": 99.0,
+          "median_ci95": [
+            99.0,
+            99.0
+          ],
+          "p90": 99.0,
+          "q1": 99.0,
+          "q3": 99.0
+        },
+        "contact_impulse": {
+          "count": 19,
+          "iqr": 1.98307582926018,
+          "median": 17.38172904222659,
+          "median_ci95": [
+            16.751953122561527,
+            18.569769129441248
+          ],
+          "p90": 18.938220507092332,
+          "q1": 16.636269529035744,
+          "q3": 18.619345358295924
+        },
+        "dominant_contact_mode_changes": {
+          "count": 19,
+          "iqr": 1.5,
+          "median": 3.0,
+          "median_ci95": [
+            2.0,
+            3.0
+          ],
+          "p90": 4.0,
+          "q1": 2.0,
+          "q3": 3.5
+        },
+        "peak_contact_force_norm": {
+          "count": 19,
+          "iqr": 1.6064453117756443,
+          "median": 9.515624999521668,
+          "median_ci95": [
+            8.566406249331306,
+            10.07421874880789
+          ],
+          "p90": 16.037499981189562,
+          "q1": 8.502929686898877,
+          "q3": 10.109374998674522
+        }
+      },
+      "audited_trials": 25,
+      "instances": {
+        "attempted": 25,
+        "feasible": 25,
+        "successful": 19,
+        "task_successful": 19
+      },
+      "objective_components": {
+        "force_effort": {
+          "count": 19,
+          "iqr": 1.8514376863391018,
+          "median": 7.877444992550654,
+          "median_ci95": [
+            7.1089066141611745,
+            8.854259463708056
+          ],
+          "p90": 14.643144682320372,
+          "q1": 7.011308223777439,
+          "q3": 8.86274591011654
+        },
+        "terminal_tracking": {
+          "count": 19,
+          "iqr": 0.1890220866485998,
+          "median": 0.24199248166749052,
+          "median_ci95": [
+            0.12455286968345647,
+            0.2974029423926632
+          ],
+          "p90": 0.543280769249375,
+          "q1": 0.11459375264278834,
+          "q3": 0.30361583929138813
+        }
+      },
+      "objective_per_instance": {
+        "count": 19,
+        "iqr": 1.6676006668244732,
+        "median": 8.196940340235324,
+        "median_ci95": [
+          7.4591716826009105,
+          8.995785226208483
+        ],
+        "p90": 14.812216660617743,
+        "q1": 7.405035389214788,
+        "q3": 9.072636056039261
+      },
+      "problem": "push_box",
+      "process_successful_trials": 25,
+      "qualified_trials": 19,
+      "solver": "CRISP",
+      "timing_all_processes_seconds": {
+        "count": 25,
+        "iqr": 0.16476619101013057,
+        "median": 0.4231004920002306,
+        "median_ci95": [
+          0.3929642980074277,
+          0.4793981900002109
+        ],
+        "p90": 0.5465667548065539,
+        "q1": 0.31538327599992044,
+        "q3": 0.480149467010051
+      },
+      "timing_qualified_seconds": {
+        "count": 19,
+        "iqr": 0.08164849149761721,
+        "median": 0.4404799680050928,
+        "median_ci95": [
+          0.40626965700357687,
+          0.480149467010051
+        ],
+        "p90": 0.5420744836039375,
+        "q1": 0.40488374350388767,
+        "q3": 0.4865322350015049
+      },
+      "trials": 25,
+      "worst": {
+        "angular_error": 0.14720085086579182,
+        "equality": 4.511830827003127e-07,
+        "physical_mpcc": 4.089453181584388e-12,
+        "position_error": 0.3581098804218517,
+        "side_violation": 4.713642570179931e-13,
+        "velocity_error": 0.0
+      }
+    },
+    {
+      "actuation": {
+        "peak_control_force": {
+          "count": 8,
+          "iqr": 1.4426426699840151,
+          "median": 8.275972555827032,
+          "median_ci95": [
+            7.893286204027607,
+            9.805309930594191
+          ],
+          "p90": 9.98466349327142,
+          "q1": 7.945092503718453,
+          "q3": 9.387735173702469
+        },
+        "peak_friction_force": {
+          "count": 8,
+          "iqr": 1.632836932330406e-07,
+          "median": 1.9619993956079045,
+          "median_ci95": [
+            1.961999319565032,
+            1.9619996676893137
+          ],
+          "p90": 1.9619997180647366,
+          "q1": 1.9619993205988355,
+          "q3": 1.9619994838825288
+        }
+      },
+      "audited_trials": 15,
+      "instances": {
+        "attempted": 15,
+        "feasible": 15,
+        "successful": 8,
+        "task_successful": 8
+      },
+      "objective_components": {
+        "control_effort": {
+          "count": 8,
+          "iqr": 0.18584958224557613,
+          "median": 0.7225496192952195,
+          "median_ci95": [
+            0.5760773120836191,
+            0.7978550518374012
+          ],
+          "p90": 0.8073943270286902,
+          "q1": 0.6119486017380874,
+          "q3": 0.7977981839836635
+        },
+        "terminal_tracking": {
+          "count": 8,
+          "iqr": 0.804506466941076,
+          "median": 0.06958781453993461,
+          "median_ci95": [
+            0.0012549686767508344,
+            0.8066793952960346
+          ],
+          "p90": 1.205160829805589,
+          "q1": 0.0021521789642849785,
+          "q3": 0.806658645905361
+        }
+      },
+      "objective_per_instance": {
+        "count": 8,
+        "iqr": 0.9903560491866521,
+        "median": 0.7921374338351541,
+        "median_ci95": [
+          0.5773322807603699,
+          1.6045344471334357
+        ],
+        "p90": 2.012555156834279,
+        "q1": 0.6141007807023724,
+        "q3": 1.6044568298890245
+      },
+      "problem": "transport",
+      "process_successful_trials": 8,
+      "qualified_trials": 8,
+      "solver": "ContactIPM",
+      "timing_all_processes_seconds": {
+        "count": 15,
+        "iqr": 0.1556993420017534,
+        "median": 0.1419724939914886,
+        "median_ci95": [
+          0.10901163199741859,
+          0.2415795459965011
+        ],
+        "p90": 0.33350502620160116,
+        "q1": 0.1138704909972148,
+        "q3": 0.2695698329989682
+      },
+      "timing_qualified_seconds": {
+        "count": 8,
+        "iqr": 0.16783414176097722,
+        "median": 0.20907731499755755,
+        "median_ci95": [
+          0.1286179769958835,
+          0.3331916660099523
+        ],
+        "p90": 0.526257274407544,
+        "q1": 0.13863386474258732,
+        "q3": 0.30646800650356454
+      },
+      "trials": 15,
+      "worst": {
+        "angular_error": 0.0,
+        "equality": 2.5354925892173696e-07,
+        "physical_mpcc": 9.997964024146275e-07,
+        "position_error": 0.0002524195343682662,
+        "side_violation": 0.0,
+        "velocity_error": 1.9688967037739826
+      }
+    },
+    {
+      "actuation": {
+        "peak_control_force": {
+          "count": 8,
+          "iqr": 1.0057093643973438,
+          "median": 8.355649072442471,
+          "median_ci95": [
+            7.91348587393777,
+            9.245983013054929
+          ],
+          "p90": 10.101400761148394,
+          "q1": 7.949456701033704,
+          "q3": 8.955166065431047
+        },
+        "peak_friction_force": {
+          "count": 8,
+          "iqr": 2.220446049250313e-16,
+          "median": 1.962,
+          "median_ci95": [
+            1.9619999999999997,
+            1.962
+          ],
+          "p90": 1.9620000000000055,
+          "q1": 1.9619999999999997,
+          "q3": 1.962
+        }
+      },
+      "audited_trials": 15,
+      "instances": {
+        "attempted": 15,
+        "feasible": 15,
+        "successful": 8,
+        "task_successful": 8
+      },
+      "objective_components": {
+        "control_effort": {
+          "count": 8,
+          "iqr": 0.18873660891265942,
+          "median": 0.7231396436240378,
+          "median_ci95": [
+            0.5770681843206676,
+            0.8029641938861016
+          ],
+          "p90": 0.8091611083350125,
+          "q1": 0.6142275848607541,
+          "q3": 0.8029641937734135
+        },
+        "terminal_tracking": {
+          "count": 8,
+          "iqr": 0.802677353992247,
+          "median": 0.07053662287482065,
+          "median_ci95": [
+            0.0010047599402494456,
+            0.8041671595926978
+          ],
+          "p90": 1.210867466635548,
+          "q1": 0.0014898054877647148,
+          "q3": 0.8041671594800117
+        }
+      },
+      "objective_per_instance": {
+        "count": 8,
+        "iqr": 0.9914359028210904,
+        "median": 0.7936762664988586,
+        "median_ci95": [
+          0.6001828501919086,
+          1.6071313533285512
+        ],
+        "p90": 2.0200285748653872,
+        "q1": 0.6156954505074588,
+        "q3": 1.6071313533285492
+      },
+      "problem": "transport",
+      "process_successful_trials": 15,
+      "qualified_trials": 8,
+      "solver": "CRISP",
+      "timing_all_processes_seconds": {
+        "count": 15,
+        "iqr": 0.449031530006323,
+        "median": 0.4060882610065164,
+        "median_ci95": [
+          0.14972910699725617,
+          0.6281259670067811
+        ],
+        "p90": 0.7272487816022476,
+        "q1": 0.15105733399832388,
+        "q3": 0.6000888640046469
+      },
+      "timing_qualified_seconds": {
+        "count": 8,
+        "iqr": 0.05436501175063313,
+        "median": 0.15105733399832388,
+        "median_ci95": [
+          0.10037230799207464,
+          0.1901230360090267
+        ],
+        "p90": 0.2580063961038831,
+        "q1": 0.10767259424756048,
+        "q3": 0.1620376059981936
+      },
+      "trials": 15,
+      "worst": {
+        "angular_error": 0.0,
+        "equality": 3.2778836299701637e-13,
+        "physical_mpcc": 2.736329293938595e-12,
+        "position_error": 0.0629888000095995,
+        "side_violation": 3.2079007929639057e-13,
+        "velocity_error": 1.9656940399099236
+      }
+    }
+  ],
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "paired_comparisons": [
+    {
+      "all_process_speedup_crisp_over_contactipm": {
+        "count": 15,
+        "iqr": 4.398315804604337,
+        "median": 6.459710151383188,
+        "median_ci95": [
+          4.4445976207658,
+          9.623263286526061
+        ],
+        "p90": 10.276761726472646,
+        "q1": 4.839696043227697,
+        "q3": 9.238011847832034
+      },
+      "pairs": 15,
+      "problem": "cartpole_soft_walls",
+      "publication_timing_ready": false,
+      "qualified_pairs": 15,
+      "qualified_speedup_crisp_over_contactipm": {
+        "count": 15,
+        "iqr": 4.398315804604337,
+        "median": 6.459710151383188,
+        "median_ci95": [
+          4.4445976207658,
+          9.623263286526061
+        ],
+        "p90": 10.276761726472646,
+        "q1": 4.839696043227697,
+        "q3": 9.238011847832034
+      },
+      "robustness_outcomes": {
+        "both": 15,
+        "contactipm_only": 0,
+        "crisp_only": 0,
+        "neither": 0
+      }
+    },
+    {
+      "all_process_speedup_crisp_over_contactipm": {
+        "count": 25,
+        "iqr": 2.2375442956082465,
+        "median": 1.299842901812674,
+        "median_ci95": [
+          0.34042270151417886,
+          2.5190436920826644
+        ],
+        "p90": 3.000884875801436,
+        "q1": 0.33767156921525354,
+        "q3": 2.5752158648235
+      },
+      "pairs": 25,
+      "problem": "push_box",
+      "publication_timing_ready": false,
+      "qualified_pairs": 19,
+      "qualified_speedup_crisp_over_contactipm": {
+        "count": 19,
+        "iqr": 2.2654317038794067,
+        "median": 1.5849798745824708,
+        "median_ci95": [
+          0.34116858549899365,
+          2.5752158648235
+        ],
+        "p90": 2.9987793715039657,
+        "q1": 0.3394200773571236,
+        "q3": 2.60485178123653
+      },
+      "robustness_outcomes": {
+        "both": 19,
+        "contactipm_only": 5,
+        "crisp_only": 0,
+        "neither": 1
+      }
+    },
+    {
+      "all_process_speedup_crisp_over_contactipm": {
+        "count": 15,
+        "iqr": 4.40316850980016,
+        "median": 2.3582087209719242,
+        "median_ci95": [
+          0.856070244386701,
+          5.290401800587589
+        ],
+        "p90": 5.794752335119513,
+        "q1": 0.8215349841638262,
+        "q3": 5.224703493963986
+      },
+      "pairs": 15,
+      "problem": "transport",
+      "publication_timing_ready": false,
+      "qualified_pairs": 8,
+      "qualified_speedup_crisp_over_contactipm": {
+        "count": 8,
+        "iqr": 0.5207544883026199,
+        "median": 0.8215349841638262,
+        "median_ci95": [
+          0.337317742685379,
+          1.0546346182115571
+        ],
+        "p90": 1.445706849039667,
+        "q1": 0.4273427292455302,
+        "q3": 0.9480972175481501
+      },
+      "robustness_outcomes": {
+        "both": 8,
+        "contactipm_only": 0,
+        "crisp_only": 0,
+        "neither": 7
+      }
+    }
+  ],
+  "protocol": {
+    "case_suite": "benchmarks/contact_ipm/validation_cases.json",
+    "case_suite_sha256": "de7a77b3ca2ffdc230619fbb1e7b8edc8e9e56782a352558e7d3c1a759f8fc18",
+    "contact_activity_tolerance": 1e-08,
+    "contactipm_environment": {},
+    "cpu_affinity": [
+      0
+    ],
+    "evaluation_order": [
+      "physical_feasibility",
+      "task_success",
+      "task_errors",
+      "objective_components",
+      "computational_performance",
+      "contact_behavior"
+    ],
+    "pairing": "contiguous (repetition, problem) blocks with randomized block and solver order",
+    "paper_reported_times_used": false,
+    "random_seed": 2027,
+    "repetitions": 1,
+    "source_case_manifest": "benchmarks/contact_ipm/source_cases.json",
+    "source_case_manifest_sha256": "f712a425b48c6246238253cc45a53f69d927a8d0ede86f32950c248ef5f1231e",
+    "threads": 1,
+    "timing": "process wall clock on this machine",
+    "trajectory_audit": "same independent audit for both solvers",
+    "warmups": 0
+  },
+  "readiness": {
+    "all_problem_timings_ready": false,
+    "issues": [
+      "multi-instance sweeps are robustness evidence, not repeated timing",
+      "at least one warmup is required",
+      "fewer than 20 measured repetitions"
+    ],
+    "minimum_repetitions": 20,
+    "protocol_ready": false
+  },
+  "revision": {
+    "contactipm": "2c6fb1020780538b06f8a106d18780250c8390e0",
+    "contactipm_source_sha256": {
+      "cartpole_soft_walls": "c9523b2a4a0ac3624d6c794a5d7d5e0296161686b5895c3ef388bd70a81db626",
+      "push_box": "03fc7e5ef9a341fdfd420d75d3255b9369ac7db51b9b40dc46c949ad7531d36f",
+      "transport": "fbae9ddc50ef4f6a421d9c75eed088c0117003f4d8136c8fcec383b7cd4f421a"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {
+      "cartpole_soft_walls": "e72cd4fb9aaa73112afe51607a5161d4529a3cc298c43d99010e5c382b23b6fb",
+      "push_box": "fde27a841e40c536c46078e074dfd9d69e6c9645d4d97726e9c58410b097b9bd",
+      "transport": "891ed282e9759de6346172c811acd8342081d2294a51dc669591a61e1be27028"
+    },
+    "crisp_tracked_dirty": true,
+    "crisp_tracked_patch": {
+      "files": [
+        "src/core/include/common/BasicTypes.h",
+        "src/examples/Transp/cpp/SolveTransp.cpp",
+        "src/examples/pushT/SolvePushT.cpp",
+        "src/examples/pushbot/cpp/SolvePushbot.cpp",
+        "src/examples/pushbox/SolvePushbox.cpp"
+      ],
+      "sha256": "3f077d4fb81e34a1a536105b8e78b2cae18e6dbd20040644427b6065901ed821"
+    }
+  },
+  "schema_version": 1,
+  "source_created_utc": "2026-07-28T08:25:45.217698+00:00",
+  "source_schema_version": 5
+}

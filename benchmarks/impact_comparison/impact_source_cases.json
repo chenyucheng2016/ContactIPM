@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "competitor": {
+    "name": "IMPACT",
+    "repository": "benchmarks/IMPACT",
+    "commit": "f56f1403659122bd4017ed36b21d83a490bc6687",
+    "tracked_diff_policy": "ignore_line_endings_only",
+    "casadi_version": "3.7.2"
+  },
+  "initialization_policy": {
+    "matching_rule": "ContactIPM receives the same physical state trajectory and zero retained controls as IMPACT. No solved trajectory is used as a warm start.",
+    "eliminated_variables": "Algebraic split variables eliminated by ContactIPM are reconstructed for objective and audit calculations."
+  },
+  "problems": {
+    "push_box": {
+      "impact_executable": "experiments/box/box_impact_multiple",
+      "source_sha256": "0d4b73db91aef1c069fe3dc481d8c92ffc7ab61cdacad80367a3aaaf5e669cfb",
+      "horizon_intervals": 50,
+      "state_nodes": 51,
+      "dt": 0.05,
+      "state_layout": ["px", "py", "theta"],
+      "control_layout": ["cx", "cy", "lambda1y", "lambda2x", "lambda3y", "lambda4x"],
+      "initialization": {
+        "states": "linear_interpolation_start_to_goal",
+        "controls": "zeros"
+      },
+      "parameters": {
+        "mass": 0.1,
+        "gravity": 9.81,
+        "friction": 0.5,
+        "rotation_scale": 0.5,
+        "half_extent_x": 0.3,
+        "half_extent_y": 0.4,
+        "contact_radius": 0.5
+      },
+      "objective": {
+        "stage_control_weight": 0.001,
+        "stage_control_indices": [0, 1, 2, 3, 4, 5],
+        "terminal_state_weight": 100.0
+      },
+      "constraints": {
+        "complementarity_pairs_per_interval": 10,
+        "additional_equalities_per_interval": 0,
+        "additional_inequalities_per_interval": 0
+      }
+    },
+    "push_t": {
+      "impact_executable": "experiments/push_t/push_t_impact_multiple",
+      "source_sha256": "c3ba588e236ff93d222e03e728970d825bd2bc5ba5d1b45d27ba995ca03b0fa8",
+      "horizon_intervals": 50,
+      "state_nodes": 51,
+      "dt": 0.05,
+      "state_layout": ["px", "py", "theta"],
+      "impact_control_layout": [
+        "cx", "cy",
+        "lambda1", "lambda2", "lambda3", "lambda4",
+        "lambda5", "lambda6", "lambda7", "lambda8",
+        "v1", "v2", "v3", "v4", "v5", "v6", "v7",
+        "w1", "w2", "w3", "w4", "w5", "w6", "w7"
+      ],
+      "contactipm_retained_control_layout": [
+        "cx", "cy",
+        "lambda1", "lambda2", "lambda3", "lambda4",
+        "lambda5", "lambda6", "lambda7", "lambda8",
+        "v1", "v2", "v3", "v4", "v5", "v6", "v7"
+      ],
+      "initialization": {
+        "states": "linear_interpolation_start_to_goal",
+        "controls": "zeros"
+      },
+      "parameters": {
+        "mass": 0.1,
+        "gravity": 9.8,
+        "friction": 0.4,
+        "rotation_scale": 0.4,
+        "unit": 0.05,
+        "contact_radius_units": 2.8,
+        "dc": 2.6429
+      },
+      "objective": {
+        "stage_control_weight": 0.01,
+        "stage_control_indices": "all_24_after_reconstructing_w",
+        "stage_state_weight": 0.0,
+        "terminal_state_weight": 100.0
+      },
+      "constraints": {
+        "complementarity_pairs_per_interval": 43,
+        "additional_equalities_per_interval": 7,
+        "additional_inequalities_per_interval": 4,
+        "contactipm_equality_treatment": "exact_elimination_of_w"
+      }
+    },
+    "cart_transport": {
+      "impact_executable": "experiments/cart_transporter/cart_transporter_impact_multiple",
+      "source_sha256": "e781b1b029027e2824eecdfdb089ba196675d496c5f84e90cbeadef9a28085fb",
+      "horizon_intervals": 300,
+      "state_nodes": 301,
+      "dt": 0.02,
+      "state_layout": ["payload_position", "cart_position", "payload_velocity", "cart_velocity"],
+      "impact_control_layout": ["friction_force", "active_force", "positive_slip", "negative_slip"],
+      "contactipm_retained_control_layout": ["friction_force", "active_force", "positive_slip"],
+      "initialization": {
+        "states": "repeat_start_state",
+        "controls": "zeros"
+      },
+      "parameters": {
+        "payload_mass": 0.1,
+        "cart_mass": 0.2,
+        "friction": 0.2,
+        "gravity": 9.81,
+        "half_cart_length": 1.0
+      },
+      "objective": {
+        "stage_control_weight": 1e-6,
+        "stage_control_indices": "all_4_after_reconstructing_negative_slip",
+        "stage_state_weight": 0.0,
+        "terminal_state_weight": 5000.0
+      },
+      "constraints": {
+        "complementarity_pairs_per_interval": 3,
+        "additional_equalities_per_interval": 1,
+        "additional_inequalities_per_interval": 4,
+        "contactipm_equality_treatment": "exact_elimination_of_negative_slip"
+      }
+    }
+  }
+}

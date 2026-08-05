@@ -1,0 +1,409 @@
+{
+  "bootstrap": {
+    "samples": 10000,
+    "seed": 2027
+  },
+  "groups": [
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 50,
+          "iqr": 0.0,
+          "median": 49.0,
+          "median_ci95": [
+            49.0,
+            49.0
+          ],
+          "p90": 49.0,
+          "q1": 49.0,
+          "q3": 49.0
+        },
+        "contact_impulse": {
+          "count": 50,
+          "iqr": 6.535971222198077,
+          "median": 5.868303796321621,
+          "median_ci95": [
+            4.035760688877375,
+            8.173421000876141
+          ],
+          "p90": 12.128897405946653,
+          "q1": 2.6474762819956315,
+          "q3": 9.183447504193708
+        },
+        "dominant_contact_mode_changes": {
+          "count": 50,
+          "iqr": 11.0,
+          "median": 15.5,
+          "median_ci95": [
+            12.0,
+            18.5
+          ],
+          "p90": 23.0,
+          "q1": 9.0,
+          "q3": 20.0
+        },
+        "peak_contact_force_norm": {
+          "count": 50,
+          "iqr": 10.947874082675622,
+          "median": 17.254389187964485,
+          "median_ci95": [
+            14.89129228163252,
+            19.55515750320083
+          ],
+          "p90": 23.967112519662987,
+          "q1": 10.968728637143972,
+          "q3": 21.916602719819593
+        }
+      },
+      "audited_trials": 1,
+      "instances": {
+        "attempted": 50,
+        "feasible": 50,
+        "successful": 50,
+        "task_successful": 50
+      },
+      "objective_components": {
+        "force_effort": {
+          "count": 50,
+          "iqr": 19.766791240797023,
+          "median": 9.856416591823173,
+          "median_ci95": [
+            5.538362286295612,
+            18.681606339381855
+          ],
+          "p90": 33.19693147017794,
+          "q1": 2.587592130104665,
+          "q3": 22.354383370901687
+        },
+        "running_tracking": {
+          "count": 50,
+          "iqr": 25.451199897832648,
+          "median": 19.035530689839078,
+          "median_ci95": [
+            7.240444915811261,
+            26.968997812608592
+          ],
+          "p90": 30.828767263909846,
+          "q1": 3.059602343982898,
+          "q3": 28.510802241815547
+        },
+        "terminal_tracking": {
+          "count": 50,
+          "iqr": 0.004450318669742024,
+          "median": 0.0016443591289551315,
+          "median_ci95": [
+            0.0008265897098751155,
+            0.002540618681872602
+          ],
+          "p90": 0.017353159464415915,
+          "q1": 0.0004659942358905441,
+          "q3": 0.004916312905632568
+        }
+      },
+      "objective_per_instance": {
+        "count": 50,
+        "iqr": 47.878969055657244,
+        "median": 29.033481529945732,
+        "median_ci95": [
+          13.217111416086219,
+          48.47068296768904
+        ],
+        "p90": 62.29355129226787,
+        "q1": 5.692762309331804,
+        "q3": 53.57173136498905
+      },
+      "problem": "push_t",
+      "process_successful_trials": 1,
+      "qualified_trials": 1,
+      "solver": "ContactIPM",
+      "timing_all_processes_seconds": {
+        "count": 1,
+        "iqr": 0.0,
+        "median": 38.1723013370065,
+        "median_ci95": [
+          38.1723013370065,
+          38.1723013370065
+        ],
+        "p90": 38.1723013370065,
+        "q1": 38.1723013370065,
+        "q3": 38.1723013370065
+      },
+      "timing_qualified_seconds": {
+        "count": 1,
+        "iqr": 0.0,
+        "median": 38.1723013370065,
+        "median_ci95": [
+          38.1723013370065,
+          38.1723013370065
+        ],
+        "p90": 38.1723013370065,
+        "q1": 38.1723013370065,
+        "q3": 38.1723013370065
+      },
+      "trials": 1,
+      "worst": {
+        "angular_error": 0.006966781975223736,
+        "equality": 4.9725320120906375e-06,
+        "physical_mpcc": 1.0016517394794023e-06,
+        "position_error": 0.057852108121997134,
+        "side_violation": 1.923051769355602e-09,
+        "velocity_error": 0.0
+      }
+    },
+    {
+      "actuation": {
+        "active_contact_steps": {
+          "count": 27,
+          "iqr": 6.0,
+          "median": 48.0,
+          "median_ci95": [
+            44.0,
+            49.0
+          ],
+          "p90": 49.0,
+          "q1": 43.0,
+          "q3": 49.0
+        },
+        "contact_impulse": {
+          "count": 27,
+          "iqr": 3.355187388007431,
+          "median": 2.763242204896957,
+          "median_ci95": [
+            1.9426285663203129,
+            4.511126647152895
+          ],
+          "p90": 7.095282346281816,
+          "q1": 1.4982099350903186,
+          "q3": 4.85339732309775
+        },
+        "dominant_contact_mode_changes": {
+          "count": 27,
+          "iqr": 9.0,
+          "median": 6.0,
+          "median_ci95": [
+            3.0,
+            10.0
+          ],
+          "p90": 19.0,
+          "q1": 2.0,
+          "q3": 11.0
+        },
+        "peak_contact_force_norm": {
+          "count": 27,
+          "iqr": 7.913425213773443,
+          "median": 9.608371483054515,
+          "median_ci95": [
+            5.719023416848044,
+            11.309293803922829
+          ],
+          "p90": 15.408331770050957,
+          "q1": 5.418576038040402,
+          "q3": 13.332001251813844
+        }
+      },
+      "audited_trials": 1,
+      "instances": {
+        "attempted": 50,
+        "feasible": 34,
+        "successful": 27,
+        "task_successful": 43
+      },
+      "objective_components": {
+        "force_effort": {
+          "count": 27,
+          "iqr": 4.507632975591797,
+          "median": 2.955755727512481,
+          "median_ci95": [
+            1.1709867574466672,
+            4.736998534158875
+          ],
+          "p90": 8.877466674635372,
+          "q1": 1.0799401743747956,
+          "q3": 5.587573149966593
+        },
+        "running_tracking": {
+          "count": 27,
+          "iqr": 14.874129896476774,
+          "median": 4.902389519215953,
+          "median_ci95": [
+            2.260151484263472,
+            10.633231936090855
+          ],
+          "p90": 22.131765161450666,
+          "q1": 1.3958294731881085,
+          "q3": 16.269959369664882
+        },
+        "terminal_tracking": {
+          "count": 27,
+          "iqr": 0.3108719778377494,
+          "median": 0.08377484069633814,
+          "median_ci95": [
+            0.0037063429853726364,
+            0.2609554024008416
+          ],
+          "p90": 0.5913696971967621,
+          "q1": 0.0030152791311606492,
+          "q3": 0.31388725696891007
+        }
+      },
+      "objective_per_instance": {
+        "count": 27,
+        "iqr": 18.700312841483843,
+        "median": 7.231279439347711,
+        "median_ci95": [
+          4.5101992362538805,
+          18.75530913115066
+        ],
+        "p90": 30.51391348530148,
+        "q1": 2.6875300942881144,
+        "q3": 21.387842935771957
+      },
+      "problem": "push_t",
+      "process_successful_trials": 1,
+      "qualified_trials": 0,
+      "solver": "CRISP",
+      "timing_all_processes_seconds": {
+        "count": 1,
+        "iqr": 0.0,
+        "median": 360.4329688500002,
+        "median_ci95": [
+          360.4329688500002,
+          360.4329688500002
+        ],
+        "p90": 360.4329688500002,
+        "q1": 360.4329688500002,
+        "q3": 360.4329688500002
+      },
+      "timing_qualified_seconds": null,
+      "trials": 1,
+      "worst": {
+        "angular_error": 0.2667356413453868,
+        "equality": 1.9998478014510819,
+        "physical_mpcc": 0.000448379314748791,
+        "position_error": 0.38847604127721336,
+        "side_violation": 4.6943750515214635e-11,
+        "velocity_error": 0.0
+      }
+    }
+  ],
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "paired_comparisons": [
+    {
+      "all_process_speedup_crisp_over_contactipm": {
+        "count": 1,
+        "iqr": 0.0,
+        "median": 9.442264579960627,
+        "median_ci95": [
+          9.442264579960627,
+          9.442264579960627
+        ],
+        "p90": 9.442264579960627,
+        "q1": 9.442264579960627,
+        "q3": 9.442264579960627
+      },
+      "pairs": 1,
+      "problem": "push_t",
+      "publication_timing_ready": false,
+      "qualified_pairs": 0,
+      "qualified_speedup_crisp_over_contactipm": null,
+      "robustness_outcomes": {
+        "both": 0,
+        "contactipm_only": 1,
+        "crisp_only": 0,
+        "neither": 0
+      }
+    }
+  ],
+  "protocol": {
+    "case_suite": null,
+    "case_suite_sha256": null,
+    "contact_activity_tolerance": 1e-08,
+    "contactipm_environment": {},
+    "cpu_affinity": [
+      0
+    ],
+    "evaluation_order": [
+      "physical_feasibility",
+      "task_success",
+      "task_errors",
+      "objective_components",
+      "computational_performance",
+      "contact_behavior"
+    ],
+    "pairing": "contiguous (repetition, problem) blocks with randomized block and solver order",
+    "paper_reported_times_used": false,
+    "random_seed": 2027,
+    "repetitions": 1,
+    "source_case_manifest": "benchmarks/contact_ipm/source_cases.json",
+    "source_case_manifest_sha256": "f712a425b48c6246238253cc45a53f69d927a8d0ede86f32950c248ef5f1231e",
+    "threads": 1,
+    "timing": "process wall clock on this machine",
+    "trajectory_audit": "same independent audit for both solvers",
+    "warmups": 0
+  },
+  "readiness": {
+    "all_problem_timings_ready": false,
+    "issues": [
+      "at least one warmup is required",
+      "fewer than 20 measured repetitions"
+    ],
+    "minimum_repetitions": 20,
+    "protocol_ready": false
+  },
+  "revision": {
+    "contactipm": "2c6fb1020780538b06f8a106d18780250c8390e0",
+    "contactipm_source_sha256": {
+      "push_t": "ebadc26d8892fdb48ed5f17eca1ec9f3d5974733ffb923861e29d726732bdd89"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {
+      "push_t": "e13e2a0292b5fa74581b3f7c1d15b502564599350827838dc2aab1cffa0498e2"
+    },
+    "crisp_tracked_dirty": true,
+    "crisp_tracked_patch": {
+      "files": [
+        "src/core/include/common/BasicTypes.h",
+        "src/examples/Transp/cpp/SolveTransp.cpp",
+        "src/examples/pushT/SolvePushT.cpp",
+        "src/examples/pushbot/cpp/SolvePushbot.cpp",
+        "src/examples/pushbox/SolvePushbox.cpp"
+      ],
+      "sha256": "3f077d4fb81e34a1a536105b8e78b2cae18e6dbd20040644427b6065901ed821"
+    }
+  },
+  "schema_version": 1,
+  "source_created_utc": "2026-07-28T08:17:33.644072+00:00",
+  "source_schema_version": 5
+}

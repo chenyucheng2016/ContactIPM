@@ -1,0 +1,280 @@
+cmake_minimum_required(VERSION 3.16)
+project(nmpc_solver VERSION 1.0.0 LANGUAGES CXX)
+
+# ── C++17 required for constexpr if, structured bindings, etc. ──
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# ── Compiler flags for embedded robustness ──
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    add_compile_options(
+        -Wall -Wextra -Wpedantic
+        -Wno-unused-parameter
+        -ffast-math
+        -fno-exceptions          # No exceptions for embedded
+        $<$<CONFIG:Release>:-O3>
+        $<$<CONFIG:Release>:-DNDEBUG>
+        $<$<CONFIG:Debug>:-O0>
+        $<$<CONFIG:Debug>:-g>
+        $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+    )
+elseif(MSVC)
+    add_compile_options(
+        /W4 /wd4100
+        /EHsc                     # Keep EH for MSVC compat, but don't throw
+    )
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG")
+    # Increase stack size to 10MB for large NMPC problems (default is 1MB)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:10000000")
+endif()
+
+# ── Header-only library ──
+add_library(nmpc_solver INTERFACE)
+target_include_directories(nmpc_solver INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_compile_features(nmpc_solver INTERFACE cxx_std_17)
+
+# ── Examples ──
+option(NMPC_BUILD_EXAMPLES "Build example applications" ON)
+if(NMPC_BUILD_EXAMPLES)
+    add_executable(pendulum_nmpc_paper examples/pendulum_nmpc_paper.cpp)
+    target_link_libraries(pendulum_nmpc_paper PRIVATE nmpc_solver)
+
+    add_executable(quadrotor_2d_nmpc examples/quadrotor_2d_nmpc.cpp)
+    target_link_libraries(quadrotor_2d_nmpc PRIVATE nmpc_solver)
+
+    add_executable(test_lqr_invariance examples/test_lqr_invariance.cpp)
+    target_link_libraries(test_lqr_invariance PRIVATE nmpc_solver)
+
+    add_executable(chain_mass_nmpc examples/chain_mass_nmpc.cpp)
+    target_link_libraries(chain_mass_nmpc PRIVATE nmpc_solver)
+
+    add_executable(centroidal_trot_nmpc examples/centroidal_trot_nmpc.cpp)
+    target_link_libraries(centroidal_trot_nmpc PRIVATE nmpc_solver)
+endif()
+
+# ── Tests ──
+option(NMPC_BUILD_TESTS "Build unit tests" ON)
+if(NMPC_BUILD_TESTS)
+    enable_testing()
+
+    # Existing Riccati test
+    add_executable(test_riccati tests/test_riccati.cpp)
+    target_link_libraries(test_riccati PRIVATE nmpc_solver)
+    add_test(NAME RiccatiRecursion COMMAND test_riccati)
+
+    # Phase A: Filter line-search tests
+    add_executable(test_filter_ls tests/test_filter_ls.cpp)
+    target_link_libraries(test_filter_ls PRIVATE nmpc_solver)
+    add_test(NAME FilterLS COMMAND test_filter_ls)
+
+    # Phase B: Hessian approximation tests
+    add_executable(test_hessian_approx tests/test_hessian_approx.cpp)
+    target_link_libraries(test_hessian_approx PRIVATE nmpc_solver)
+    add_test(NAME HessianApprox COMMAND test_hessian_approx)
+
+    # Phase C: Barrier manager tests
+    add_executable(test_barrier_manager tests/test_barrier_manager.cpp)
+    target_link_libraries(test_barrier_manager PRIVATE nmpc_solver)
+    add_test(NAME BarrierManager COMMAND test_barrier_manager)
+
+    # Phase D: KKT diagnostics tests
+    add_executable(test_kkt_diag tests/test_kkt_diag.cpp)
+    target_link_libraries(test_kkt_diag PRIVATE nmpc_solver)
+    add_test(NAME KKTDiag COMMAND test_kkt_diag)
+
+    # Phase E: Globalization features tests
+    add_executable(test_globalization tests/test_globalization.cpp)
+    target_link_libraries(test_globalization PRIVATE nmpc_solver)
+    add_test(NAME Globalization COMMAND test_globalization)
+
+    # Preconditioner invariance regression test
+    add_executable(test_precond_invariance tests/test_precond_invariance.cpp)
+    target_link_libraries(test_precond_invariance PRIVATE nmpc_solver)
+    add_test(NAME PrecondInvariance COMMAND test_precond_invariance)
+    # MPCC recognition and Eq. 3.13 elastic slack/barrier regression
+    add_executable(test_mpcc_relaxation tests/test_mpcc_relaxation.cpp)
+    target_link_libraries(test_mpcc_relaxation PRIVATE nmpc_solver)
+    add_test(NAME MPCCRelaxation COMMAND test_mpcc_relaxation)
+
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME ContactBenchmarkProtocol
+                 COMMAND ${Python3_EXECUTABLE}
+                         ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/contact_ipm/test_benchmark_protocol.py
+                         -v)
+    endif()
+endif()
+
+option(NMPC_BUILD_CONTACT_BENCHMARKS
+       "Build contact-implicit benchmarks reproduced from CRISP" OFF)
+if(NMPC_BUILD_CONTACT_BENCHMARKS)
+    set(NMPC_CONTACT_PUSH_BOX_NODES 100 CACHE STRING
+        "Push Box benchmark node count")
+    set(NMPC_CONTACT_PUSH_T_NODES 50 CACHE STRING
+        "Push T benchmark node count")
+    set(NMPC_CONTACT_PUSH_BOX_DT 0.02 CACHE STRING
+        "Push Box benchmark time step")
+    set(NMPC_CLOSED_LOOP_PUSH_BOX_NODES 20 CACHE STRING
+        "Closed-loop Push Box MPC node count")
+    set(NMPC_CLOSED_LOOP_PUSH_BOX_DT 0.1 CACHE STRING
+        "Closed-loop Push Box MPC time step")
+    set(NMPC_CONTACT_PUSH_T_DT 0.05 CACHE STRING
+        "Push T benchmark time step")
+    if(NMPC_CONTACT_PUSH_BOX_NODES LESS 2 OR
+       NMPC_CLOSED_LOOP_PUSH_BOX_NODES LESS 2 OR
+       NMPC_CONTACT_PUSH_T_NODES LESS 2)
+        message(FATAL_ERROR "Contact benchmark node counts must be at least 2")
+    endif()
+
+    add_executable(contact_cartpole_soft_walls
+        benchmarks/contact_ipm/cartpole_soft_walls.cpp)
+    target_link_libraries(contact_cartpole_soft_walls PRIVATE nmpc_solver)
+    target_compile_definitions(contact_cartpole_soft_walls PRIVATE
+        NMPC_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+    add_executable(contact_push_box
+        benchmarks/contact_ipm/push_box.cpp)
+    target_link_libraries(contact_push_box PRIVATE nmpc_solver)
+    target_compile_definitions(contact_push_box PRIVATE
+        CONTACT_BENCHMARK_NODES=${NMPC_CONTACT_PUSH_BOX_NODES}
+        CONTACT_BENCHMARK_DT=${NMPC_CONTACT_PUSH_BOX_DT})
+    if(NMPC_BUILD_TESTS)
+        add_test(NAME PushBoxContactRegression
+                 COMMAND contact_push_box)
+    endif()
+
+    add_executable(contact_push_box_closed_loop
+        benchmarks/contact_ipm/push_box_closed_loop.cpp)
+    target_link_libraries(contact_push_box_closed_loop PRIVATE nmpc_solver)
+    target_compile_definitions(contact_push_box_closed_loop PRIVATE
+        CONTACT_BENCHMARK_NODES=${NMPC_CLOSED_LOOP_PUSH_BOX_NODES}
+        CONTACT_BENCHMARK_DT=${NMPC_CLOSED_LOOP_PUSH_BOX_DT})
+    if(NMPC_BUILD_TESTS)
+        add_test(NAME PushBoxClosedLoopSmoke
+                 COMMAND contact_push_box_closed_loop --mode smoke
+                         --output push_box_closed_loop_smoke.json)
+    endif()
+
+    add_executable(contact_transport
+        benchmarks/contact_ipm/transport.cpp)
+    target_link_libraries(contact_transport PRIVATE nmpc_solver)
+
+    add_executable(contact_push_t
+        benchmarks/contact_ipm/push_t.cpp)
+    target_link_libraries(contact_push_t PRIVATE nmpc_solver)
+    target_compile_definitions(contact_push_t PRIVATE
+        CONTACT_BENCHMARK_NODES=${NMPC_CONTACT_PUSH_T_NODES}
+        CONTACT_BENCHMARK_DT=${NMPC_CONTACT_PUSH_T_DT})
+    if(NMPC_BUILD_TESTS)
+        add_test(NAME PushTStationarityRegression
+                 COMMAND contact_push_t 27)
+        add_test(NAME PushTRecoveryRegression
+                 COMMAND contact_push_t 25)
+        add_test(NAME PushTRawInequalityRegression
+                 COMMAND contact_push_t 37)
+    endif()
+endif()
+
+option(NMPC_BUILD_CASADI_NATIVE_BENCHMARKS
+       "Generate and build native CasADi callback benchmarks" OFF)
+if(NMPC_BUILD_CASADI_NATIVE_BENCHMARKS)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    set(CASADI_NATIVE_BENCHMARKS
+        cart_pendulum
+        quadcopter
+        quadcopter_tracking
+        hanging_chain_2d
+        hanging_chain_3d)
+    set(CASADI_NATIVE_GENERATED_DIR
+        "${CMAKE_CURRENT_BINARY_DIR}/casadi_native_generated")
+
+    foreach(bench ${CASADI_NATIVE_BENCHMARKS})
+        set(generated_c
+            "${CASADI_NATIVE_GENERATED_DIR}/${bench}_functions.c")
+        set(generated_config
+            "${CASADI_NATIVE_GENERATED_DIR}/${bench}_config.hpp")
+        add_custom_command(
+            OUTPUT "${generated_c}" "${generated_config}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "${CASADI_NATIVE_GENERATED_DIR}"
+            COMMAND ${Python3_EXECUTABLE} -m casadi_benchmarks.generate_native
+                    --problem ${bench}
+                    --output-dir "${CASADI_NATIVE_GENERATED_DIR}"
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks"
+            DEPENDS
+                benchmarks/casadi_benchmarks/generate_native.py
+                benchmarks/casadi_benchmarks/problems.py
+                benchmarks/casadi_benchmarks/solvers.py
+                benchmarks/casadi_benchmarks/discretize.py
+            VERBATIM)
+        set_source_files_properties("${generated_c}"
+            PROPERTIES GENERATED TRUE LANGUAGE CXX)
+        add_executable(casadi_native_${bench}
+            benchmarks/casadi_benchmarks/native_benchmark.cpp
+            "${generated_c}" "${generated_config}")
+        target_include_directories(casadi_native_${bench} PRIVATE
+            "${CASADI_NATIVE_GENERATED_DIR}")
+        target_compile_definitions(casadi_native_${bench} PRIVATE
+            CONTACTIPM_NATIVE_CONFIG_HEADER="${bench}_config.hpp")
+        target_link_libraries(casadi_native_${bench} PRIVATE nmpc_solver)
+    endforeach()
+endif()
+option(NMPC_BUILD_FATROP_BENCHMARKS
+       "Build optional FATROP-generated benchmarks and diagnostics" OFF)
+if(NMPC_BUILD_FATROP_BENCHMARKS)
+    # ── Diagnostics ──
+    add_executable(diag_verbose benchmarks/fatrop_contactipm/diag_verbose.cpp)
+    target_include_directories(diag_verbose PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/quadcopter_mpc
+    )
+    target_link_libraries(diag_verbose PRIVATE nmpc_solver)
+
+    add_executable(bench_quadcopter_mpc benchmarks/fatrop_contactipm/bench_quadcopter_mpc.cpp)
+    target_include_directories(bench_quadcopter_mpc PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/quadcopter_mpc
+    )
+    target_link_libraries(bench_quadcopter_mpc PRIVATE nmpc_solver)
+
+    # ── FATROP benchmarks ──
+    set(FATROP_BENCHMARKS
+        cart_pendulum_mpc
+        cart_pendulum_time
+        quadcopter_mpc
+        quadcopter_p2p
+        quadcopter_one_obs
+        quadcopter_three_obs
+        truck_trailer_time
+        hanging_chain_2d
+        hanging_chain_3d
+    )
+
+    foreach(bench ${FATROP_BENCHMARKS})
+        add_executable(fatrop_${bench} benchmarks/fatrop_contactipm/bench_${bench}.cpp)
+        target_include_directories(fatrop_${bench} PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+            ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/${bench}
+        )
+        target_link_libraries(fatrop_${bench} PRIVATE nmpc_solver)
+    endforeach()
+
+    # Diagnostic executable for cart_pendulum_mpc
+    add_executable(diag_cart_pendulum_mpc benchmarks/fatrop_contactipm/diag_cart_pendulum_mpc.cpp)
+    target_include_directories(diag_cart_pendulum_mpc PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/cart_pendulum_mpc
+    )
+    target_link_libraries(diag_cart_pendulum_mpc PRIVATE nmpc_solver)
+
+    # Diagnostic executable for hanging_chain_2d
+    add_executable(diag_hanging_chain_2d benchmarks/fatrop_contactipm/diag_hanging_chain_2d.cpp)
+    target_include_directories(diag_hanging_chain_2d PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_contactipm
+        ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/fatrop_codegen/hanging_chain_2d
+    )
+    target_link_libraries(diag_hanging_chain_2d PRIVATE nmpc_solver)
+endif()

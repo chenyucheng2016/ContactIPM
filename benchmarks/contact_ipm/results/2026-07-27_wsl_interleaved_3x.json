@@ -1,0 +1,1746 @@
+{
+  "commands": [
+    {
+      "command": [
+        "/tmp/contactipm-build/contact_cartpole_soft_walls"
+      ],
+      "cwd": ".",
+      "problem": "cartpole_soft_walls",
+      "solver": "ContactIPM"
+    },
+    {
+      "command": [
+        "/tmp/crisp-build/examples/pushbot_example"
+      ],
+      "cwd": "/tmp/crisp-build/examples",
+      "problem": "cartpole_soft_walls",
+      "solver": "CRISP"
+    },
+    {
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "command": [
+        "/tmp/crisp-build/examples/pushbox_example"
+      ],
+      "cwd": "/tmp/crisp-build/examples",
+      "problem": "push_box",
+      "solver": "CRISP"
+    },
+    {
+      "command": [
+        "/tmp/contactipm-build/contact_transport"
+      ],
+      "cwd": ".",
+      "problem": "transport",
+      "solver": "ContactIPM"
+    },
+    {
+      "command": [
+        "/tmp/crisp-build/examples/cartTransp_example"
+      ],
+      "cwd": "/tmp/crisp-build/examples",
+      "problem": "transport",
+      "solver": "CRISP"
+    },
+    {
+      "command": [
+        "/tmp/contactipm-build/contact_push_t"
+      ],
+      "cwd": ".",
+      "problem": "push_t",
+      "solver": "ContactIPM"
+    },
+    {
+      "command": [
+        "/tmp/crisp-build/examples/pushT_example"
+      ],
+      "cwd": "/tmp/crisp-build/examples",
+      "problem": "push_t",
+      "solver": "CRISP"
+    }
+  ],
+  "created_utc": "2026-07-27T16:47:12.878285+00:00",
+  "machine": {
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "protocol": {
+    "paper_reported_times_used": false,
+    "random_seed": 2027,
+    "repetitions": 3,
+    "threads": 1,
+    "timing": "process wall clock on this machine",
+    "warmups": 1
+  },
+  "results": [
+    {
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_segments": 50,
+          "segments": [
+            {
+              "angular_error": 0.00024101297815232875,
+              "max_equality": 7.704994428288717e-09,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 1.280465529021764e-16,
+              "position_error": 0.0006531835089057221,
+              "segment": 0,
+              "success": true
+            },
+            {
+              "angular_error": 8.019141898955863e-08,
+              "max_equality": 5.738242637998159e-09,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 4.57297621712799e-17,
+              "position_error": 0.003838662192315351,
+              "segment": 1,
+              "success": true
+            },
+            {
+              "angular_error": 2.587912878125598e-07,
+              "max_equality": 2.8212170204156006e-07,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 2.651297830323514e-16,
+              "position_error": 0.028943883756268933,
+              "segment": 2,
+              "success": true
+            },
+            {
+              "angular_error": 8.554827316898175e-06,
+              "max_equality": 2.0852463383097541e-07,
+              "max_side_violation": 1.3877787807814457e-16,
+              "physical_mpcc": 5.683375719352781e-16,
+              "position_error": 0.044125502265286096,
+              "segment": 3,
+              "success": true
+            },
+            {
+              "angular_error": 5.824100427228793e-06,
+              "max_equality": 1.2453699826019157e-06,
+              "max_side_violation": 4.440892098500626e-15,
+              "physical_mpcc": 5.614366884570451e-09,
+              "position_error": 0.05108379381064282,
+              "segment": 4,
+              "success": true
+            },
+            {
+              "angular_error": 0.008866628362869675,
+              "max_equality": 1.1816702061295814e-09,
+              "max_side_violation": 5.551115123125783e-16,
+              "physical_mpcc": 9.256048775599218e-15,
+              "position_error": 0.06208182682627784,
+              "segment": 5,
+              "success": true
+            },
+            {
+              "angular_error": 0.0022049108518513473,
+              "max_equality": 1.8984318515136026e-11,
+              "max_side_violation": 1.4710455076283324e-15,
+              "physical_mpcc": 1.8872722781219194e-11,
+              "position_error": 0.05323348082956339,
+              "segment": 6,
+              "success": true
+            },
+            {
+              "angular_error": 0.027414102592022805,
+              "max_equality": 4.618084699194234e-09,
+              "max_side_violation": 9.71445146547012e-16,
+              "physical_mpcc": 8.414741011324073e-14,
+              "position_error": 0.08016285002141622,
+              "segment": 7,
+              "success": true
+            },
+            {
+              "angular_error": 0.02505105435989648,
+              "max_equality": 3.4754894911846626e-06,
+              "max_side_violation": 7.485148608034161e-15,
+              "physical_mpcc": 1.574811129172961e-07,
+              "position_error": 0.06666028393726242,
+              "segment": 8,
+              "success": true
+            },
+            {
+              "angular_error": 0.015875592766295146,
+              "max_equality": 1.9719892385694493e-11,
+              "max_side_violation": 4.4364512064021255e-13,
+              "physical_mpcc": 1.4015892252443137e-09,
+              "position_error": 0.040095332362561555,
+              "segment": 9,
+              "success": true
+            },
+            {
+              "angular_error": 0.007757596626344498,
+              "max_equality": 8.688723072826734e-07,
+              "max_side_violation": 3.3306690738754696e-15,
+              "physical_mpcc": 3.135615352572156e-09,
+              "position_error": 0.018535498635274417,
+              "segment": 10,
+              "success": true
+            },
+            {
+              "angular_error": 0.014422210296426909,
+              "max_equality": 3.47548947026425e-06,
+              "max_side_violation": 2.0872192862952943e-14,
+              "physical_mpcc": 5.4968528497399445e-06,
+              "position_error": 0.059129206371451325,
+              "segment": 11,
+              "success": true
+            },
+            {
+              "angular_error": 0.029432136846812076,
+              "max_equality": 1.7199398505418628e-07,
+              "max_side_violation": 4.8865251845220196e-14,
+              "physical_mpcc": 8.071405054005785e-06,
+              "position_error": 0.08944791999182412,
+              "segment": 12,
+              "success": true
+            },
+            {
+              "angular_error": 4.0937677607197354e-07,
+              "max_equality": 6.870001112992911e-07,
+              "max_side_violation": 2.945376485144402e-15,
+              "physical_mpcc": 3.751841411880755e-06,
+              "position_error": 0.05864366997455162,
+              "segment": 13,
+              "success": true
+            },
+            {
+              "angular_error": 0.031881030676475214,
+              "max_equality": 1.0266227472577327e-06,
+              "max_side_violation": 6.505906924303417e-14,
+              "physical_mpcc": 0.000448379314748791,
+              "position_error": 0.09618963955960277,
+              "segment": 14,
+              "success": false
+            },
+            {
+              "angular_error": 4.1407849371566385e-15,
+              "max_equality": 1.8912660659786695e-07,
+              "max_side_violation": 2.069663884718409e-13,
+              "physical_mpcc": 5.4308251597834335e-06,
+              "position_error": 0.020413102198190557,
+              "segment": 15,
+              "success": true
+            },
+            {
+              "angular_error": 0.2667356413453868,
+              "max_equality": 9.749881992423841e-16,
+              "max_side_violation": 5.551115123125783e-17,
+              "physical_mpcc": 8.807544534935986e-07,
+              "position_error": 0.35069982221284374,
+              "segment": 16,
+              "success": false
+            },
+            {
+              "angular_error": 0.0212240355362958,
+              "max_equality": 4.318647240930673e-07,
+              "max_side_violation": 2.9906305326190217e-12,
+              "physical_mpcc": 7.130083800130469e-06,
+              "position_error": 0.2376239740340816,
+              "segment": 17,
+              "success": false
+            },
+            {
+              "angular_error": 0.24343719529499092,
+              "max_equality": 6.363453600860547e-16,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 9.483338041572225e-09,
+              "position_error": 0.19310239016465758,
+              "segment": 18,
+              "success": false
+            },
+            {
+              "angular_error": 3.365038456215608e-11,
+              "max_equality": 1.4579372545170188,
+              "max_side_violation": 2.0413161784484774e-11,
+              "physical_mpcc": 5.1413892168509915e-12,
+              "position_error": 0.014096533549990083,
+              "segment": 19,
+              "success": false
+            },
+            {
+              "angular_error": 0.0002834009646245396,
+              "max_equality": 1.618033988261438,
+              "max_side_violation": 4.6943750515214635e-11,
+              "physical_mpcc": 1.0515190600732485e-11,
+              "position_error": 0.0507604594557636,
+              "segment": 20,
+              "success": false
+            },
+            {
+              "angular_error": 6.715895722233904e-05,
+              "max_equality": 1.7526133600330187,
+              "max_side_violation": 8.870284730986853e-12,
+              "physical_mpcc": 1.4901161038971761e-08,
+              "position_error": 0.06472065262910134,
+              "segment": 21,
+              "success": false
+            },
+            {
+              "angular_error": 4.900795407963843e-07,
+              "max_equality": 1.8595529359302363,
+              "max_side_violation": 9.60413897303939e-13,
+              "physical_mpcc": 7.697565911343404e-11,
+              "position_error": 0.003087602392636177,
+              "segment": 22,
+              "success": false
+            },
+            {
+              "angular_error": 2.97908833019056e-11,
+              "max_equality": 1.9371663222490958,
+              "max_side_violation": 1.4183099139586375e-14,
+              "physical_mpcc": 8.887245379794632e-11,
+              "position_error": 0.007653819496442237,
+              "segment": 23,
+              "success": false
+            },
+            {
+              "angular_error": 5.761201788483453e-06,
+              "max_equality": 1.9842294023916425,
+              "max_side_violation": 1.4420853898279893e-11,
+              "physical_mpcc": 2.487808096758777e-12,
+              "position_error": 0.005981718567070598,
+              "segment": 24,
+              "success": false
+            },
+            {
+              "angular_error": 1.7966436290173596e-05,
+              "max_equality": 1.9998478014510819,
+              "max_side_violation": 8.326672684688674e-16,
+              "physical_mpcc": 3.0226859844471877e-15,
+              "position_error": 0.0015957565081513169,
+              "segment": 25,
+              "success": false
+            },
+            {
+              "angular_error": 7.324367540788994e-07,
+              "max_equality": 1.9842292869533793,
+              "max_side_violation": 1.1124804042953919e-14,
+              "physical_mpcc": 1.0169598294603274e-14,
+              "position_error": 0.001477962658995956,
+              "segment": 26,
+              "success": false
+            },
+            {
+              "angular_error": 1.1616759215335448e-07,
+              "max_equality": 1.9371663222538946,
+              "max_side_violation": 6.676202471184276e-15,
+              "physical_mpcc": 1.0014303706737465e-15,
+              "position_error": 0.002677491656783354,
+              "segment": 27,
+              "success": false
+            },
+            {
+              "angular_error": 0.002926295940852086,
+              "max_equality": 1.8595529716639019,
+              "max_side_violation": 8.076872504148014e-15,
+              "physical_mpcc": 3.35247640849144e-14,
+              "position_error": 0.0032664437260572035,
+              "segment": 28,
+              "success": false
+            },
+            {
+              "angular_error": 0.00011850601608575512,
+              "max_equality": 1.7526133579801535,
+              "max_side_violation": 2.930988785010413e-14,
+              "physical_mpcc": 1.863891426921207e-14,
+              "position_error": 0.0035358321897585006,
+              "segment": 29,
+              "success": false
+            },
+            {
+              "angular_error": 0.0017468156686796087,
+              "max_equality": 1.6180339882954602,
+              "max_side_violation": 6.6240350960869544e-15,
+              "physical_mpcc": 2.5796854133303268e-14,
+              "position_error": 0.0036107590930451222,
+              "segment": 30,
+              "success": false
+            },
+            {
+              "angular_error": 4.165343777842723e-05,
+              "max_equality": 1.4579372534972705,
+              "max_side_violation": 3.4783169711690026e-13,
+              "physical_mpcc": 1.2154157114783455e-12,
+              "position_error": 0.005466430251030481,
+              "segment": 31,
+              "success": false
+            },
+            {
+              "angular_error": 6.317484151572954e-05,
+              "max_equality": 4.981300032458336e-07,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 1.280075374803048e-15,
+              "position_error": 0.020249715893322126,
+              "segment": 32,
+              "success": true
+            },
+            {
+              "angular_error": 6.205105873569039e-15,
+              "max_equality": 3.443951630000279e-08,
+              "max_side_violation": 1.1102230246251565e-16,
+              "physical_mpcc": 9.225762860662826e-16,
+              "position_error": 0.001357735085449537,
+              "segment": 33,
+              "success": true
+            },
+            {
+              "angular_error": 3.7338044079852223e-06,
+              "max_equality": 2.141398169897002e-12,
+              "max_side_violation": 6.661338147750939e-16,
+              "physical_mpcc": 9.558398634755158e-15,
+              "position_error": 0.004858537929776711,
+              "segment": 34,
+              "success": true
+            },
+            {
+              "angular_error": 3.055541930585548e-14,
+              "max_equality": 8.688722697523105e-07,
+              "max_side_violation": 4.860668634032505e-16,
+              "physical_mpcc": 2.9565976033303416e-15,
+              "position_error": 0.0060879741994957865,
+              "segment": 35,
+              "success": true
+            },
+            {
+              "angular_error": 0.0003696024643137334,
+              "max_equality": 1.8230086650048837e-11,
+              "max_side_violation": 5.551115123125783e-16,
+              "physical_mpcc": 6.348869746296142e-15,
+              "position_error": 0.03326643397771583,
+              "segment": 36,
+              "success": true
+            },
+            {
+              "angular_error": 2.3018358914425607e-05,
+              "max_equality": 2.2624715455901723e-06,
+              "max_side_violation": 8.428998617739468e-16,
+              "physical_mpcc": 3.0818658485506826e-05,
+              "position_error": 0.014554922720228009,
+              "segment": 37,
+              "success": false
+            },
+            {
+              "angular_error": 1.747065530438574e-10,
+              "max_equality": 4.884680376016082e-07,
+              "max_side_violation": 2.914335439641036e-15,
+              "physical_mpcc": 6.5563515813382084e-06,
+              "position_error": 0.09226662042622821,
+              "segment": 38,
+              "success": true
+            },
+            {
+              "angular_error": 0.004998128037493433,
+              "max_equality": 1.2906561597247901e-08,
+              "max_side_violation": 1.2641936811442638e-14,
+              "physical_mpcc": 5.447347356831169e-14,
+              "position_error": 0.02992890863790245,
+              "segment": 39,
+              "success": true
+            },
+            {
+              "angular_error": 4.733718408009985e-06,
+              "max_equality": 4.653271731963615e-07,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 1.3334294062048607e-16,
+              "position_error": 0.006571393980779787,
+              "segment": 40,
+              "success": true
+            },
+            {
+              "angular_error": 0.18278066159780632,
+              "max_equality": 7.868498075325192e-09,
+              "max_side_violation": 2.1621593404574924e-14,
+              "physical_mpcc": 1.651257746056859e-15,
+              "position_error": 0.38847604127721336,
+              "segment": 41,
+              "success": false
+            },
+            {
+              "angular_error": 0.007916179380174799,
+              "max_equality": 1.742928024128787e-11,
+              "max_side_violation": 6.500505836687902e-13,
+              "physical_mpcc": 1.4958130606506661e-05,
+              "position_error": 0.0972721029390593,
+              "segment": 42,
+              "success": false
+            },
+            {
+              "angular_error": 0.1535653042046585,
+              "max_equality": 6.765875614211936e-07,
+              "max_side_violation": 1.8777306084482455e-14,
+              "physical_mpcc": 1.3645936327736867e-06,
+              "position_error": 0.2602257725841116,
+              "segment": 43,
+              "success": false
+            },
+            {
+              "angular_error": 0.012091443709417789,
+              "max_equality": 2.88866074964056e-06,
+              "max_side_violation": 3.0411729259211923e-15,
+              "physical_mpcc": 6.438564685900043e-13,
+              "position_error": 0.11105807202855872,
+              "segment": 44,
+              "success": false
+            },
+            {
+              "angular_error": 0.06868286024475613,
+              "max_equality": 7.354042839136099e-07,
+              "max_side_violation": 3.3389036996241504e-16,
+              "physical_mpcc": 4.670907192703752e-16,
+              "position_error": 0.1166757358603537,
+              "segment": 45,
+              "success": false
+            },
+            {
+              "angular_error": 4.409788506576362e-13,
+              "max_equality": 1.7084778036746684e-10,
+              "max_side_violation": 2.637823094216989e-15,
+              "physical_mpcc": 4.611429869010967e-16,
+              "position_error": 0.0005343917593218447,
+              "segment": 46,
+              "success": true
+            },
+            {
+              "angular_error": 3.108413936437141e-06,
+              "max_equality": 1.3935257940711834e-06,
+              "max_side_violation": 6.938893903907228e-17,
+              "physical_mpcc": 2.5418221984255077e-16,
+              "position_error": 0.005468412860928186,
+              "segment": 47,
+              "success": true
+            },
+            {
+              "angular_error": 3.609567489558721e-06,
+              "max_equality": 1.9860974045937674e-09,
+              "max_side_violation": 1.4573235961115122e-15,
+              "physical_mpcc": 5.020719528744846e-15,
+              "position_error": 0.005513802745332248,
+              "segment": 48,
+              "success": true
+            },
+            {
+              "angular_error": 0.0003112344024589764,
+              "max_equality": 1.8377635258460395e-07,
+              "max_side_violation": 9.71445146547012e-16,
+              "physical_mpcc": 5.5557175412857414e-15,
+              "position_error": 0.0009808754220239444,
+              "segment": 49,
+              "success": true
+            }
+          ],
+          "successful_segments": 27,
+          "worst_angular_error": 0.2667356413453868,
+          "worst_equality": 1.9998478014510819,
+          "worst_physical_mpcc": 0.000448379314748791,
+          "worst_position_error": 0.38847604127721336,
+          "worst_side_violation": 4.6943750515214635e-11
+        }
+      },
+      "problem": "push_t",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjective is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 1/50 final_error | solve_time_ms: 299 pos_error: 0.000653184 radius_error_abs: 0.000303976\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 2/50 final_error | solve_time_ms: 395 pos_error: 0.00383866 radius_error_abs: 0.0022975\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 3/50 final_error | solve_time_ms: 1115 pos_error: 0.0289439 radius_error_abs: 0.0259995\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 4/50 final_error | solve_time_ms: 3295 pos_error: 0.0441255 radius_error_abs: 0.040821\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 5/50 final_error | solve_time_ms: 4227 pos_error: 0.0510838 radius_error_abs: 0.0476732\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 6/50 final_error | solve_time_ms: 6425 pos_error: 0.0620818 radius_error_abs: 0.0549563\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 7/50 final_error | solve_time_ms: 3108 pos_error: 0.0532335 radius_error_abs: 0.0476249\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 8/50 final_error | solve_time_ms: 3154 pos_error: 0.0801629 radius_error_abs: 0.06315\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 4352 pos_error: 0.0666603 radius_error_abs: 0.0471734\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 10/50 final_error | solve_time_ms: 7992 pos_error: 0.0400953 radius_error_abs: 0.0192578\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 11/50 final_error | solve_time_ms: 8082 pos_error: 0.0185355 radius_error_abs: 0.00167602\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 12/50 final_error | solve_time_ms: 5259 pos_error: 0.0591292 radius_error_abs: 0.0364227\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 13/50 final_error | solve_time_ms: 7710 pos_error: 0.0894479 radius_error_abs: 0.0658626\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 14/50 final_error | solve_time_ms: 34563 pos_error: 0.0586437 radius_error_abs: 0.0551384\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 15/50 final_error | solve_time_ms: 16293 pos_error: 0.0961896 radius_error_abs: 0.0843621\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 16/50 final_error | solve_time_ms: 17266 pos_error: 0.0204131 radius_error_abs: 0.00408131\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 17/50 final_error | solve_time_ms: 14571 pos_error: 0.3507 radius_error_abs: 0.341677\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 18/50 final_error | solve_time_ms: 26272 pos_error: 0.237624 radius_error_abs: 0.230409\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 19/50 final_error | solve_time_ms: 18496 pos_error: 0.193102 radius_error_abs: 0.167577\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 20/50 final_error | solve_time_ms: 11515 pos_error: 0.0140965 radius_error_abs: 0.0113878\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 21/50 final_error | solve_time_ms: 10191 pos_error: 0.0507605 radius_error_abs: 0.0468093\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 22/50 final_error | solve_time_ms: 10337 pos_error: 0.0647207 radius_error_abs: 0.061055\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 23/50 final_error | solve_time_ms: 4955 pos_error: 0.0030876 radius_error_abs: 0.00219134\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 24/50 final_error | solve_time_ms: 6714 pos_error: 0.00765382 radius_error_abs: 0.0059929\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 25/50 final_error | solve_time_ms: 3982 pos_error: 0.00598172 radius_error_abs: 0.00448943\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 26/50 final_error | solve_time_ms: 1316 pos_error: 0.00159576 radius_error_abs: 0.00115812\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 27/50 final_error | solve_time_ms: 334 pos_error: 0.00147796 radius_error_abs: 0.00116767\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 28/50 final_error | solve_time_ms: 878 pos_error: 0.00267749 radius_error_abs: 0.00191804\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 29/50 final_error | solve_time_ms: 2108 pos_error: 0.00326644 radius_error_abs: 0.00178375\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 30/50 final_error | solve_time_ms: 2898 pos_error: 0.00353583 radius_error_abs: 0.00151699\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 31/50 final_error | solve_time_ms: 2299 pos_error: 0.00361076 radius_error_abs: 0.00130705\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 32/50 final_error | solve_time_ms: 1514 pos_error: 0.00546643 radius_error_abs: 0.00317027\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 33/50 final_error | solve_time_ms: 4931 pos_error: 0.0202497 radius_error_abs: 0.000598011\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 34/50 final_error | solve_time_ms: 6927 pos_error: 0.00135774 radius_error_abs: 0.00070113\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 35/50 final_error | solve_time_ms: 5585 pos_error: 0.00485854 radius_error_abs: 0.00120178\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 36/50 final_error | solve_time_ms: 4907 pos_error: 0.00608797 radius_error_abs: 0.00285359\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 37/50 final_error | solve_time_ms: 5722 pos_error: 0.0332664 radius_error_abs: 0.030229\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 38/50 final_error | solve_time_ms: 11247 pos_error: 0.0145549 radius_error_abs: 0.012727\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 39/50 final_error | solve_time_ms: 3856 pos_error: 0.0922666 radius_error_abs: 0.0911628\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 40/50 final_error | solve_time_ms: 11238 pos_error: 0.0299289 radius_error_abs: 0.0275176\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 41/50 final_error | solve_time_ms: 1282 pos_error: 0.00657139 radius_error_abs: 0.00272097\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 42/50 final_error | solve_time_ms: 3559 pos_error: 0.388476 radius_error_abs: 0.388429\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 43/50 final_error | solve_time_ms: 17078 pos_error: 0.0972721 radius_error_abs: 0.0932867\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 44/50 final_error | solve_time_ms: 9222 pos_error: 0.260226 radius_error_abs: 0.259245\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 45/50 final_error | solve_time_ms: 5693 pos_error: 0.111058 radius_error_abs: 0.106708\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 46/50 final_error | solve_time_ms: 2432 pos_error: 0.116676 radius_error_abs: 0.111973\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 47/50 final_error | solve_time_ms: 1785 pos_error: 0.000534392 radius_error_abs: 0.000222297\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 48/50 final_error | solve_time_ms: 693 pos_error: 0.00546841 radius_error_abs: 0.00228171\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 49/50 final_error | solve_time_ms: 1197 pos_error: 0.0055138 radius_error_abs: 0.002175\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 50/50 final_error | solve_time_ms: 435 pos_error: 0.000980875 radius_error_abs: 0.000146544\n",
+      "wall_time_seconds": 339.76860724400103
+    },
+    {
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_segments": 50,
+          "segments": [
+            {
+              "angular_error": 0.00024101297815232875,
+              "max_equality": 7.704994428288717e-09,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 1.280465529021764e-16,
+              "position_error": 0.0006531835089057221,
+              "segment": 0,
+              "success": true
+            },
+            {
+              "angular_error": 8.019141898955863e-08,
+              "max_equality": 5.738242637998159e-09,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 4.57297621712799e-17,
+              "position_error": 0.003838662192315351,
+              "segment": 1,
+              "success": true
+            },
+            {
+              "angular_error": 2.587912878125598e-07,
+              "max_equality": 2.8212170204156006e-07,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 2.651297830323514e-16,
+              "position_error": 0.028943883756268933,
+              "segment": 2,
+              "success": true
+            },
+            {
+              "angular_error": 8.554827316898175e-06,
+              "max_equality": 2.0852463383097541e-07,
+              "max_side_violation": 1.3877787807814457e-16,
+              "physical_mpcc": 5.683375719352781e-16,
+              "position_error": 0.044125502265286096,
+              "segment": 3,
+              "success": true
+            },
+            {
+              "angular_error": 5.824100427228793e-06,
+              "max_equality": 1.2453699826019157e-06,
+              "max_side_violation": 4.440892098500626e-15,
+              "physical_mpcc": 5.614366884570451e-09,
+              "position_error": 0.05108379381064282,
+              "segment": 4,
+              "success": true
+            },
+            {
+              "angular_error": 0.008866628362869675,
+              "max_equality": 1.1816702061295814e-09,
+              "max_side_violation": 5.551115123125783e-16,
+              "physical_mpcc": 9.256048775599218e-15,
+              "position_error": 0.06208182682627784,
+              "segment": 5,
+              "success": true
+            },
+            {
+              "angular_error": 0.0022049108518513473,
+              "max_equality": 1.8984318515136026e-11,
+              "max_side_violation": 1.4710455076283324e-15,
+              "physical_mpcc": 1.8872722781219194e-11,
+              "position_error": 0.05323348082956339,
+              "segment": 6,
+              "success": true
+            },
+            {
+              "angular_error": 0.027414102592022805,
+              "max_equality": 4.618084699194234e-09,
+              "max_side_violation": 9.71445146547012e-16,
+              "physical_mpcc": 8.414741011324073e-14,
+              "position_error": 0.08016285002141622,
+              "segment": 7,
+              "success": true
+            },
+            {
+              "angular_error": 0.02505105435989648,
+              "max_equality": 3.4754894911846626e-06,
+              "max_side_violation": 7.485148608034161e-15,
+              "physical_mpcc": 1.574811129172961e-07,
+              "position_error": 0.06666028393726242,
+              "segment": 8,
+              "success": true
+            },
+            {
+              "angular_error": 0.015875592766295146,
+              "max_equality": 1.9719892385694493e-11,
+              "max_side_violation": 4.4364512064021255e-13,
+              "physical_mpcc": 1.4015892252443137e-09,
+              "position_error": 0.040095332362561555,
+              "segment": 9,
+              "success": true
+            },
+            {
+              "angular_error": 0.007757596626344498,
+              "max_equality": 8.688723072826734e-07,
+              "max_side_violation": 3.3306690738754696e-15,
+              "physical_mpcc": 3.135615352572156e-09,
+              "position_error": 0.018535498635274417,
+              "segment": 10,
+              "success": true
+            },
+            {
+              "angular_error": 0.014422210296426909,
+              "max_equality": 3.47548947026425e-06,
+              "max_side_violation": 2.0872192862952943e-14,
+              "physical_mpcc": 5.4968528497399445e-06,
+              "position_error": 0.059129206371451325,
+              "segment": 11,
+              "success": true
+            },
+            {
+              "angular_error": 0.029432136846812076,
+              "max_equality": 1.7199398505418628e-07,
+              "max_side_violation": 4.8865251845220196e-14,
+              "physical_mpcc": 8.071405054005785e-06,
+              "position_error": 0.08944791999182412,
+              "segment": 12,
+              "success": true
+            },
+            {
+              "angular_error": 4.0937677607197354e-07,
+              "max_equality": 6.870001112992911e-07,
+              "max_side_violation": 2.945376485144402e-15,
+              "physical_mpcc": 3.751841411880755e-06,
+              "position_error": 0.05864366997455162,
+              "segment": 13,
+              "success": true
+            },
+            {
+              "angular_error": 0.031881030676475214,
+              "max_equality": 1.0266227472577327e-06,
+              "max_side_violation": 6.505906924303417e-14,
+              "physical_mpcc": 0.000448379314748791,
+              "position_error": 0.09618963955960277,
+              "segment": 14,
+              "success": false
+            },
+            {
+              "angular_error": 4.1407849371566385e-15,
+              "max_equality": 1.8912660659786695e-07,
+              "max_side_violation": 2.069663884718409e-13,
+              "physical_mpcc": 5.4308251597834335e-06,
+              "position_error": 0.020413102198190557,
+              "segment": 15,
+              "success": true
+            },
+            {
+              "angular_error": 0.2667356413453868,
+              "max_equality": 9.749881992423841e-16,
+              "max_side_violation": 5.551115123125783e-17,
+              "physical_mpcc": 8.807544534935986e-07,
+              "position_error": 0.35069982221284374,
+              "segment": 16,
+              "success": false
+            },
+            {
+              "angular_error": 0.0212240355362958,
+              "max_equality": 4.318647240930673e-07,
+              "max_side_violation": 2.9906305326190217e-12,
+              "physical_mpcc": 7.130083800130469e-06,
+              "position_error": 0.2376239740340816,
+              "segment": 17,
+              "success": false
+            },
+            {
+              "angular_error": 0.24343719529499092,
+              "max_equality": 6.363453600860547e-16,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 9.483338041572225e-09,
+              "position_error": 0.19310239016465758,
+              "segment": 18,
+              "success": false
+            },
+            {
+              "angular_error": 3.365038456215608e-11,
+              "max_equality": 1.4579372545170188,
+              "max_side_violation": 2.0413161784484774e-11,
+              "physical_mpcc": 5.1413892168509915e-12,
+              "position_error": 0.014096533549990083,
+              "segment": 19,
+              "success": false
+            },
+            {
+              "angular_error": 0.0002834009646245396,
+              "max_equality": 1.618033988261438,
+              "max_side_violation": 4.6943750515214635e-11,
+              "physical_mpcc": 1.0515190600732485e-11,
+              "position_error": 0.0507604594557636,
+              "segment": 20,
+              "success": false
+            },
+            {
+              "angular_error": 6.715895722233904e-05,
+              "max_equality": 1.7526133600330187,
+              "max_side_violation": 8.870284730986853e-12,
+              "physical_mpcc": 1.4901161038971761e-08,
+              "position_error": 0.06472065262910134,
+              "segment": 21,
+              "success": false
+            },
+            {
+              "angular_error": 4.900795407963843e-07,
+              "max_equality": 1.8595529359302363,
+              "max_side_violation": 9.60413897303939e-13,
+              "physical_mpcc": 7.697565911343404e-11,
+              "position_error": 0.003087602392636177,
+              "segment": 22,
+              "success": false
+            },
+            {
+              "angular_error": 2.97908833019056e-11,
+              "max_equality": 1.9371663222490958,
+              "max_side_violation": 1.4183099139586375e-14,
+              "physical_mpcc": 8.887245379794632e-11,
+              "position_error": 0.007653819496442237,
+              "segment": 23,
+              "success": false
+            },
+            {
+              "angular_error": 5.761201788483453e-06,
+              "max_equality": 1.9842294023916425,
+              "max_side_violation": 1.4420853898279893e-11,
+              "physical_mpcc": 2.487808096758777e-12,
+              "position_error": 0.005981718567070598,
+              "segment": 24,
+              "success": false
+            },
+            {
+              "angular_error": 1.7966436290173596e-05,
+              "max_equality": 1.9998478014510819,
+              "max_side_violation": 8.326672684688674e-16,
+              "physical_mpcc": 3.0226859844471877e-15,
+              "position_error": 0.0015957565081513169,
+              "segment": 25,
+              "success": false
+            },
+            {
+              "angular_error": 7.324367540788994e-07,
+              "max_equality": 1.9842292869533793,
+              "max_side_violation": 1.1124804042953919e-14,
+              "physical_mpcc": 1.0169598294603274e-14,
+              "position_error": 0.001477962658995956,
+              "segment": 26,
+              "success": false
+            },
+            {
+              "angular_error": 1.1616759215335448e-07,
+              "max_equality": 1.9371663222538946,
+              "max_side_violation": 6.676202471184276e-15,
+              "physical_mpcc": 1.0014303706737465e-15,
+              "position_error": 0.002677491656783354,
+              "segment": 27,
+              "success": false
+            },
+            {
+              "angular_error": 0.002926295940852086,
+              "max_equality": 1.8595529716639019,
+              "max_side_violation": 8.076872504148014e-15,
+              "physical_mpcc": 3.35247640849144e-14,
+              "position_error": 0.0032664437260572035,
+              "segment": 28,
+              "success": false
+            },
+            {
+              "angular_error": 0.00011850601608575512,
+              "max_equality": 1.7526133579801535,
+              "max_side_violation": 2.930988785010413e-14,
+              "physical_mpcc": 1.863891426921207e-14,
+              "position_error": 0.0035358321897585006,
+              "segment": 29,
+              "success": false
+            },
+            {
+              "angular_error": 0.0017468156686796087,
+              "max_equality": 1.6180339882954602,
+              "max_side_violation": 6.6240350960869544e-15,
+              "physical_mpcc": 2.5796854133303268e-14,
+              "position_error": 0.0036107590930451222,
+              "segment": 30,
+              "success": false
+            },
+            {
+              "angular_error": 4.165343777842723e-05,
+              "max_equality": 1.4579372534972705,
+              "max_side_violation": 3.4783169711690026e-13,
+              "physical_mpcc": 1.2154157114783455e-12,
+              "position_error": 0.005466430251030481,
+              "segment": 31,
+              "success": false
+            },
+            {
+              "angular_error": 6.317484151572954e-05,
+              "max_equality": 4.981300032458336e-07,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 1.280075374803048e-15,
+              "position_error": 0.020249715893322126,
+              "segment": 32,
+              "success": true
+            },
+            {
+              "angular_error": 6.205105873569039e-15,
+              "max_equality": 3.443951630000279e-08,
+              "max_side_violation": 1.1102230246251565e-16,
+              "physical_mpcc": 9.225762860662826e-16,
+              "position_error": 0.001357735085449537,
+              "segment": 33,
+              "success": true
+            },
+            {
+              "angular_error": 3.7338044079852223e-06,
+              "max_equality": 2.141398169897002e-12,
+              "max_side_violation": 6.661338147750939e-16,
+              "physical_mpcc": 9.558398634755158e-15,
+              "position_error": 0.004858537929776711,
+              "segment": 34,
+              "success": true
+            },
+            {
+              "angular_error": 3.055541930585548e-14,
+              "max_equality": 8.688722697523105e-07,
+              "max_side_violation": 4.860668634032505e-16,
+              "physical_mpcc": 2.9565976033303416e-15,
+              "position_error": 0.0060879741994957865,
+              "segment": 35,
+              "success": true
+            },
+            {
+              "angular_error": 0.0003696024643137334,
+              "max_equality": 1.8230086650048837e-11,
+              "max_side_violation": 5.551115123125783e-16,
+              "physical_mpcc": 6.348869746296142e-15,
+              "position_error": 0.03326643397771583,
+              "segment": 36,
+              "success": true
+            },
+            {
+              "angular_error": 2.3018358914425607e-05,
+              "max_equality": 2.2624715455901723e-06,
+              "max_side_violation": 8.428998617739468e-16,
+              "physical_mpcc": 3.0818658485506826e-05,
+              "position_error": 0.014554922720228009,
+              "segment": 37,
+              "success": false
+            },
+            {
+              "angular_error": 1.747065530438574e-10,
+              "max_equality": 4.884680376016082e-07,
+              "max_side_violation": 2.914335439641036e-15,
+              "physical_mpcc": 6.5563515813382084e-06,
+              "position_error": 0.09226662042622821,
+              "segment": 38,
+              "success": true
+            },
+            {
+              "angular_error": 0.004998128037493433,
+              "max_equality": 1.2906561597247901e-08,
+              "max_side_violation": 1.2641936811442638e-14,
+              "physical_mpcc": 5.447347356831169e-14,
+              "position_error": 0.02992890863790245,
+              "segment": 39,
+              "success": true
+            },
+            {
+              "angular_error": 4.733718408009985e-06,
+              "max_equality": 4.653271731963615e-07,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 1.3334294062048607e-16,
+              "position_error": 0.006571393980779787,
+              "segment": 40,
+              "success": true
+            },
+            {
+              "angular_error": 0.18278066159780632,
+              "max_equality": 7.868498075325192e-09,
+              "max_side_violation": 2.1621593404574924e-14,
+              "physical_mpcc": 1.651257746056859e-15,
+              "position_error": 0.38847604127721336,
+              "segment": 41,
+              "success": false
+            },
+            {
+              "angular_error": 0.007916179380174799,
+              "max_equality": 1.742928024128787e-11,
+              "max_side_violation": 6.500505836687902e-13,
+              "physical_mpcc": 1.4958130606506661e-05,
+              "position_error": 0.0972721029390593,
+              "segment": 42,
+              "success": false
+            },
+            {
+              "angular_error": 0.1535653042046585,
+              "max_equality": 6.765875614211936e-07,
+              "max_side_violation": 1.8777306084482455e-14,
+              "physical_mpcc": 1.3645936327736867e-06,
+              "position_error": 0.2602257725841116,
+              "segment": 43,
+              "success": false
+            },
+            {
+              "angular_error": 0.012091443709417789,
+              "max_equality": 2.88866074964056e-06,
+              "max_side_violation": 3.0411729259211923e-15,
+              "physical_mpcc": 6.438564685900043e-13,
+              "position_error": 0.11105807202855872,
+              "segment": 44,
+              "success": false
+            },
+            {
+              "angular_error": 0.06868286024475613,
+              "max_equality": 7.354042839136099e-07,
+              "max_side_violation": 3.3389036996241504e-16,
+              "physical_mpcc": 4.670907192703752e-16,
+              "position_error": 0.1166757358603537,
+              "segment": 45,
+              "success": false
+            },
+            {
+              "angular_error": 4.409788506576362e-13,
+              "max_equality": 1.7084778036746684e-10,
+              "max_side_violation": 2.637823094216989e-15,
+              "physical_mpcc": 4.611429869010967e-16,
+              "position_error": 0.0005343917593218447,
+              "segment": 46,
+              "success": true
+            },
+            {
+              "angular_error": 3.108413936437141e-06,
+              "max_equality": 1.3935257940711834e-06,
+              "max_side_violation": 6.938893903907228e-17,
+              "physical_mpcc": 2.5418221984255077e-16,
+              "position_error": 0.005468412860928186,
+              "segment": 47,
+              "success": true
+            },
+            {
+              "angular_error": 3.609567489558721e-06,
+              "max_equality": 1.9860974045937674e-09,
+              "max_side_violation": 1.4573235961115122e-15,
+              "physical_mpcc": 5.020719528744846e-15,
+              "position_error": 0.005513802745332248,
+              "segment": 48,
+              "success": true
+            },
+            {
+              "angular_error": 0.0003112344024589764,
+              "max_equality": 1.8377635258460395e-07,
+              "max_side_violation": 9.71445146547012e-16,
+              "physical_mpcc": 5.5557175412857414e-15,
+              "position_error": 0.0009808754220239444,
+              "segment": 49,
+              "success": true
+            }
+          ],
+          "successful_segments": 27,
+          "worst_angular_error": 0.2667356413453868,
+          "worst_equality": 1.9998478014510819,
+          "worst_physical_mpcc": 0.000448379314748791,
+          "worst_position_error": 0.38847604127721336,
+          "worst_side_violation": 4.6943750515214635e-11
+        }
+      },
+      "problem": "push_t",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjective is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 1/50 final_error | solve_time_ms: 271 pos_error: 0.000653184 radius_error_abs: 0.000303976\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 2/50 final_error | solve_time_ms: 381 pos_error: 0.00383866 radius_error_abs: 0.0022975\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 3/50 final_error | solve_time_ms: 1189 pos_error: 0.0289439 radius_error_abs: 0.0259995\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 4/50 final_error | solve_time_ms: 3379 pos_error: 0.0441255 radius_error_abs: 0.040821\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 5/50 final_error | solve_time_ms: 4214 pos_error: 0.0510838 radius_error_abs: 0.0476732\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 6/50 final_error | solve_time_ms: 6472 pos_error: 0.0620818 radius_error_abs: 0.0549563\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 7/50 final_error | solve_time_ms: 3124 pos_error: 0.0532335 radius_error_abs: 0.0476249\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 8/50 final_error | solve_time_ms: 3177 pos_error: 0.0801629 radius_error_abs: 0.06315\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 4363 pos_error: 0.0666603 radius_error_abs: 0.0471734\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 10/50 final_error | solve_time_ms: 7984 pos_error: 0.0400953 radius_error_abs: 0.0192578\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 11/50 final_error | solve_time_ms: 7937 pos_error: 0.0185355 radius_error_abs: 0.00167602\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 12/50 final_error | solve_time_ms: 5157 pos_error: 0.0591292 radius_error_abs: 0.0364227\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 13/50 final_error | solve_time_ms: 7663 pos_error: 0.0894479 radius_error_abs: 0.0658626\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 14/50 final_error | solve_time_ms: 34829 pos_error: 0.0586437 radius_error_abs: 0.0551384\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 15/50 final_error | solve_time_ms: 16083 pos_error: 0.0961896 radius_error_abs: 0.0843621\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 16/50 final_error | solve_time_ms: 17606 pos_error: 0.0204131 radius_error_abs: 0.00408131\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 17/50 final_error | solve_time_ms: 15445 pos_error: 0.3507 radius_error_abs: 0.341677\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 18/50 final_error | solve_time_ms: 27198 pos_error: 0.237624 radius_error_abs: 0.230409\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 19/50 final_error | solve_time_ms: 19576 pos_error: 0.193102 radius_error_abs: 0.167577\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 20/50 final_error | solve_time_ms: 12030 pos_error: 0.0140965 radius_error_abs: 0.0113878\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 21/50 final_error | solve_time_ms: 10635 pos_error: 0.0507605 radius_error_abs: 0.0468093\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 22/50 final_error | solve_time_ms: 10818 pos_error: 0.0647207 radius_error_abs: 0.061055\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 23/50 final_error | solve_time_ms: 5066 pos_error: 0.0030876 radius_error_abs: 0.00219134\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 24/50 final_error | solve_time_ms: 6931 pos_error: 0.00765382 radius_error_abs: 0.0059929\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 25/50 final_error | solve_time_ms: 4064 pos_error: 0.00598172 radius_error_abs: 0.00448943\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 26/50 final_error | solve_time_ms: 1381 pos_error: 0.00159576 radius_error_abs: 0.00115812\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 27/50 final_error | solve_time_ms: 362 pos_error: 0.00147796 radius_error_abs: 0.00116767\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 28/50 final_error | solve_time_ms: 930 pos_error: 0.00267749 radius_error_abs: 0.00191804\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 29/50 final_error | solve_time_ms: 2233 pos_error: 0.00326644 radius_error_abs: 0.00178375\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 30/50 final_error | solve_time_ms: 3055 pos_error: 0.00353583 radius_error_abs: 0.00151699\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 31/50 final_error | solve_time_ms: 2413 pos_error: 0.00361076 radius_error_abs: 0.00130705\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 32/50 final_error | solve_time_ms: 1561 pos_error: 0.00546643 radius_error_abs: 0.00317027\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 33/50 final_error | solve_time_ms: 5130 pos_error: 0.0202497 radius_error_abs: 0.000598011\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 34/50 final_error | solve_time_ms: 7114 pos_error: 0.00135774 radius_error_abs: 0.00070113\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 35/50 final_error | solve_time_ms: 5749 pos_error: 0.00485854 radius_error_abs: 0.00120178\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 36/50 final_error | solve_time_ms: 5096 pos_error: 0.00608797 radius_error_abs: 0.00285359\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 37/50 final_error | solve_time_ms: 6015 pos_error: 0.0332664 radius_error_abs: 0.030229\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 38/50 final_error | solve_time_ms: 11374 pos_error: 0.0145549 radius_error_abs: 0.012727\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 39/50 final_error | solve_time_ms: 3874 pos_error: 0.0922666 radius_error_abs: 0.0911628\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 40/50 final_error | solve_time_ms: 11589 pos_error: 0.0299289 radius_error_abs: 0.0275176\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 41/50 final_error | solve_time_ms: 1302 pos_error: 0.00657139 radius_error_abs: 0.00272097\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 42/50 final_error | solve_time_ms: 3662 pos_error: 0.388476 radius_error_abs: 0.388429\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 43/50 final_error | solve_time_ms: 17522 pos_error: 0.0972721 radius_error_abs: 0.0932867\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 44/50 final_error | solve_time_ms: 9433 pos_error: 0.260226 radius_error_abs: 0.259245\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 45/50 final_error | solve_time_ms: 5756 pos_error: 0.111058 radius_error_abs: 0.106708\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 46/50 final_error | solve_time_ms: 2529 pos_error: 0.116676 radius_error_abs: 0.111973\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 47/50 final_error | solve_time_ms: 1805 pos_error: 0.000534392 radius_error_abs: 0.000222297\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 48/50 final_error | solve_time_ms: 713 pos_error: 0.00546841 radius_error_abs: 0.00228171\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 49/50 final_error | solve_time_ms: 1204 pos_error: 0.0055138 radius_error_abs: 0.002175\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 50/50 final_error | solve_time_ms: 434 pos_error: 0.000980875 radius_error_abs: 0.000146544\n",
+      "wall_time_seconds": 347.8973573660005
+    },
+    {
+      "metrics": {},
+      "problem": "cartpole_soft_walls",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== CARTPOLE WITH SOFT WALLS ===\nStatus:              Success\nTask success:        yes\nSolve time:          0.372078 s\nIterations:          276\nObjective:           2.720175844e+00\nPrimal infeas:       0.000e+00\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.997e-07\nFinal theta(mu):     1.000e-06\nTerminal state:      [0.002374, 0.029813, -0.004793, -0.008442]\n",
+      "wall_time_seconds": 0.3788200250019145
+    },
+    {
+      "metrics": {},
+      "problem": "push_box",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model Pushbox_pushboxObjective is loaded.\nModel Pushbox_pushboxDynamicConstraints is loaded.\nModel Pushbox_pushboxContactConstraints is loaded.\nModel Pushbox_pushboxInitialConstraints is loaded.\nModel Pushbox_pushboxContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:Pushbox solved in 77 iterations.\nSolver time: 400ms\nQP solver time: 387.849ms\nmax constraint violation: equality: 2.78528e-07 inequality: 9.75109e-14\nobj from 2654.6 to 6.93078\n",
+      "wall_time_seconds": 0.4037512870017963
+    },
+    {
+      "metrics": {
+        "summary": {
+          "attempted_segments": 50,
+          "successful_segments": 50,
+          "total_iterations": 23546,
+          "worst_angular_error": 0.021508,
+          "worst_dynamics": 6.58e-06,
+          "worst_physical_mpcc": 4.564e-06,
+          "worst_position_error": 0.062447,
+          "worst_side_violation": 8.499e-09
+        }
+      },
+      "problem": "push_t",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 00: status=Success task=yes primal=1.73e-18 stat=9.72e-03 mpcc=1.00e-06 pos=0.0009 angle=0.0001\nsegment 01: status=Success task=yes primal=6.58e-06 stat=3.41e-03 mpcc=4.56e-06 pos=0.0111 angle=0.0000\nsegment 02: status=Success task=yes primal=6.94e-18 stat=9.34e-03 mpcc=1.00e-06 pos=0.0284 angle=0.0000\nsegment 03: status=Success task=yes primal=1.73e-18 stat=9.74e-03 mpcc=9.95e-07 pos=0.0417 angle=0.0001\nsegment 04: status=Success task=yes primal=0.00e+00 stat=2.50e-03 mpcc=9.96e-07 pos=0.0039 angle=0.0000\nsegment 05: status=Success task=yes primal=2.12e-07 stat=7.50e-03 mpcc=1.00e-06 pos=0.0575 angle=0.0001\nsegment 06: status=Success task=yes primal=7.06e-07 stat=4.18e-03 mpcc=1.00e-06 pos=0.0509 angle=0.0014\nsegment 07: status=Success task=yes primal=3.33e-16 stat=9.84e-03 mpcc=1.00e-06 pos=0.0384 angle=0.0002\nsegment 08: status=Success task=yes primal=6.94e-18 stat=8.53e-04 mpcc=9.99e-07 pos=0.0010 angle=0.0000\nsegment 09: status=Success task=yes primal=1.11e-16 stat=5.94e-03 mpcc=1.00e-06 pos=0.0035 angle=0.0012\nsegment 10: status=Success task=yes primal=6.22e-09 stat=2.60e-03 mpcc=1.00e-06 pos=0.0024 angle=0.0012\nsegment 11: status=Success task=yes primal=2.47e-07 stat=5.86e-03 mpcc=1.01e-06 pos=0.0036 angle=0.0002\nsegment 12: status=Success task=yes primal=2.22e-16 stat=1.38e-03 mpcc=1.00e-06 pos=0.0139 angle=0.0060\nsegment 13: status=Success task=yes primal=1.40e-06 stat=2.98e-03 mpcc=1.00e-06 pos=0.0063 angle=0.0007\nsegment 14: status=Success task=yes primal=5.55e-17 stat=7.26e-03 mpcc=9.95e-07 pos=0.0144 angle=0.0001\nsegment 15: status=Success task=yes primal=1.73e-18 stat=7.73e-03 mpcc=1.00e-06 pos=0.0056 angle=0.0007\nsegment 16: status=Success task=yes primal=2.78e-17 stat=9.23e-03 mpcc=9.88e-07 pos=0.0106 angle=0.0001\nsegment 17: status=Success task=yes primal=4.74e-07 stat=5.08e-03 mpcc=1.00e-06 pos=0.0083 angle=0.0000\nsegment 18: status=Success task=yes primal=3.47e-18 stat=6.84e-03 mpcc=9.92e-07 pos=0.0215 angle=0.0001\nsegment 19: status=Success task=yes primal=1.39e-17 stat=9.89e-03 mpcc=8.73e-07 pos=0.0234 angle=0.0000\nsegment 20: status=Success task=yes primal=6.94e-18 stat=4.26e-03 mpcc=1.00e-06 pos=0.0099 angle=0.0000\nsegment 21: status=Success task=yes primal=6.62e-07 stat=6.28e-03 mpcc=1.00e-06 pos=0.0201 angle=0.0002\nsegment 22: status=Success task=yes primal=1.02e-08 stat=6.01e-03 mpcc=1.01e-06 pos=0.0119 angle=0.0000\nsegment 23: status=Success task=yes primal=1.73e-18 stat=9.99e-03 mpcc=8.87e-07 pos=0.0124 angle=0.0000\nsegment 24: status=Success task=yes primal=3.47e-18 stat=9.42e-03 mpcc=9.40e-07 pos=0.0182 angle=0.0001\nsegment 25: status=Success task=yes primal=5.55e-17 stat=9.85e-03 mpcc=8.65e-07 pos=0.0339 angle=0.0003\nsegment 26: status=Success task=yes primal=0.00e+00 stat=6.24e-03 mpcc=9.99e-07 pos=0.0032 angle=0.0000\nsegment 27: status=Success task=yes primal=1.83e-06 stat=3.20e-03 mpcc=1.03e-06 pos=0.0100 angle=0.0037\nsegment 28: status=Success task=yes primal=0.00e+00 stat=2.67e-04 mpcc=1.00e-06 pos=0.0141 angle=0.0215\nsegment 29: status=Success task=yes primal=0.00e+00 stat=9.20e-03 mpcc=9.80e-07 pos=0.0081 angle=0.0000\nsegment 30: status=Success task=yes primal=0.00e+00 stat=9.90e-03 mpcc=8.99e-07 pos=0.0042 angle=0.0004\nsegment 31: status=Success task=yes primal=8.73e-09 stat=9.74e-03 mpcc=1.01e-06 pos=0.0054 angle=0.0000\nsegment 32: status=Success task=yes primal=0.00e+00 stat=9.72e-03 mpcc=9.54e-07 pos=0.0093 angle=0.0026\nsegment 33: status=Success task=yes primal=0.00e+00 stat=1.63e-03 mpcc=1.00e-06 pos=0.0023 angle=0.0001\nsegment 34: status=Success task=yes primal=0.00e+00 stat=8.91e-03 mpcc=8.60e-07 pos=0.0134 angle=0.0001\nsegment 35: status=Success task=yes primal=0.00e+00 stat=9.70e-03 mpcc=8.57e-07 pos=0.0032 angle=0.0000\nsegment 36: status=Success task=yes primal=0.00e+00 stat=9.69e-03 mpcc=8.64e-07 pos=0.0133 angle=0.0000\nsegment 37: status=Success task=yes primal=0.00e+00 stat=1.00e-02 mpcc=8.68e-07 pos=0.0353 angle=0.0011\nsegment 38: status=Success task=yes primal=0.00e+00 stat=9.88e-03 mpcc=8.83e-07 pos=0.0031 angle=0.0000\nsegment 39: status=Success task=yes primal=0.00e+00 stat=6.36e-03 mpcc=9.99e-07 pos=0.0353 angle=0.0008\nsegment 40: status=Success task=yes primal=0.00e+00 stat=9.96e-03 mpcc=8.71e-07 pos=0.0410 angle=0.0011\nsegment 41: status=Success task=yes primal=0.00e+00 stat=9.52e-03 mpcc=8.80e-07 pos=0.0624 angle=0.0000\nsegment 42: status=Success task=yes primal=6.83e-08 stat=1.52e-03 mpcc=1.00e-06 pos=0.0154 angle=0.0000\nsegment 43: status=Success task=yes primal=0.00e+00 stat=3.34e-03 mpcc=1.00e-06 pos=0.0281 angle=0.0001\nsegment 44: status=Success task=yes primal=0.00e+00 stat=8.69e-03 mpcc=9.90e-07 pos=0.0305 angle=0.0002\nsegment 45: status=Success task=yes primal=0.00e+00 stat=7.92e-03 mpcc=9.83e-07 pos=0.0086 angle=0.0000\nsegment 46: status=Success task=yes primal=0.00e+00 stat=7.10e-03 mpcc=1.00e-06 pos=0.0136 angle=0.0001\nsegment 47: status=Success task=yes primal=0.00e+00 stat=3.29e-03 mpcc=1.00e-06 pos=0.0003 angle=0.0000\nsegment 48: status=Success task=yes primal=0.00e+00 stat=5.00e-03 mpcc=9.87e-07 pos=0.0012 angle=0.0004\nsegment 49: status=Success task=yes primal=0.00e+00 stat=4.40e-03 mpcc=1.00e-06 pos=0.0030 angle=0.0003\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 50/50\nTotal solve time:    60.495912 s\nTotal iterations:    23546\nWorst dynamics:      6.580e-06\nWorst side violation:8.499e-09\nWorst physical MPCC: 4.564e-06\nWorst position error:0.062447\nWorst angular error: 0.021508\n",
+      "wall_time_seconds": 60.49848865500098
+    },
+    {
+      "metrics": {},
+      "problem": "transport",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== TRANSPORT ===\nStatus:              Success\nTask success:        yes\nSolve time:          0.057100 s\nIterations:          55 total (13 final stage)\nObjective:           2.964117163e+00\nPrimal infeas:       5.637e-07\nStationarity:        5.457e-03\nBarrier residual:    5.000e-07\nPhysical MPCC:       1.908e-06\nTranslation error:   0.000034\nVelocity error:      0.462052\nTerminal physical:   [-0.500034, -0.000000, -1.538010, -1.992409]\n",
+      "wall_time_seconds": 0.06013998499838635
+    },
+    {
+      "metrics": {},
+      "problem": "cartpole_soft_walls",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== CARTPOLE WITH SOFT WALLS ===\nStatus:              Success\nTask success:        yes\nSolve time:          0.390503 s\nIterations:          276\nObjective:           2.720175844e+00\nPrimal infeas:       0.000e+00\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.997e-07\nFinal theta(mu):     1.000e-06\nTerminal state:      [0.002374, 0.029813, -0.004793, -0.008442]\n",
+      "wall_time_seconds": 0.39884588299901225
+    },
+    {
+      "metrics": {
+        "summary": {
+          "attempted_segments": 50,
+          "successful_segments": 50,
+          "total_iterations": 23546,
+          "worst_angular_error": 0.021508,
+          "worst_dynamics": 6.58e-06,
+          "worst_physical_mpcc": 4.564e-06,
+          "worst_position_error": 0.062447,
+          "worst_side_violation": 8.499e-09
+        }
+      },
+      "problem": "push_t",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 00: status=Success task=yes primal=1.73e-18 stat=9.72e-03 mpcc=1.00e-06 pos=0.0009 angle=0.0001\nsegment 01: status=Success task=yes primal=6.58e-06 stat=3.41e-03 mpcc=4.56e-06 pos=0.0111 angle=0.0000\nsegment 02: status=Success task=yes primal=6.94e-18 stat=9.34e-03 mpcc=1.00e-06 pos=0.0284 angle=0.0000\nsegment 03: status=Success task=yes primal=1.73e-18 stat=9.74e-03 mpcc=9.95e-07 pos=0.0417 angle=0.0001\nsegment 04: status=Success task=yes primal=0.00e+00 stat=2.50e-03 mpcc=9.96e-07 pos=0.0039 angle=0.0000\nsegment 05: status=Success task=yes primal=2.12e-07 stat=7.50e-03 mpcc=1.00e-06 pos=0.0575 angle=0.0001\nsegment 06: status=Success task=yes primal=7.06e-07 stat=4.18e-03 mpcc=1.00e-06 pos=0.0509 angle=0.0014\nsegment 07: status=Success task=yes primal=3.33e-16 stat=9.84e-03 mpcc=1.00e-06 pos=0.0384 angle=0.0002\nsegment 08: status=Success task=yes primal=6.94e-18 stat=8.53e-04 mpcc=9.99e-07 pos=0.0010 angle=0.0000\nsegment 09: status=Success task=yes primal=1.11e-16 stat=5.94e-03 mpcc=1.00e-06 pos=0.0035 angle=0.0012\nsegment 10: status=Success task=yes primal=6.22e-09 stat=2.60e-03 mpcc=1.00e-06 pos=0.0024 angle=0.0012\nsegment 11: status=Success task=yes primal=2.47e-07 stat=5.86e-03 mpcc=1.01e-06 pos=0.0036 angle=0.0002\nsegment 12: status=Success task=yes primal=2.22e-16 stat=1.38e-03 mpcc=1.00e-06 pos=0.0139 angle=0.0060\nsegment 13: status=Success task=yes primal=1.40e-06 stat=2.98e-03 mpcc=1.00e-06 pos=0.0063 angle=0.0007\nsegment 14: status=Success task=yes primal=5.55e-17 stat=7.26e-03 mpcc=9.95e-07 pos=0.0144 angle=0.0001\nsegment 15: status=Success task=yes primal=1.73e-18 stat=7.73e-03 mpcc=1.00e-06 pos=0.0056 angle=0.0007\nsegment 16: status=Success task=yes primal=2.78e-17 stat=9.23e-03 mpcc=9.88e-07 pos=0.0106 angle=0.0001\nsegment 17: status=Success task=yes primal=4.74e-07 stat=5.08e-03 mpcc=1.00e-06 pos=0.0083 angle=0.0000\nsegment 18: status=Success task=yes primal=3.47e-18 stat=6.84e-03 mpcc=9.92e-07 pos=0.0215 angle=0.0001\nsegment 19: status=Success task=yes primal=1.39e-17 stat=9.89e-03 mpcc=8.73e-07 pos=0.0234 angle=0.0000\nsegment 20: status=Success task=yes primal=6.94e-18 stat=4.26e-03 mpcc=1.00e-06 pos=0.0099 angle=0.0000\nsegment 21: status=Success task=yes primal=6.62e-07 stat=6.28e-03 mpcc=1.00e-06 pos=0.0201 angle=0.0002\nsegment 22: status=Success task=yes primal=1.02e-08 stat=6.01e-03 mpcc=1.01e-06 pos=0.0119 angle=0.0000\nsegment 23: status=Success task=yes primal=1.73e-18 stat=9.99e-03 mpcc=8.87e-07 pos=0.0124 angle=0.0000\nsegment 24: status=Success task=yes primal=3.47e-18 stat=9.42e-03 mpcc=9.40e-07 pos=0.0182 angle=0.0001\nsegment 25: status=Success task=yes primal=5.55e-17 stat=9.85e-03 mpcc=8.65e-07 pos=0.0339 angle=0.0003\nsegment 26: status=Success task=yes primal=0.00e+00 stat=6.24e-03 mpcc=9.99e-07 pos=0.0032 angle=0.0000\nsegment 27: status=Success task=yes primal=1.83e-06 stat=3.20e-03 mpcc=1.03e-06 pos=0.0100 angle=0.0037\nsegment 28: status=Success task=yes primal=0.00e+00 stat=2.67e-04 mpcc=1.00e-06 pos=0.0141 angle=0.0215\nsegment 29: status=Success task=yes primal=0.00e+00 stat=9.20e-03 mpcc=9.80e-07 pos=0.0081 angle=0.0000\nsegment 30: status=Success task=yes primal=0.00e+00 stat=9.90e-03 mpcc=8.99e-07 pos=0.0042 angle=0.0004\nsegment 31: status=Success task=yes primal=8.73e-09 stat=9.74e-03 mpcc=1.01e-06 pos=0.0054 angle=0.0000\nsegment 32: status=Success task=yes primal=0.00e+00 stat=9.72e-03 mpcc=9.54e-07 pos=0.0093 angle=0.0026\nsegment 33: status=Success task=yes primal=0.00e+00 stat=1.63e-03 mpcc=1.00e-06 pos=0.0023 angle=0.0001\nsegment 34: status=Success task=yes primal=0.00e+00 stat=8.91e-03 mpcc=8.60e-07 pos=0.0134 angle=0.0001\nsegment 35: status=Success task=yes primal=0.00e+00 stat=9.70e-03 mpcc=8.57e-07 pos=0.0032 angle=0.0000\nsegment 36: status=Success task=yes primal=0.00e+00 stat=9.69e-03 mpcc=8.64e-07 pos=0.0133 angle=0.0000\nsegment 37: status=Success task=yes primal=0.00e+00 stat=1.00e-02 mpcc=8.68e-07 pos=0.0353 angle=0.0011\nsegment 38: status=Success task=yes primal=0.00e+00 stat=9.88e-03 mpcc=8.83e-07 pos=0.0031 angle=0.0000\nsegment 39: status=Success task=yes primal=0.00e+00 stat=6.36e-03 mpcc=9.99e-07 pos=0.0353 angle=0.0008\nsegment 40: status=Success task=yes primal=0.00e+00 stat=9.96e-03 mpcc=8.71e-07 pos=0.0410 angle=0.0011\nsegment 41: status=Success task=yes primal=0.00e+00 stat=9.52e-03 mpcc=8.80e-07 pos=0.0624 angle=0.0000\nsegment 42: status=Success task=yes primal=6.83e-08 stat=1.52e-03 mpcc=1.00e-06 pos=0.0154 angle=0.0000\nsegment 43: status=Success task=yes primal=0.00e+00 stat=3.34e-03 mpcc=1.00e-06 pos=0.0281 angle=0.0001\nsegment 44: status=Success task=yes primal=0.00e+00 stat=8.69e-03 mpcc=9.90e-07 pos=0.0305 angle=0.0002\nsegment 45: status=Success task=yes primal=0.00e+00 stat=7.92e-03 mpcc=9.83e-07 pos=0.0086 angle=0.0000\nsegment 46: status=Success task=yes primal=0.00e+00 stat=7.10e-03 mpcc=1.00e-06 pos=0.0136 angle=0.0001\nsegment 47: status=Success task=yes primal=0.00e+00 stat=3.29e-03 mpcc=1.00e-06 pos=0.0003 angle=0.0000\nsegment 48: status=Success task=yes primal=0.00e+00 stat=5.00e-03 mpcc=9.87e-07 pos=0.0012 angle=0.0004\nsegment 49: status=Success task=yes primal=0.00e+00 stat=4.40e-03 mpcc=1.00e-06 pos=0.0030 angle=0.0003\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 50/50\nTotal solve time:    58.724254 s\nTotal iterations:    23546\nWorst dynamics:      6.580e-06\nWorst side violation:8.499e-09\nWorst physical MPCC: 4.564e-06\nWorst position error:0.062447\nWorst angular error: 0.021508\n",
+      "wall_time_seconds": 58.727264832999936
+    },
+    {
+      "metrics": {},
+      "problem": "cartpole_soft_walls",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushbotSwingUp_pushbotObjective is loaded.\nModel PushbotSwingUp_pushBotDynamicConstraints is loaded.\nModel PushbotSwingUp_pushBotContactConstraints is loaded.\nModel PushbotSwingUp_pushBotInitialConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:PushbotSwingUp solved in 51 iterations.\nSolver time: 122ms\nQP solver time: 117.702ms\nmax constraint violation: equality: 9.04284e-08 inequality: 6.04741e-15\nobj from 1827.96 to 2.72017\n",
+      "wall_time_seconds": 0.12992618099815445
+    },
+    {
+      "metrics": {},
+      "problem": "transport",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model CartTransp_cartTranspObjective is loaded.\nModel CartTransp_cartTranspDynamicConstraints is loaded.\nModel CartTransp_cartTranspContactConstraints is loaded.\nModel CartTransp_cartTranspInitialConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:CartTransp solved in 27 iterations.\nSolver time: 314ms\nQP solver time: 309.1ms\nmax constraint violation: equality: 1.17475e-14 inequality: 2.73632e-12\nobj from 25080 to 2.98346\n",
+      "wall_time_seconds": 0.31829766599912546
+    },
+    {
+      "metrics": {},
+      "problem": "push_box",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model Pushbox_pushboxObjective is loaded.\nModel Pushbox_pushboxDynamicConstraints is loaded.\nModel Pushbox_pushboxContactConstraints is loaded.\nModel Pushbox_pushboxInitialConstraints is loaded.\nModel Pushbox_pushboxContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:Pushbox solved in 77 iterations.\nSolver time: 375ms\nQP solver time: 362.609ms\nmax constraint violation: equality: 2.78528e-07 inequality: 9.75109e-14\nobj from 2654.6 to 6.93078\n",
+      "wall_time_seconds": 0.37900688799709314
+    },
+    {
+      "metrics": {},
+      "problem": "transport",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== TRANSPORT ===\nStatus:              Success\nTask success:        yes\nSolve time:          0.063719 s\nIterations:          55 total (13 final stage)\nObjective:           2.964117163e+00\nPrimal infeas:       5.637e-07\nStationarity:        5.457e-03\nBarrier residual:    5.000e-07\nPhysical MPCC:       1.908e-06\nTranslation error:   0.000034\nVelocity error:      0.462052\nTerminal physical:   [-0.500034, -0.000000, -1.538010, -1.992409]\n",
+      "wall_time_seconds": 0.06606622400067863
+    },
+    {
+      "metrics": {},
+      "problem": "transport",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model CartTransp_cartTranspObjective is loaded.\nModel CartTransp_cartTranspDynamicConstraints is loaded.\nModel CartTransp_cartTranspContactConstraints is loaded.\nModel CartTransp_cartTranspInitialConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:CartTransp solved in 27 iterations.\nSolver time: 309ms\nQP solver time: 303.189ms\nmax constraint violation: equality: 1.17475e-14 inequality: 2.73632e-12\nobj from 25080 to 2.98346\n",
+      "wall_time_seconds": 0.3135941799991997
+    },
+    {
+      "metrics": {},
+      "problem": "cartpole_soft_walls",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushbotSwingUp_pushbotObjective is loaded.\nModel PushbotSwingUp_pushBotDynamicConstraints is loaded.\nModel PushbotSwingUp_pushBotContactConstraints is loaded.\nModel PushbotSwingUp_pushBotInitialConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:PushbotSwingUp solved in 51 iterations.\nSolver time: 151ms\nQP solver time: 144.134ms\nmax constraint violation: equality: 9.04284e-08 inequality: 6.04741e-15\nobj from 1827.96 to 2.72017\n",
+      "wall_time_seconds": 0.1623944630009646
+    },
+    {
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_segments": 50,
+          "segments": [
+            {
+              "angular_error": 0.00024101297815232875,
+              "max_equality": 7.704994428288717e-09,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 1.280465529021764e-16,
+              "position_error": 0.0006531835089057221,
+              "segment": 0,
+              "success": true
+            },
+            {
+              "angular_error": 8.019141898955863e-08,
+              "max_equality": 5.738242637998159e-09,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 4.57297621712799e-17,
+              "position_error": 0.003838662192315351,
+              "segment": 1,
+              "success": true
+            },
+            {
+              "angular_error": 2.587912878125598e-07,
+              "max_equality": 2.8212170204156006e-07,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 2.651297830323514e-16,
+              "position_error": 0.028943883756268933,
+              "segment": 2,
+              "success": true
+            },
+            {
+              "angular_error": 8.554827316898175e-06,
+              "max_equality": 2.0852463383097541e-07,
+              "max_side_violation": 1.3877787807814457e-16,
+              "physical_mpcc": 5.683375719352781e-16,
+              "position_error": 0.044125502265286096,
+              "segment": 3,
+              "success": true
+            },
+            {
+              "angular_error": 5.824100427228793e-06,
+              "max_equality": 1.2453699826019157e-06,
+              "max_side_violation": 4.440892098500626e-15,
+              "physical_mpcc": 5.614366884570451e-09,
+              "position_error": 0.05108379381064282,
+              "segment": 4,
+              "success": true
+            },
+            {
+              "angular_error": 0.008866628362869675,
+              "max_equality": 1.1816702061295814e-09,
+              "max_side_violation": 5.551115123125783e-16,
+              "physical_mpcc": 9.256048775599218e-15,
+              "position_error": 0.06208182682627784,
+              "segment": 5,
+              "success": true
+            },
+            {
+              "angular_error": 0.0022049108518513473,
+              "max_equality": 1.8984318515136026e-11,
+              "max_side_violation": 1.4710455076283324e-15,
+              "physical_mpcc": 1.8872722781219194e-11,
+              "position_error": 0.05323348082956339,
+              "segment": 6,
+              "success": true
+            },
+            {
+              "angular_error": 0.027414102592022805,
+              "max_equality": 4.618084699194234e-09,
+              "max_side_violation": 9.71445146547012e-16,
+              "physical_mpcc": 8.414741011324073e-14,
+              "position_error": 0.08016285002141622,
+              "segment": 7,
+              "success": true
+            },
+            {
+              "angular_error": 0.02505105435989648,
+              "max_equality": 3.4754894911846626e-06,
+              "max_side_violation": 7.485148608034161e-15,
+              "physical_mpcc": 1.574811129172961e-07,
+              "position_error": 0.06666028393726242,
+              "segment": 8,
+              "success": true
+            },
+            {
+              "angular_error": 0.015875592766295146,
+              "max_equality": 1.9719892385694493e-11,
+              "max_side_violation": 4.4364512064021255e-13,
+              "physical_mpcc": 1.4015892252443137e-09,
+              "position_error": 0.040095332362561555,
+              "segment": 9,
+              "success": true
+            },
+            {
+              "angular_error": 0.007757596626344498,
+              "max_equality": 8.688723072826734e-07,
+              "max_side_violation": 3.3306690738754696e-15,
+              "physical_mpcc": 3.135615352572156e-09,
+              "position_error": 0.018535498635274417,
+              "segment": 10,
+              "success": true
+            },
+            {
+              "angular_error": 0.014422210296426909,
+              "max_equality": 3.47548947026425e-06,
+              "max_side_violation": 2.0872192862952943e-14,
+              "physical_mpcc": 5.4968528497399445e-06,
+              "position_error": 0.059129206371451325,
+              "segment": 11,
+              "success": true
+            },
+            {
+              "angular_error": 0.029432136846812076,
+              "max_equality": 1.7199398505418628e-07,
+              "max_side_violation": 4.8865251845220196e-14,
+              "physical_mpcc": 8.071405054005785e-06,
+              "position_error": 0.08944791999182412,
+              "segment": 12,
+              "success": true
+            },
+            {
+              "angular_error": 4.0937677607197354e-07,
+              "max_equality": 6.870001112992911e-07,
+              "max_side_violation": 2.945376485144402e-15,
+              "physical_mpcc": 3.751841411880755e-06,
+              "position_error": 0.05864366997455162,
+              "segment": 13,
+              "success": true
+            },
+            {
+              "angular_error": 0.031881030676475214,
+              "max_equality": 1.0266227472577327e-06,
+              "max_side_violation": 6.505906924303417e-14,
+              "physical_mpcc": 0.000448379314748791,
+              "position_error": 0.09618963955960277,
+              "segment": 14,
+              "success": false
+            },
+            {
+              "angular_error": 4.1407849371566385e-15,
+              "max_equality": 1.8912660659786695e-07,
+              "max_side_violation": 2.069663884718409e-13,
+              "physical_mpcc": 5.4308251597834335e-06,
+              "position_error": 0.020413102198190557,
+              "segment": 15,
+              "success": true
+            },
+            {
+              "angular_error": 0.2667356413453868,
+              "max_equality": 9.749881992423841e-16,
+              "max_side_violation": 5.551115123125783e-17,
+              "physical_mpcc": 8.807544534935986e-07,
+              "position_error": 0.35069982221284374,
+              "segment": 16,
+              "success": false
+            },
+            {
+              "angular_error": 0.0212240355362958,
+              "max_equality": 4.318647240930673e-07,
+              "max_side_violation": 2.9906305326190217e-12,
+              "physical_mpcc": 7.130083800130469e-06,
+              "position_error": 0.2376239740340816,
+              "segment": 17,
+              "success": false
+            },
+            {
+              "angular_error": 0.24343719529499092,
+              "max_equality": 6.363453600860547e-16,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 9.483338041572225e-09,
+              "position_error": 0.19310239016465758,
+              "segment": 18,
+              "success": false
+            },
+            {
+              "angular_error": 3.365038456215608e-11,
+              "max_equality": 1.4579372545170188,
+              "max_side_violation": 2.0413161784484774e-11,
+              "physical_mpcc": 5.1413892168509915e-12,
+              "position_error": 0.014096533549990083,
+              "segment": 19,
+              "success": false
+            },
+            {
+              "angular_error": 0.0002834009646245396,
+              "max_equality": 1.618033988261438,
+              "max_side_violation": 4.6943750515214635e-11,
+              "physical_mpcc": 1.0515190600732485e-11,
+              "position_error": 0.0507604594557636,
+              "segment": 20,
+              "success": false
+            },
+            {
+              "angular_error": 6.715895722233904e-05,
+              "max_equality": 1.7526133600330187,
+              "max_side_violation": 8.870284730986853e-12,
+              "physical_mpcc": 1.4901161038971761e-08,
+              "position_error": 0.06472065262910134,
+              "segment": 21,
+              "success": false
+            },
+            {
+              "angular_error": 4.900795407963843e-07,
+              "max_equality": 1.8595529359302363,
+              "max_side_violation": 9.60413897303939e-13,
+              "physical_mpcc": 7.697565911343404e-11,
+              "position_error": 0.003087602392636177,
+              "segment": 22,
+              "success": false
+            },
+            {
+              "angular_error": 2.97908833019056e-11,
+              "max_equality": 1.9371663222490958,
+              "max_side_violation": 1.4183099139586375e-14,
+              "physical_mpcc": 8.887245379794632e-11,
+              "position_error": 0.007653819496442237,
+              "segment": 23,
+              "success": false
+            },
+            {
+              "angular_error": 5.761201788483453e-06,
+              "max_equality": 1.9842294023916425,
+              "max_side_violation": 1.4420853898279893e-11,
+              "physical_mpcc": 2.487808096758777e-12,
+              "position_error": 0.005981718567070598,
+              "segment": 24,
+              "success": false
+            },
+            {
+              "angular_error": 1.7966436290173596e-05,
+              "max_equality": 1.9998478014510819,
+              "max_side_violation": 8.326672684688674e-16,
+              "physical_mpcc": 3.0226859844471877e-15,
+              "position_error": 0.0015957565081513169,
+              "segment": 25,
+              "success": false
+            },
+            {
+              "angular_error": 7.324367540788994e-07,
+              "max_equality": 1.9842292869533793,
+              "max_side_violation": 1.1124804042953919e-14,
+              "physical_mpcc": 1.0169598294603274e-14,
+              "position_error": 0.001477962658995956,
+              "segment": 26,
+              "success": false
+            },
+            {
+              "angular_error": 1.1616759215335448e-07,
+              "max_equality": 1.9371663222538946,
+              "max_side_violation": 6.676202471184276e-15,
+              "physical_mpcc": 1.0014303706737465e-15,
+              "position_error": 0.002677491656783354,
+              "segment": 27,
+              "success": false
+            },
+            {
+              "angular_error": 0.002926295940852086,
+              "max_equality": 1.8595529716639019,
+              "max_side_violation": 8.076872504148014e-15,
+              "physical_mpcc": 3.35247640849144e-14,
+              "position_error": 0.0032664437260572035,
+              "segment": 28,
+              "success": false
+            },
+            {
+              "angular_error": 0.00011850601608575512,
+              "max_equality": 1.7526133579801535,
+              "max_side_violation": 2.930988785010413e-14,
+              "physical_mpcc": 1.863891426921207e-14,
+              "position_error": 0.0035358321897585006,
+              "segment": 29,
+              "success": false
+            },
+            {
+              "angular_error": 0.0017468156686796087,
+              "max_equality": 1.6180339882954602,
+              "max_side_violation": 6.6240350960869544e-15,
+              "physical_mpcc": 2.5796854133303268e-14,
+              "position_error": 0.0036107590930451222,
+              "segment": 30,
+              "success": false
+            },
+            {
+              "angular_error": 4.165343777842723e-05,
+              "max_equality": 1.4579372534972705,
+              "max_side_violation": 3.4783169711690026e-13,
+              "physical_mpcc": 1.2154157114783455e-12,
+              "position_error": 0.005466430251030481,
+              "segment": 31,
+              "success": false
+            },
+            {
+              "angular_error": 6.317484151572954e-05,
+              "max_equality": 4.981300032458336e-07,
+              "max_side_violation": 8.326672684688674e-17,
+              "physical_mpcc": 1.280075374803048e-15,
+              "position_error": 0.020249715893322126,
+              "segment": 32,
+              "success": true
+            },
+            {
+              "angular_error": 6.205105873569039e-15,
+              "max_equality": 3.443951630000279e-08,
+              "max_side_violation": 1.1102230246251565e-16,
+              "physical_mpcc": 9.225762860662826e-16,
+              "position_error": 0.001357735085449537,
+              "segment": 33,
+              "success": true
+            },
+            {
+              "angular_error": 3.7338044079852223e-06,
+              "max_equality": 2.141398169897002e-12,
+              "max_side_violation": 6.661338147750939e-16,
+              "physical_mpcc": 9.558398634755158e-15,
+              "position_error": 0.004858537929776711,
+              "segment": 34,
+              "success": true
+            },
+            {
+              "angular_error": 3.055541930585548e-14,
+              "max_equality": 8.688722697523105e-07,
+              "max_side_violation": 4.860668634032505e-16,
+              "physical_mpcc": 2.9565976033303416e-15,
+              "position_error": 0.0060879741994957865,
+              "segment": 35,
+              "success": true
+            },
+            {
+              "angular_error": 0.0003696024643137334,
+              "max_equality": 1.8230086650048837e-11,
+              "max_side_violation": 5.551115123125783e-16,
+              "physical_mpcc": 6.348869746296142e-15,
+              "position_error": 0.03326643397771583,
+              "segment": 36,
+              "success": true
+            },
+            {
+              "angular_error": 2.3018358914425607e-05,
+              "max_equality": 2.2624715455901723e-06,
+              "max_side_violation": 8.428998617739468e-16,
+              "physical_mpcc": 3.0818658485506826e-05,
+              "position_error": 0.014554922720228009,
+              "segment": 37,
+              "success": false
+            },
+            {
+              "angular_error": 1.747065530438574e-10,
+              "max_equality": 4.884680376016082e-07,
+              "max_side_violation": 2.914335439641036e-15,
+              "physical_mpcc": 6.5563515813382084e-06,
+              "position_error": 0.09226662042622821,
+              "segment": 38,
+              "success": true
+            },
+            {
+              "angular_error": 0.004998128037493433,
+              "max_equality": 1.2906561597247901e-08,
+              "max_side_violation": 1.2641936811442638e-14,
+              "physical_mpcc": 5.447347356831169e-14,
+              "position_error": 0.02992890863790245,
+              "segment": 39,
+              "success": true
+            },
+            {
+              "angular_error": 4.733718408009985e-06,
+              "max_equality": 4.653271731963615e-07,
+              "max_side_violation": 2.7755575615628914e-17,
+              "physical_mpcc": 1.3334294062048607e-16,
+              "position_error": 0.006571393980779787,
+              "segment": 40,
+              "success": true
+            },
+            {
+              "angular_error": 0.18278066159780632,
+              "max_equality": 7.868498075325192e-09,
+              "max_side_violation": 2.1621593404574924e-14,
+              "physical_mpcc": 1.651257746056859e-15,
+              "position_error": 0.38847604127721336,
+              "segment": 41,
+              "success": false
+            },
+            {
+              "angular_error": 0.007916179380174799,
+              "max_equality": 1.742928024128787e-11,
+              "max_side_violation": 6.500505836687902e-13,
+              "physical_mpcc": 1.4958130606506661e-05,
+              "position_error": 0.0972721029390593,
+              "segment": 42,
+              "success": false
+            },
+            {
+              "angular_error": 0.1535653042046585,
+              "max_equality": 6.765875614211936e-07,
+              "max_side_violation": 1.8777306084482455e-14,
+              "physical_mpcc": 1.3645936327736867e-06,
+              "position_error": 0.2602257725841116,
+              "segment": 43,
+              "success": false
+            },
+            {
+              "angular_error": 0.012091443709417789,
+              "max_equality": 2.88866074964056e-06,
+              "max_side_violation": 3.0411729259211923e-15,
+              "physical_mpcc": 6.438564685900043e-13,
+              "position_error": 0.11105807202855872,
+              "segment": 44,
+              "success": false
+            },
+            {
+              "angular_error": 0.06868286024475613,
+              "max_equality": 7.354042839136099e-07,
+              "max_side_violation": 3.3389036996241504e-16,
+              "physical_mpcc": 4.670907192703752e-16,
+              "position_error": 0.1166757358603537,
+              "segment": 45,
+              "success": false
+            },
+            {
+              "angular_error": 4.409788506576362e-13,
+              "max_equality": 1.7084778036746684e-10,
+              "max_side_violation": 2.637823094216989e-15,
+              "physical_mpcc": 4.611429869010967e-16,
+              "position_error": 0.0005343917593218447,
+              "segment": 46,
+              "success": true
+            },
+            {
+              "angular_error": 3.108413936437141e-06,
+              "max_equality": 1.3935257940711834e-06,
+              "max_side_violation": 6.938893903907228e-17,
+              "physical_mpcc": 2.5418221984255077e-16,
+              "position_error": 0.005468412860928186,
+              "segment": 47,
+              "success": true
+            },
+            {
+              "angular_error": 3.609567489558721e-06,
+              "max_equality": 1.9860974045937674e-09,
+              "max_side_violation": 1.4573235961115122e-15,
+              "physical_mpcc": 5.020719528744846e-15,
+              "position_error": 0.005513802745332248,
+              "segment": 48,
+              "success": true
+            },
+            {
+              "angular_error": 0.0003112344024589764,
+              "max_equality": 1.8377635258460395e-07,
+              "max_side_violation": 9.71445146547012e-16,
+              "physical_mpcc": 5.5557175412857414e-15,
+              "position_error": 0.0009808754220239444,
+              "segment": 49,
+              "success": true
+            }
+          ],
+          "successful_segments": 27,
+          "worst_angular_error": 0.2667356413453868,
+          "worst_equality": 1.9998478014510819,
+          "worst_physical_mpcc": 0.000448379314748791,
+          "worst_position_error": 0.38847604127721336,
+          "worst_side_violation": 4.6943750515214635e-11
+        }
+      },
+      "problem": "push_t",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushT_pushTObjective is loaded.\nModel PushT_pushTDynamicConstraints is loaded.\nModel PushT_pushTContactConstraints is loaded.\nModel PushT_pushTInitialConstraints is loaded.\nModel PushT_pushTContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 1/50 final_error | solve_time_ms: 304 pos_error: 0.000653184 radius_error_abs: 0.000303976\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 2/50 final_error | solve_time_ms: 407 pos_error: 0.00383866 radius_error_abs: 0.0022975\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 3/50 final_error | solve_time_ms: 1214 pos_error: 0.0289439 radius_error_abs: 0.0259995\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 4/50 final_error | solve_time_ms: 3378 pos_error: 0.0441255 radius_error_abs: 0.040821\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 5/50 final_error | solve_time_ms: 4379 pos_error: 0.0510838 radius_error_abs: 0.0476732\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 6/50 final_error | solve_time_ms: 6552 pos_error: 0.0620818 radius_error_abs: 0.0549563\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 7/50 final_error | solve_time_ms: 3173 pos_error: 0.0532335 radius_error_abs: 0.0476249\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 8/50 final_error | solve_time_ms: 3251 pos_error: 0.0801629 radius_error_abs: 0.06315\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 9/50 final_error | solve_time_ms: 4431 pos_error: 0.0666603 radius_error_abs: 0.0471734\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 10/50 final_error | solve_time_ms: 8120 pos_error: 0.0400953 radius_error_abs: 0.0192578\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 11/50 final_error | solve_time_ms: 8230 pos_error: 0.0185355 radius_error_abs: 0.00167602\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 12/50 final_error | solve_time_ms: 5205 pos_error: 0.0591292 radius_error_abs: 0.0364227\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 13/50 final_error | solve_time_ms: 7641 pos_error: 0.0894479 radius_error_abs: 0.0658626\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 14/50 final_error | solve_time_ms: 34902 pos_error: 0.0586437 radius_error_abs: 0.0551384\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 15/50 final_error | solve_time_ms: 16110 pos_error: 0.0961896 radius_error_abs: 0.0843621\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 16/50 final_error | solve_time_ms: 17473 pos_error: 0.0204131 radius_error_abs: 0.00408131\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 17/50 final_error | solve_time_ms: 15482 pos_error: 0.3507 radius_error_abs: 0.341677\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 18/50 final_error | solve_time_ms: 27315 pos_error: 0.237624 radius_error_abs: 0.230409\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 19/50 final_error | solve_time_ms: 19666 pos_error: 0.193102 radius_error_abs: 0.167577\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 20/50 final_error | solve_time_ms: 12154 pos_error: 0.0140965 radius_error_abs: 0.0113878\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 21/50 final_error | solve_time_ms: 10741 pos_error: 0.0507605 radius_error_abs: 0.0468093\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 22/50 final_error | solve_time_ms: 10762 pos_error: 0.0647207 radius_error_abs: 0.061055\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 23/50 final_error | solve_time_ms: 5027 pos_error: 0.0030876 radius_error_abs: 0.00219134\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 24/50 final_error | solve_time_ms: 7371 pos_error: 0.00765382 radius_error_abs: 0.0059929\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 25/50 final_error | solve_time_ms: 4100 pos_error: 0.00598172 radius_error_abs: 0.00448943\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 26/50 final_error | solve_time_ms: 1363 pos_error: 0.00159576 radius_error_abs: 0.00115812\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 27/50 final_error | solve_time_ms: 348 pos_error: 0.00147796 radius_error_abs: 0.00116767\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 28/50 final_error | solve_time_ms: 896 pos_error: 0.00267749 radius_error_abs: 0.00191804\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 29/50 final_error | solve_time_ms: 2210 pos_error: 0.00326644 radius_error_abs: 0.00178375\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 30/50 final_error | solve_time_ms: 2999 pos_error: 0.00353583 radius_error_abs: 0.00151699\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 31/50 final_error | solve_time_ms: 2408 pos_error: 0.00361076 radius_error_abs: 0.00130705\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\npenalty maxed out, check the solution.\n\nseg 32/50 final_error | solve_time_ms: 1560 pos_error: 0.00546643 radius_error_abs: 0.00317027\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 33/50 final_error | solve_time_ms: 5114 pos_error: 0.0202497 radius_error_abs: 0.000598011\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 34/50 final_error | solve_time_ms: 7177 pos_error: 0.00135774 radius_error_abs: 0.00070113\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 35/50 final_error | solve_time_ms: 5785 pos_error: 0.00485854 radius_error_abs: 0.00120178\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 36/50 final_error | solve_time_ms: 5008 pos_error: 0.00608797 radius_error_abs: 0.00285359\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 37/50 final_error | solve_time_ms: 5966 pos_error: 0.0332664 radius_error_abs: 0.030229\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 38/50 final_error | solve_time_ms: 11553 pos_error: 0.0145549 radius_error_abs: 0.012727\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 39/50 final_error | solve_time_ms: 3970 pos_error: 0.0922666 radius_error_abs: 0.0911628\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 40/50 final_error | solve_time_ms: 11561 pos_error: 0.0299289 radius_error_abs: 0.0275176\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 41/50 final_error | solve_time_ms: 1313 pos_error: 0.00657139 radius_error_abs: 0.00272097\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 42/50 final_error | solve_time_ms: 3741 pos_error: 0.388476 radius_error_abs: 0.388429\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 43/50 final_error | solve_time_ms: 17959 pos_error: 0.0972721 radius_error_abs: 0.0932867\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 44/50 final_error | solve_time_ms: 9491 pos_error: 0.260226 radius_error_abs: 0.259245\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 45/50 final_error | solve_time_ms: 5970 pos_error: 0.111058 radius_error_abs: 0.106708\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 46/50 final_error | solve_time_ms: 2530 pos_error: 0.116676 radius_error_abs: 0.111973\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 47/50 final_error | solve_time_ms: 1839 pos_error: 0.000534392 radius_error_abs: 0.000222297\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 48/50 final_error | solve_time_ms: 717 pos_error: 0.00546841 radius_error_abs: 0.00228171\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 49/50 final_error | solve_time_ms: 1233 pos_error: 0.0055138 radius_error_abs: 0.002175\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nseg 50/50 final_error | solve_time_ms: 464 pos_error: 0.000980875 radius_error_abs: 0.000146544\n",
+      "wall_time_seconds": 350.6364645779977
+    },
+    {
+      "metrics": {},
+      "problem": "cartpole_soft_walls",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model PushbotSwingUp_pushbotObjective is loaded.\nModel PushbotSwingUp_pushBotDynamicConstraints is loaded.\nModel PushbotSwingUp_pushBotContactConstraints is loaded.\nModel PushbotSwingUp_pushBotInitialConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:PushbotSwingUp solved in 51 iterations.\nSolver time: 132ms\nQP solver time: 127.788ms\nmax constraint violation: equality: 9.04284e-08 inequality: 6.04741e-15\nobj from 1827.96 to 2.72017\n",
+      "wall_time_seconds": 0.1396366000008129
+    },
+    {
+      "metrics": {},
+      "problem": "push_box",
+      "repetition": 2,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.221253 s\nIterations:          338 total (138 final stage)\nObjective:           2.219943641e+01\nDynamics defect:     4.441e-16\nPrimal infeas:       2.220e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.805e-07\nTranslation error:   0.033242\nAngular error:       0.004306\nTerminal state:      [-1.488635, -2.566838, 4.193096]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "wall_time_seconds": 0.22350268499940285
+    },
+    {
+      "metrics": {},
+      "problem": "transport",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model CartTransp_cartTranspObjective is loaded.\nModel CartTransp_cartTranspDynamicConstraints is loaded.\nModel CartTransp_cartTranspContactConstraints is loaded.\nModel CartTransp_cartTranspInitialConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:CartTransp solved in 27 iterations.\nSolver time: 305ms\nQP solver time: 300.459ms\nmax constraint violation: equality: 1.17475e-14 inequality: 2.73632e-12\nobj from 25080 to 2.98346\n",
+      "wall_time_seconds": 0.3102248689974658
+    },
+    {
+      "metrics": {},
+      "problem": "transport",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== TRANSPORT ===\nStatus:              Success\nTask success:        yes\nSolve time:          0.061114 s\nIterations:          55 total (13 final stage)\nObjective:           2.964117163e+00\nPrimal infeas:       5.637e-07\nStationarity:        5.457e-03\nBarrier residual:    5.000e-07\nPhysical MPCC:       1.908e-06\nTranslation error:   0.000034\nVelocity error:      0.462052\nTerminal physical:   [-0.500034, -0.000000, -1.538010, -1.992409]\n",
+      "wall_time_seconds": 0.06383393299984164
+    },
+    {
+      "metrics": {},
+      "problem": "push_box",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.216434 s\nIterations:          338 total (138 final stage)\nObjective:           2.219943641e+01\nDynamics defect:     4.441e-16\nPrimal infeas:       2.220e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.805e-07\nTranslation error:   0.033242\nAngular error:       0.004306\nTerminal state:      [-1.488635, -2.566838, 4.193096]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "wall_time_seconds": 0.21918590200220933
+    },
+    {
+      "metrics": {},
+      "problem": "cartpole_soft_walls",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== CARTPOLE WITH SOFT WALLS ===\nStatus:              Success\nTask success:        yes\nSolve time:          0.389875 s\nIterations:          276\nObjective:           2.720175844e+00\nPrimal infeas:       0.000e+00\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.997e-07\nFinal theta(mu):     1.000e-06\nTerminal state:      [0.002374, 0.029813, -0.004793, -0.008442]\n",
+      "wall_time_seconds": 0.39453479399890057
+    },
+    {
+      "metrics": {},
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.224833 s\nIterations:          338 total (138 final stage)\nObjective:           2.219943641e+01\nDynamics defect:     4.441e-16\nPrimal infeas:       2.220e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.805e-07\nTranslation error:   0.033242\nAngular error:       0.004306\nTerminal state:      [-1.488635, -2.566838, 4.193096]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "wall_time_seconds": 0.22749694700178225
+    },
+    {
+      "metrics": {
+        "summary": {
+          "attempted_segments": 50,
+          "successful_segments": 50,
+          "total_iterations": 23546,
+          "worst_angular_error": 0.021508,
+          "worst_dynamics": 6.58e-06,
+          "worst_physical_mpcc": 4.564e-06,
+          "worst_position_error": 0.062447,
+          "worst_side_violation": 8.499e-09
+        }
+      },
+      "problem": "push_t",
+      "repetition": 1,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "segment 00: status=Success task=yes primal=1.73e-18 stat=9.72e-03 mpcc=1.00e-06 pos=0.0009 angle=0.0001\nsegment 01: status=Success task=yes primal=6.58e-06 stat=3.41e-03 mpcc=4.56e-06 pos=0.0111 angle=0.0000\nsegment 02: status=Success task=yes primal=6.94e-18 stat=9.34e-03 mpcc=1.00e-06 pos=0.0284 angle=0.0000\nsegment 03: status=Success task=yes primal=1.73e-18 stat=9.74e-03 mpcc=9.95e-07 pos=0.0417 angle=0.0001\nsegment 04: status=Success task=yes primal=0.00e+00 stat=2.50e-03 mpcc=9.96e-07 pos=0.0039 angle=0.0000\nsegment 05: status=Success task=yes primal=2.12e-07 stat=7.50e-03 mpcc=1.00e-06 pos=0.0575 angle=0.0001\nsegment 06: status=Success task=yes primal=7.06e-07 stat=4.18e-03 mpcc=1.00e-06 pos=0.0509 angle=0.0014\nsegment 07: status=Success task=yes primal=3.33e-16 stat=9.84e-03 mpcc=1.00e-06 pos=0.0384 angle=0.0002\nsegment 08: status=Success task=yes primal=6.94e-18 stat=8.53e-04 mpcc=9.99e-07 pos=0.0010 angle=0.0000\nsegment 09: status=Success task=yes primal=1.11e-16 stat=5.94e-03 mpcc=1.00e-06 pos=0.0035 angle=0.0012\nsegment 10: status=Success task=yes primal=6.22e-09 stat=2.60e-03 mpcc=1.00e-06 pos=0.0024 angle=0.0012\nsegment 11: status=Success task=yes primal=2.47e-07 stat=5.86e-03 mpcc=1.01e-06 pos=0.0036 angle=0.0002\nsegment 12: status=Success task=yes primal=2.22e-16 stat=1.38e-03 mpcc=1.00e-06 pos=0.0139 angle=0.0060\nsegment 13: status=Success task=yes primal=1.40e-06 stat=2.98e-03 mpcc=1.00e-06 pos=0.0063 angle=0.0007\nsegment 14: status=Success task=yes primal=5.55e-17 stat=7.26e-03 mpcc=9.95e-07 pos=0.0144 angle=0.0001\nsegment 15: status=Success task=yes primal=1.73e-18 stat=7.73e-03 mpcc=1.00e-06 pos=0.0056 angle=0.0007\nsegment 16: status=Success task=yes primal=2.78e-17 stat=9.23e-03 mpcc=9.88e-07 pos=0.0106 angle=0.0001\nsegment 17: status=Success task=yes primal=4.74e-07 stat=5.08e-03 mpcc=1.00e-06 pos=0.0083 angle=0.0000\nsegment 18: status=Success task=yes primal=3.47e-18 stat=6.84e-03 mpcc=9.92e-07 pos=0.0215 angle=0.0001\nsegment 19: status=Success task=yes primal=1.39e-17 stat=9.89e-03 mpcc=8.73e-07 pos=0.0234 angle=0.0000\nsegment 20: status=Success task=yes primal=6.94e-18 stat=4.26e-03 mpcc=1.00e-06 pos=0.0099 angle=0.0000\nsegment 21: status=Success task=yes primal=6.62e-07 stat=6.28e-03 mpcc=1.00e-06 pos=0.0201 angle=0.0002\nsegment 22: status=Success task=yes primal=1.02e-08 stat=6.01e-03 mpcc=1.01e-06 pos=0.0119 angle=0.0000\nsegment 23: status=Success task=yes primal=1.73e-18 stat=9.99e-03 mpcc=8.87e-07 pos=0.0124 angle=0.0000\nsegment 24: status=Success task=yes primal=3.47e-18 stat=9.42e-03 mpcc=9.40e-07 pos=0.0182 angle=0.0001\nsegment 25: status=Success task=yes primal=5.55e-17 stat=9.85e-03 mpcc=8.65e-07 pos=0.0339 angle=0.0003\nsegment 26: status=Success task=yes primal=0.00e+00 stat=6.24e-03 mpcc=9.99e-07 pos=0.0032 angle=0.0000\nsegment 27: status=Success task=yes primal=1.83e-06 stat=3.20e-03 mpcc=1.03e-06 pos=0.0100 angle=0.0037\nsegment 28: status=Success task=yes primal=0.00e+00 stat=2.67e-04 mpcc=1.00e-06 pos=0.0141 angle=0.0215\nsegment 29: status=Success task=yes primal=0.00e+00 stat=9.20e-03 mpcc=9.80e-07 pos=0.0081 angle=0.0000\nsegment 30: status=Success task=yes primal=0.00e+00 stat=9.90e-03 mpcc=8.99e-07 pos=0.0042 angle=0.0004\nsegment 31: status=Success task=yes primal=8.73e-09 stat=9.74e-03 mpcc=1.01e-06 pos=0.0054 angle=0.0000\nsegment 32: status=Success task=yes primal=0.00e+00 stat=9.72e-03 mpcc=9.54e-07 pos=0.0093 angle=0.0026\nsegment 33: status=Success task=yes primal=0.00e+00 stat=1.63e-03 mpcc=1.00e-06 pos=0.0023 angle=0.0001\nsegment 34: status=Success task=yes primal=0.00e+00 stat=8.91e-03 mpcc=8.60e-07 pos=0.0134 angle=0.0001\nsegment 35: status=Success task=yes primal=0.00e+00 stat=9.70e-03 mpcc=8.57e-07 pos=0.0032 angle=0.0000\nsegment 36: status=Success task=yes primal=0.00e+00 stat=9.69e-03 mpcc=8.64e-07 pos=0.0133 angle=0.0000\nsegment 37: status=Success task=yes primal=0.00e+00 stat=1.00e-02 mpcc=8.68e-07 pos=0.0353 angle=0.0011\nsegment 38: status=Success task=yes primal=0.00e+00 stat=9.88e-03 mpcc=8.83e-07 pos=0.0031 angle=0.0000\nsegment 39: status=Success task=yes primal=0.00e+00 stat=6.36e-03 mpcc=9.99e-07 pos=0.0353 angle=0.0008\nsegment 40: status=Success task=yes primal=0.00e+00 stat=9.96e-03 mpcc=8.71e-07 pos=0.0410 angle=0.0011\nsegment 41: status=Success task=yes primal=0.00e+00 stat=9.52e-03 mpcc=8.80e-07 pos=0.0624 angle=0.0000\nsegment 42: status=Success task=yes primal=6.83e-08 stat=1.52e-03 mpcc=1.00e-06 pos=0.0154 angle=0.0000\nsegment 43: status=Success task=yes primal=0.00e+00 stat=3.34e-03 mpcc=1.00e-06 pos=0.0281 angle=0.0001\nsegment 44: status=Success task=yes primal=0.00e+00 stat=8.69e-03 mpcc=9.90e-07 pos=0.0305 angle=0.0002\nsegment 45: status=Success task=yes primal=0.00e+00 stat=7.92e-03 mpcc=9.83e-07 pos=0.0086 angle=0.0000\nsegment 46: status=Success task=yes primal=0.00e+00 stat=7.10e-03 mpcc=1.00e-06 pos=0.0136 angle=0.0001\nsegment 47: status=Success task=yes primal=0.00e+00 stat=3.29e-03 mpcc=1.00e-06 pos=0.0003 angle=0.0000\nsegment 48: status=Success task=yes primal=0.00e+00 stat=5.00e-03 mpcc=9.87e-07 pos=0.0012 angle=0.0004\nsegment 49: status=Success task=yes primal=0.00e+00 stat=4.40e-03 mpcc=1.00e-06 pos=0.0030 angle=0.0003\n\n=== PUSH T SOURCE INITIAL CONDITIONS ===\nSuccessful segments: 50/50\nTotal solve time:    59.812130 s\nTotal iterations:    23546\nWorst dynamics:      6.580e-06\nWorst side violation:8.499e-09\nWorst physical MPCC: 4.564e-06\nWorst position error:0.062447\nWorst angular error: 0.021508\n",
+      "wall_time_seconds": 59.814659397998184
+    },
+    {
+      "metrics": {},
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model Pushbox_pushboxObjective is loaded.\nModel Pushbox_pushboxDynamicConstraints is loaded.\nModel Pushbox_pushboxContactConstraints is loaded.\nModel Pushbox_pushboxInitialConstraints is loaded.\nModel Pushbox_pushboxContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:Pushbox solved in 77 iterations.\nSolver time: 361ms\nQP solver time: 350.744ms\nmax constraint violation: equality: 2.78528e-07 inequality: 9.75109e-14\nobj from 2654.6 to 6.93078\n",
+      "wall_time_seconds": 0.3654600769987155
+    }
+  ],
+  "revision": "8a0450a98092d6f3dc6e83aa7a5594c726aec587",
+  "schema_version": 2
+}

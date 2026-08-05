@@ -1,0 +1,65 @@
+# Build directories
+build/
+/build-contact/
+/build-crisp/
+/build-impact/
+/build-impact-contact/
+cmake-build-*/
+/build-*/
+out/
+
+# Log files
+log/
+*.log
+
+# IDE files
+.vs/
+.vscode/
+*.suo
+*.user
+*.sln.docstates
+
+# Compiled binaries
+*.exe
+*.dll
+*.pyd
+*.lib
+*.obj
+*.o
+*.a
+*.so
+*.pdb
+*.ilk
+
+# CMake generated
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Python generated
+__pycache__/
+*.py[cod]
+
+# Local scratch and test output
+/tmp/
+/Testing/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Benchmark generated files
+benchmarks/.venv/
+benchmarks/c_generated_code/
+benchmarks/__pycache__/
+benchmarks/data/
+
+# Generated acados code at root level
+c_generated_code/
+*_ocp.json
+*_mpc.json
+
+# Repository-local third-party packages used by reproduction builds
+.deps/

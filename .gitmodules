@@ -1,0 +1,6 @@
+[submodule "benchmarks/CRISP"]
+	path = benchmarks/CRISP
+	url = https://github.com/ComputationalRobotics/CRISP.git
+[submodule "benchmarks/IMPACT"]
+	path = benchmarks/IMPACT
+	url = https://github.com/JonasPflaume/IMPACT.git

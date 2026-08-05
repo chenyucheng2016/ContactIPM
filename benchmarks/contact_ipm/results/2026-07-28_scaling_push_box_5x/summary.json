@@ -1,0 +1,357 @@
+{
+  "description": "Matched compiled node/complementarity-count scaling study.",
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "nodes": [
+    25,
+    50,
+    75,
+    100,
+    150
+  ],
+  "points": [
+    {
+      "contactipm_source_primal_variables": 219,
+      "crisp_source_primal_variables": 225,
+      "dt": 0.0825,
+      "intervals": 24,
+      "median_paired_speedup_crisp_over_contactipm": null,
+      "nodes": 25,
+      "paired_speedups_crisp_over_contactipm": [],
+      "physical_duration": 1.98,
+      "problem": "push_box",
+      "qualified_pairs": 0,
+      "solvers": {
+        "CRISP": {
+          "attempted": 5,
+          "audit_passed": 5,
+          "eligible": 5,
+          "eligible_iterations": [
+            135,
+            135,
+            135,
+            135,
+            135
+          ],
+          "eligible_wall_times_seconds": [
+            0.19720451399916783,
+            0.17681118300242815,
+            0.24151171000266913,
+            0.21534409800369758,
+            0.23009902899502777
+          ],
+          "median_eligible_iterations": 135,
+          "median_eligible_wall_time_seconds": 0.21534409800369758,
+          "solver_converged": 5
+        },
+        "ContactIPM": {
+          "attempted": 5,
+          "audit_passed": 0,
+          "eligible": 0,
+          "eligible_iterations": [],
+          "eligible_wall_times_seconds": [],
+          "median_eligible_iterations": null,
+          "median_eligible_wall_time_seconds": null,
+          "solver_converged": 0
+        }
+      },
+      "total_complementarity_pairs": 240
+    },
+    {
+      "contactipm_source_primal_variables": 444,
+      "crisp_source_primal_variables": 450,
+      "dt": 0.04040816326530612,
+      "intervals": 49,
+      "median_paired_speedup_crisp_over_contactipm": null,
+      "nodes": 50,
+      "paired_speedups_crisp_over_contactipm": [],
+      "physical_duration": 1.98,
+      "problem": "push_box",
+      "qualified_pairs": 0,
+      "solvers": {
+        "CRISP": {
+          "attempted": 5,
+          "audit_passed": 5,
+          "eligible": 5,
+          "eligible_iterations": [
+            83,
+            83,
+            83,
+            83,
+            83
+          ],
+          "eligible_wall_times_seconds": [
+            0.247738873003982,
+            0.24166736500046682,
+            0.3090038570080651,
+            0.33278704999247566,
+            0.3276499040075578
+          ],
+          "median_eligible_iterations": 83,
+          "median_eligible_wall_time_seconds": 0.3090038570080651,
+          "solver_converged": 5
+        },
+        "ContactIPM": {
+          "attempted": 5,
+          "audit_passed": 0,
+          "eligible": 0,
+          "eligible_iterations": [],
+          "eligible_wall_times_seconds": [],
+          "median_eligible_iterations": null,
+          "median_eligible_wall_time_seconds": null,
+          "solver_converged": 0
+        }
+      },
+      "total_complementarity_pairs": 490
+    },
+    {
+      "contactipm_source_primal_variables": 669,
+      "crisp_source_primal_variables": 675,
+      "dt": 0.026756756756756758,
+      "intervals": 74,
+      "median_paired_speedup_crisp_over_contactipm": 1.5913195282886914,
+      "nodes": 75,
+      "paired_speedups_crisp_over_contactipm": [
+        1.5583089214561836,
+        1.5087136495338769,
+        1.5913195282886914,
+        1.604073270613242,
+        1.7338807851114773
+      ],
+      "physical_duration": 1.98,
+      "problem": "push_box",
+      "qualified_pairs": 5,
+      "solvers": {
+        "CRISP": {
+          "attempted": 5,
+          "audit_passed": 5,
+          "eligible": 5,
+          "eligible_iterations": [
+            38,
+            38,
+            38,
+            38,
+            38
+          ],
+          "eligible_wall_times_seconds": [
+            0.2072111390007194,
+            0.20606361600221135,
+            0.23478531900036614,
+            0.2673301739996532,
+            0.26720739000302274
+          ],
+          "median_eligible_iterations": 38,
+          "median_eligible_wall_time_seconds": 0.23478531900036614,
+          "solver_converged": 5
+        },
+        "ContactIPM": {
+          "attempted": 5,
+          "audit_passed": 5,
+          "eligible": 5,
+          "eligible_iterations": [
+            231,
+            231,
+            231,
+            231,
+            231
+          ],
+          "eligible_wall_times_seconds": [
+            0.13021340800332837,
+            0.13223540798935574,
+            0.13541030099440832,
+            0.17719079699600115,
+            0.16658053899300285
+          ],
+          "median_eligible_iterations": 231,
+          "median_eligible_wall_time_seconds": 0.13541030099440832,
+          "solver_converged": 5
+        }
+      },
+      "total_complementarity_pairs": 740
+    },
+    {
+      "contactipm_source_primal_variables": 894,
+      "crisp_source_primal_variables": 900,
+      "dt": 0.02,
+      "intervals": 99,
+      "median_paired_speedup_crisp_over_contactipm": 2.252693161106898,
+      "nodes": 100,
+      "paired_speedups_crisp_over_contactipm": [
+        2.0147735890985157,
+        2.344271394072909,
+        2.252693161106898,
+        2.2807831378534615,
+        2.222497062321044
+      ],
+      "physical_duration": 1.98,
+      "problem": "push_box",
+      "qualified_pairs": 5,
+      "solvers": {
+        "CRISP": {
+          "attempted": 5,
+          "audit_passed": 5,
+          "eligible": 5,
+          "eligible_iterations": [
+            77,
+            77,
+            77,
+            77,
+            77
+          ],
+          "eligible_wall_times_seconds": [
+            0.42296886899566744,
+            0.4328804340038914,
+            0.5560885230079293,
+            0.5836683249945054,
+            0.5535788470006082
+          ],
+          "median_eligible_iterations": 77,
+          "median_eligible_wall_time_seconds": 0.5535788470006082,
+          "solver_converged": 5
+        },
+        "ContactIPM": {
+          "attempted": 5,
+          "audit_passed": 5,
+          "eligible": 5,
+          "eligible_iterations": [
+            282,
+            282,
+            282,
+            282,
+            282
+          ],
+          "eligible_wall_times_seconds": [
+            0.18776142099522986,
+            0.21485314099118114,
+            0.25020889000734314,
+            0.24897643100121059,
+            0.24271437201241497
+          ],
+          "median_eligible_iterations": 282,
+          "median_eligible_wall_time_seconds": 0.24271437201241497,
+          "solver_converged": 5
+        }
+      },
+      "total_complementarity_pairs": 990
+    },
+    {
+      "contactipm_source_primal_variables": 1344,
+      "crisp_source_primal_variables": 1350,
+      "dt": 0.013288590604026845,
+      "intervals": 149,
+      "median_paired_speedup_crisp_over_contactipm": null,
+      "nodes": 150,
+      "paired_speedups_crisp_over_contactipm": [],
+      "physical_duration": 1.98,
+      "problem": "push_box",
+      "qualified_pairs": 0,
+      "solvers": {
+        "CRISP": {
+          "attempted": 5,
+          "audit_passed": 0,
+          "eligible": 0,
+          "eligible_iterations": [],
+          "eligible_wall_times_seconds": [],
+          "median_eligible_iterations": null,
+          "median_eligible_wall_time_seconds": null,
+          "solver_converged": 5
+        },
+        "ContactIPM": {
+          "attempted": 5,
+          "audit_passed": 5,
+          "eligible": 5,
+          "eligible_iterations": [
+            1956,
+            1956,
+            1956,
+            1956,
+            1956
+          ],
+          "eligible_wall_times_seconds": [
+            2.599352089004242,
+            2.5874086060066475,
+            2.4544922309869435,
+            2.509983195006498,
+            2.53114794800058
+          ],
+          "median_eligible_iterations": 1956,
+          "median_eligible_wall_time_seconds": 2.53114794800058,
+          "solver_converged": 5
+        }
+      },
+      "total_complementarity_pairs": 1490
+    }
+  ],
+  "problem": "push_box",
+  "protocol": {
+    "continuous_time_objective_rescaled": false,
+    "cpu_affinity": "auto",
+    "fixed_physical_duration": true,
+    "paper_reported_times_used": false,
+    "repetitions": 5,
+    "seed": 2027,
+    "threads": 1,
+    "warmups": 1
+  },
+  "push_t_segment": null,
+  "raw_artifacts": [
+    "push_box_nodes_25.json",
+    "push_box_nodes_50.json",
+    "push_box_nodes_75.json",
+    "push_box_nodes_100.json",
+    "push_box_nodes_150.json"
+  ],
+  "revision": {
+    "contactipm": "97833fe6e9b24705886919f15b651712587ea065",
+    "contactipm_source_sha256": {
+      "push_box": "3c023899bdef83e1b4221d46c8804c3623f7655a86af0c1df99215b21b1b3355"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {
+      "push_box": "feb5f8bce816496d4a7888066d23fb98ea8845b052bde210cb7b30964b9b2382"
+    },
+    "crisp_tracked_dirty": true,
+    "crisp_tracked_patch": {
+      "files": [
+        "src/core/include/common/BasicTypes.h",
+        "src/examples/Transp/cpp/SolveTransp.cpp",
+        "src/examples/pushT/SolvePushT.cpp",
+        "src/examples/pushbot/cpp/SolvePushbot.cpp",
+        "src/examples/pushbox/SolvePushbox.cpp"
+      ],
+      "sha256": "93679cc1d7c6bbe7ac9973f5bc14bf3aba6c26e18f804757ecc2cf37e581cc48"
+    }
+  },
+  "schema_version": 1
+}

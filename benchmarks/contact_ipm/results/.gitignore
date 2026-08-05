@@ -1,0 +1,7 @@
+*_trajectories/
+*.stdout.log
+*.stderr.log
+contact_transport_tight.json
+dry_*.json
+exact_instance_smoke.json
+exact_push_t.json

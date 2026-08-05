@@ -1,0 +1,231 @@
+{
+  "commands": [
+    {
+      "case": {},
+      "case_id": "source",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {},
+      "executable_sha256": "d08ed88b5a664af554f42cac63a50bc528ad159de36f770fef60c77931a02b96",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {},
+      "case_id": "source",
+      "command": [
+        "/tmp/crisp-build/examples/pushbox_example"
+      ],
+      "cwd": "/tmp/crisp-build/examples",
+      "environment": {},
+      "executable_sha256": "e9ec9bb8fc92603400f44c4756528d8d5a34e6cf2c4e2fae58b73afdb19ce007",
+      "problem": "push_box",
+      "solver": "CRISP"
+    }
+  ],
+  "created_utc": "2026-07-28T11:29:17.387134+00:00",
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "protocol": {
+    "benchmark_objective_environment": {
+      "CONTACT_BENCHMARK_EFFORT_SCALE": "0.10000000000000001",
+      "CONTACT_BENCHMARK_TRACKING_SCALE": "1"
+    },
+    "case_suite": null,
+    "case_suite_sha256": null,
+    "contact_activity_tolerance": 1e-08,
+    "contactipm_environment": {},
+    "cpu_affinity": [
+      0
+    ],
+    "evaluation_order": [
+      "physical_feasibility",
+      "task_success",
+      "task_errors",
+      "objective_components",
+      "computational_performance",
+      "contact_behavior"
+    ],
+    "pairing": "contiguous (repetition, problem) blocks with randomized block and solver order",
+    "paper_reported_times_used": false,
+    "random_seed": 2027,
+    "repetitions": 1,
+    "source_case_manifest": "benchmarks/contact_ipm/source_cases.json",
+    "source_case_manifest_sha256": "f712a425b48c6246238253cc45a53f69d927a8d0ede86f32950c248ef5f1231e",
+    "threads": 1,
+    "timing": "process wall clock on this machine",
+    "trajectory_audit": "same independent audit for both solvers",
+    "warmups": 0
+  },
+  "results": [
+    {
+      "block_index": 0,
+      "case": {},
+      "case_id": "source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 16.286362823028746,
+                "dominant_contact_mode_changes": 3,
+                "peak_contact_force_norm": 8.359374999227471
+              },
+              "angular_error": 0.010179502225301285,
+              "feasibility_ratios": {
+                "equality": 0.02785280716413596,
+                "physical_complementarity": 2.61981292078778e-08,
+                "side": 3.1339818132021e-06
+              },
+              "feasible": true,
+              "max_equality": 2.785280716413596e-07,
+              "max_side_violation": 3.1339818132021e-14,
+              "objective": 6.8341006127218815,
+              "objective_components": {
+                "force_effort": 6.735324136192044,
+                "terminal_tracking": 0.09877647652983779
+              },
+              "physical_mpcc": 2.61981292078778e-13,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.029734533790585386
+            }
+          ],
+          "objective": 6.8341006127218815,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.010179502225301285,
+          "worst_equality": 2.785280716413596e-07,
+          "worst_physical_mpcc": 2.61981292078778e-13,
+          "worst_position_error": 0.029734533790585386,
+          "worst_side_violation": 3.1339818132021e-14,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "CRISP",
+      "stderr": "",
+      "stdout": "Model Pushbox_pushboxObjectiveBenchmark is loaded.\nModel Pushbox_pushboxDynamicConstraints is loaded.\nModel Pushbox_pushboxContactConstraints is loaded.\nModel Pushbox_pushboxInitialConstraints is loaded.\nModel Pushbox_pushboxContactSingleForceConstraints is loaded.\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\ncurrent merit function converge, examing the constraints violation.\n\nOptimization converged.\n\nOptimization problem:Pushbox solved in 75 iterations.\nSolver time: 412ms\nQP solver time: 400.505ms\nmax constraint violation: equality: 2.78528e-07 inequality: 3.13398e-14\nobj from 2654.6 to 0.772309\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_tracking_effort_pareto/push_box_effort_0p1_trajectories/trial_001_crisp_push_box_source",
+      "wall_time_seconds": 0.4314103070064448
+    },
+    {
+      "block_index": 0,
+      "case": {},
+      "case_id": "source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.286544885267563,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 17.082712956612873
+              },
+              "angular_error": 0.001433519046011078,
+              "feasibility_ratios": {
+                "equality": 0.0002749195524009984,
+                "physical_complementarity": 0.10264198697381777,
+                "side": 0.03502099655419031
+              },
+              "feasible": true,
+              "max_equality": 2.749195524009984e-09,
+              "max_side_violation": 3.502099655419031e-10,
+              "objective": 18.934594954267432,
+              "objective_components": {
+                "force_effort": 18.910158082906943,
+                "terminal_tracking": 0.024436871360488284
+              },
+              "physical_mpcc": 1.0264198697381778e-06,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.015566429801004672
+            }
+          ],
+          "objective": 18.934594954267432,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.001433519046011078,
+          "worst_equality": 2.749195524009984e-09,
+          "worst_physical_mpcc": 1.0264198697381778e-06,
+          "worst_position_error": 0.015566429801004672,
+          "worst_side_violation": 3.502099655419031e-10,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 1,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 1,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Max iterations reached\nTask success:        no\nSolve time:          1.910319 s\nIterations:          1652 total\nObjective:           1.915452680e+00\nDynamics defect:     2.749e-09\nPrimal infeas:       3.634e-08\nBarrier residual:    8.545e-06\nPhysical MPCC:       1.026e-06\nTranslation error:   0.015566\nAngular error:       0.001434\nTerminal state:      [-1.492069, -2.584682, 4.187357]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_tracking_effort_pareto/push_box_effort_0p1_trajectories/trial_002_contactipm_push_box_source",
+      "wall_time_seconds": 1.9234000349970302
+    }
+  ],
+  "revision": {
+    "contactipm": "dde3b4476f8dfdba3a932f421cb57b4aff5b32c6",
+    "contactipm_source_sha256": {
+      "push_box": "101f7e0f2c4e4da462c7a451dc33fe16a30283d8dbde50a3395778db3006d9fb"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {
+      "push_box": "1a6438671b0f3c7d5b6b577519f550c79559289e718d0d31b353db0dd2099ed1"
+    },
+    "crisp_tracked_dirty": true,
+    "crisp_tracked_patch": {
+      "files": [
+        "src/core/include/common/BasicTypes.h",
+        "src/examples/Transp/cpp/SolveTransp.cpp",
+        "src/examples/pushT/SolvePushT.cpp",
+        "src/examples/pushbot/cpp/SolvePushbot.cpp",
+        "src/examples/pushbox/SolvePushbox.cpp"
+      ],
+      "sha256": "cd455d0a33773f93df932ddd8e22e3e871662f38cb939a2f3bea194c073ea620"
+    }
+  },
+  "schema_version": 5
+}

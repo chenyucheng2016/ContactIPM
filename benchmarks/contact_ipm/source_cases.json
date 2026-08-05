@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "source": "benchmarks/CRISP/src/examples",
+  "problems": {
+    "cartpole_soft_walls": {
+      "nodes": 100,
+      "dt": 0.02,
+      "row_layout": ["x", "theta", "x_dot", "theta_dot", "u", "lambda_left", "lambda_right"],
+      "initial_state": [0.0, 3.14159, 0.0, 2.8],
+      "initial_guess": {
+        "kind": "file",
+        "path": "benchmarks/CRISP/src/examples/pushbot/initial_guess_pushbot_example.txt",
+        "sha256": "470c6b28b09c87200498f1ef8895a11d783df1d4f0646cb1ef749360e8003e5d"
+      },
+      "target_state": [0.0, 0.0, 0.0, 0.0],
+      "parameters": {
+        "cart_mass": 1.0,
+        "pole_mass": 0.1,
+        "pole_length": 0.8,
+        "gravity": 9.8,
+        "left_wall": 1.0,
+        "right_wall": 1.0,
+        "left_stiffness": 200.0,
+        "right_stiffness": 200.0
+      },
+      "terminal_weights": [100.0, 100.0, 100.0, 100.0],
+      "control_weights": [0.001, 0.0, 0.0],
+      "task_tolerances": {
+        "equality": 1e-5,
+        "side": 1e-8,
+        "physical_complementarity": 1e-5,
+        "position": 0.1,
+        "angle": 0.5235987755982988,
+        "velocity": 0.5,
+        "angular_velocity": 0.3141592653589793
+      }
+    },
+    "push_box": {
+      "nodes": 100,
+      "dt": 0.02,
+      "row_layout": ["px", "py", "theta", "cx", "cy", "lambda1", "lambda2", "lambda3", "lambda4"],
+      "initial_state": [0.0, 0.0, 0.0],
+      "initial_guess": {"kind": "zeros"},
+      "target_segment": 12,
+      "target_segments": 18,
+      "target_radius": 3.0,
+      "parameters": {
+        "half_length": 0.5,
+        "half_width": 0.25,
+        "mass": 1.0,
+        "friction": 0.5,
+        "gravity": 9.8,
+        "rotation_scale": 0.4
+      },
+      "terminal_weights": [100.0, 100.0, 100.0],
+      "force_weights": [0.001, 0.001, 0.001, 0.001],
+      "task_tolerances": {
+        "equality": 1e-5,
+        "side": 1e-8,
+        "physical_complementarity": 1e-5,
+        "translation": 0.1,
+        "angle": 0.5235987755982988
+      }
+    },
+    "transport": {
+      "nodes": 200,
+      "dt": 0.02,
+      "row_layout": ["payload_position", "cart_position", "payload_velocity", "cart_velocity", "positive_slip", "negative_slip", "friction_force", "active_force"],
+      "initial_state": [3.5, 3.0, -4.0, -4.0, 0.0, 0.0],
+      "initial_guess": {"kind": "zeros"},
+      "target_state": [-0.5, 0.0, -2.0, -2.0, 0.0, 0.0],
+      "parameters": {
+        "payload_mass": 1.0,
+        "cart_mass": 2.0,
+        "friction": 0.2,
+        "gravity": 9.81,
+        "half_cart_length": 1.0
+      },
+      "terminal_weights": [100000.0, 100000.0, 10.0, 10.0, 0.0, 0.0],
+      "control_weights": [0.0001, 0.0001],
+      "task_tolerances": {
+        "equality": 1e-5,
+        "side": 1e-8,
+        "physical_complementarity": 1e-5,
+        "translation": 0.1,
+        "velocity": 0.5
+      }
+    },
+    "push_t": {
+      "nodes": 50,
+      "dt": 0.05,
+      "row_layout": ["px", "py", "theta", "cx", "cy", "v1", "w1", "v2", "w2", "v3", "w3", "v4", "w4", "v5", "w5", "v6", "w6", "v7", "w7", "lambda1", "lambda2", "lambda3", "lambda4", "lambda5", "lambda6", "lambda7", "lambda8", "cos_theta", "sin_theta"],
+      "initial_guess": {"kind": "zeros"},
+      "initial_cases": {
+        "count": 50,
+        "angle_start": 0.0,
+        "angle_period": 6.283185307179586,
+        "radius_start": 0.25,
+        "radius_end": 0.5
+      },
+      "target_pose": [0.01, 0.01, 0.01],
+      "parameters": {
+        "unit": 0.05,
+        "mass": 1.0,
+        "friction": 0.4,
+        "gravity": 9.8,
+        "radius_units": 2.8,
+        "rotation_scale": 0.4,
+        "dc": 2.6429
+      },
+      "pose_representation": ["px", "py", "cos_theta", "sin_theta"],
+      "running_pose_weights": [1.0, 1.0, 1.0, 1.0],
+      "terminal_pose_weights": [100.0, 100.0, 100.0, 100.0],
+      "force_weights": [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01],
+      "task_tolerances": {
+        "equality": 1e-5,
+        "side": 1e-8,
+        "physical_complementarity": 1e-5,
+        "position": 0.1,
+        "angle": 0.5235987755982988
+      }
+    }
+  }
+}

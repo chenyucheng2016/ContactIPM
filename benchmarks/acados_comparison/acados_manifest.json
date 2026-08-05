@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/acados/acados.git",
+  "commit": "dc6668f8538e49831f03a36ddf755de6e92d38ea",
+  "python_interface_version": "0.5.1",
+  "casadi_version": "3.7.2"
+}

@@ -1,0 +1,2430 @@
+{
+  "commands": [
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "source__segment_10",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.8190778623577253,-1.026060429977006,3.4906585039886591"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "source__segment_11",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.298133329356935,-1.9283628290596169,3.8397243543875246"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "source__source",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-1.5000000000000013,-2.5980762113533156,4.1887902047863905"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "source__segment_13",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-0.52094453300079102,-2.9544232590366239,4.5378560551852569"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "source__segment_14",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "0.52094453300078991,-2.9544232590366244,4.8869219055841224"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "box_left__segment_10",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "-0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.8190778623577253,-1.026060429977006,3.4906585039886591"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "box_left__segment_11",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "-0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.298133329356935,-1.9283628290596169,3.8397243543875246"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "box_left__source",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "-0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-1.5000000000000013,-2.5980762113533156,4.1887902047863905"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "box_left__segment_13",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "-0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-0.52094453300079102,-2.9544232590366239,4.5378560551852569"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "box_left__segment_14",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "-0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "0.52094453300078991,-2.9544232590366244,4.8869219055841224"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "box_right__segment_10",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.8190778623577253,-1.026060429977006,3.4906585039886591"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "box_right__segment_11",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.298133329356935,-1.9283628290596169,3.8397243543875246"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "box_right__source",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-1.5000000000000013,-2.5980762113533156,4.1887902047863905"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "box_right__segment_13",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-0.52094453300079102,-2.9544232590366239,4.5378560551852569"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "box_right__segment_14",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0.10000000000000001,0,0",
+        "CONTACT_BENCHMARK_TARGET_STATE": "0.52094453300078991,-2.9544232590366244,4.8869219055841224"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "angle_minus__segment_10",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,-0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.8190778623577253,-1.026060429977006,3.4906585039886591"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "angle_minus__segment_11",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,-0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.298133329356935,-1.9283628290596169,3.8397243543875246"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "angle_minus__source",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,-0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-1.5000000000000013,-2.5980762113533156,4.1887902047863905"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "angle_minus__segment_13",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,-0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-0.52094453300079102,-2.9544232590366239,4.5378560551852569"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "angle_minus__segment_14",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,-0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "0.52094453300078991,-2.9544232590366244,4.8869219055841224"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "angle_plus__segment_10",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.8190778623577253,-1.026060429977006,3.4906585039886591"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "angle_plus__segment_11",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-2.298133329356935,-1.9283628290596169,3.8397243543875246"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "angle_plus__source",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-1.5000000000000013,-2.5980762113533156,4.1887902047863905"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "angle_plus__segment_13",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "-0.52094453300079102,-2.9544232590366239,4.5378560551852569"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    },
+    {
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "angle_plus__segment_14",
+      "command": [
+        "/tmp/contactipm-build/contact_push_box"
+      ],
+      "cwd": ".",
+      "environment": {
+        "CONTACT_BENCHMARK_INITIAL_STATE": "0,0,0.10000000000000001",
+        "CONTACT_BENCHMARK_TARGET_STATE": "0.52094453300078991,-2.9544232590366244,4.8869219055841224"
+      },
+      "executable_sha256": "ad3b1f786197fe08d8b4484b7f6e963ef27c3a3ef060e37b573229dcbdab8df3",
+      "problem": "push_box",
+      "solver": "ContactIPM"
+    }
+  ],
+  "created_utc": "2026-07-28T08:28:10.162968+00:00",
+  "machine": {
+    "available_cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "cpu_governor": null,
+    "cpu_model": "Intel(R) Core(TM) Ultra 7 155H",
+    "logical_cpu_count": 22,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31",
+    "processor": "x86_64",
+    "python": "3.11.11 (main, Dec  4 2024, 08:55:08) [GCC 9.4.0]"
+  },
+  "protocol": {
+    "case_suite": "benchmarks/contact_ipm/validation_cases.json",
+    "case_suite_sha256": "de7a77b3ca2ffdc230619fbb1e7b8edc8e9e56782a352558e7d3c1a759f8fc18",
+    "contact_activity_tolerance": 1e-08,
+    "contactipm_environment": {
+      "CONTACTIPM_PUSH_EXACT_HESSIAN": "0"
+    },
+    "cpu_affinity": [
+      0
+    ],
+    "evaluation_order": [
+      "physical_feasibility",
+      "task_success",
+      "task_errors",
+      "objective_components",
+      "computational_performance",
+      "contact_behavior"
+    ],
+    "pairing": "contiguous (repetition, problem) blocks with randomized block and solver order",
+    "paper_reported_times_used": false,
+    "random_seed": 2027,
+    "repetitions": 1,
+    "source_case_manifest": "benchmarks/contact_ipm/source_cases.json",
+    "source_case_manifest_sha256": "f712a425b48c6246238253cc45a53f69d927a8d0ede86f32950c248ef5f1231e",
+    "threads": 1,
+    "timing": "process wall clock on this machine",
+    "trajectory_audit": "same independent audit for both solvers",
+    "warmups": 0
+  },
+  "results": [
+    {
+      "block_index": 0,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "angle_plus__segment_14",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.027751166805878,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.515678635862214
+              },
+              "angular_error": 0.01391871740830819,
+              "feasibility_ratios": {
+                "equality": 3.885780586188048e-11,
+                "physical_complementarity": 0.05831476464410627,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.885780586188048e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.591115785169915,
+              "objective_components": {
+                "force_effort": 18.461120644421353,
+                "terminal_tracking": 0.12999514074856253
+              },
+              "physical_mpcc": 5.831476464410628e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03325989646997242
+            }
+          ],
+          "objective": 18.591115785169915,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.01391871740830819,
+          "worst_equality": 3.885780586188048e-16,
+          "worst_physical_mpcc": 5.831476464410628e-07,
+          "worst_position_error": 0.03325989646997242,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.640314 s\nIterations:          931 total\nObjective:           1.859111579e+01\nDynamics defect:     4.025e-16\nPrimal infeas:       0.000e+00\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.831e-07\nTranslation error:   0.033260\nAngular error:       0.013919\nTerminal state:      [0.519817, -2.921182, 4.873003]\nTarget state:        [0.520945, -2.954423, 4.886922]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_001_contactipm_push_box_angle_plus__segment_14",
+      "wall_time_seconds": 0.6586787449923577
+    },
+    {
+      "block_index": 1,
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "box_left__source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 26.86320013274894,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.436717667900055
+              },
+              "angular_error": 0.013633779702357351,
+              "feasibility_ratios": {
+                "equality": 3.469446951953614e-11,
+                "physical_complementarity": 0.06827871431855083,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.469446951953614e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.36610669708643,
+              "objective_components": {
+                "force_effort": 18.237723226477637,
+                "terminal_tracking": 0.1283834706087921
+              },
+              "physical_mpcc": 6.827871431855084e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.033135400361479106
+            }
+          ],
+          "objective": 18.36610669708643,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013633779702357351,
+          "worst_equality": 3.469446951953614e-16,
+          "worst_physical_mpcc": 6.827871431855084e-07,
+          "worst_position_error": 0.033135400361479106,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.157694 s\nIterations:          309 total\nObjective:           1.836610670e+01\nDynamics defect:     3.608e-16\nPrimal infeas:       5.551e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       6.828e-07\nTranslation error:   0.033135\nAngular error:       0.013634\nTerminal state:      [-1.479317, -2.572188, 4.175156]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_002_contactipm_push_box_box_left__source",
+      "wall_time_seconds": 0.17827227398811374
+    },
+    {
+      "block_index": 2,
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "box_left__segment_13",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 26.898585973774768,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.443572148344199
+              },
+              "angular_error": 0.014139093718079643,
+              "feasibility_ratios": {
+                "equality": 3.608224830031759e-11,
+                "physical_complementarity": 0.05284101670749652,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.608224830031759e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.41465469690794,
+              "objective_components": {
+                "force_effort": 18.285004395876122,
+                "terminal_tracking": 0.1296503010318204
+              },
+              "physical_mpcc": 5.284101670749652e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.033114785808601645
+            }
+          ],
+          "objective": 18.41465469690794,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.014139093718079643,
+          "worst_equality": 3.608224830031759e-16,
+          "worst_physical_mpcc": 5.284101670749652e-07,
+          "worst_position_error": 0.033114785808601645,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.110718 s\nIterations:          164 total\nObjective:           1.841465470e+01\nDynamics defect:     3.469e-16\nPrimal infeas:       2.776e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.284e-07\nTranslation error:   0.033115\nAngular error:       0.014139\nTerminal state:      [-0.511333, -2.922734, 4.523717]\nTarget state:        [-0.520945, -2.954423, 4.537856]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_003_contactipm_push_box_box_left__segment_13",
+      "wall_time_seconds": 0.161400003999006
+    },
+    {
+      "block_index": 3,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "angle_minus__segment_14",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.030505825818672,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.519283130502101
+              },
+              "angular_error": 0.013951596242580244,
+              "feasibility_ratios": {
+                "equality": 4.302114220422481e-11,
+                "physical_complementarity": 0.04974103635395273,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 4.3021142204224816e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.595133134987726,
+              "objective_components": {
+                "force_effort": 18.464925733950132,
+                "terminal_tracking": 0.13020740103759557
+              },
+              "physical_mpcc": 4.974103635395274e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.033278025372007525
+            }
+          ],
+          "objective": 18.595133134987726,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013951596242580244,
+          "worst_equality": 4.3021142204224816e-16,
+          "worst_physical_mpcc": 4.974103635395274e-07,
+          "worst_position_error": 0.033278025372007525,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.289491 s\nIterations:          488 total\nObjective:           1.859513313e+01\nDynamics defect:     4.163e-16\nPrimal infeas:       1.388e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       4.974e-07\nTranslation error:   0.033278\nAngular error:       0.013952\nTerminal state:      [0.519709, -2.921168, 4.872970]\nTarget state:        [0.520945, -2.954423, 4.886922]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_004_contactipm_push_box_angle_minus__segment_14",
+      "wall_time_seconds": 0.30852463700284716
+    },
+    {
+      "block_index": 4,
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "box_left__segment_11",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.06285346470391,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.575364121154614
+              },
+              "angular_error": 0.01300726498039273,
+              "feasibility_ratios": {
+                "equality": 2.2204460492503128e-11,
+                "physical_complementarity": 0.08118511326972475,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.220446049250313e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.640544506099967,
+              "objective_components": {
+                "force_effort": 18.51177485932924,
+                "terminal_tracking": 0.12876964677072708
+              },
+              "physical_mpcc": 8.118511326972475e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.033444095524279314
+            }
+          ],
+          "objective": 18.640544506099967,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.01300726498039273,
+          "worst_equality": 2.220446049250313e-16,
+          "worst_physical_mpcc": 8.118511326972475e-07,
+          "worst_position_error": 0.033444095524279314,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.122451 s\nIterations:          244 total\nObjective:           1.864054451e+01\nDynamics defect:     2.220e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       8.119e-07\nTranslation error:   0.033444\nAngular error:       0.013007\nTerminal state:      [-2.268716, -1.912452, 3.826717]\nTarget state:        [-2.298133, -1.928363, 3.839724]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_005_contactipm_push_box_box_left__segment_11",
+      "wall_time_seconds": 0.14172169400262646
+    },
+    {
+      "block_index": 5,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "angle_plus__segment_11",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.545170401019742,
+                "dominant_contact_mode_changes": 1,
+                "peak_contact_force_norm": 17.04015850284072
+              },
+              "angular_error": 0.013086452178622032,
+              "feasibility_ratios": {
+                "equality": 2.2204460492503128e-11,
+                "physical_complementarity": 0.050286920120123396,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.220446049250313e-16,
+              "max_side_violation": 0.0,
+              "objective": 19.320384990251483,
+              "objective_components": {
+                "force_effort": 19.188009864377623,
+                "terminal_tracking": 0.13237512587386002
+              },
+              "physical_mpcc": 5.02869201201234e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.033948431894790645
+            }
+          ],
+          "objective": 19.320384990251483,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013086452178622032,
+          "worst_equality": 2.220446049250313e-16,
+          "worst_physical_mpcc": 5.02869201201234e-07,
+          "worst_position_error": 0.033948431894790645,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.252417 s\nIterations:          369 total\nObjective:           1.932038499e+01\nDynamics defect:     2.220e-16\nPrimal infeas:       1.388e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.029e-07\nTranslation error:   0.033948\nAngular error:       0.013086\nTerminal state:      [-2.268119, -1.912499, 3.826638]\nTarget state:        [-2.298133, -1.928363, 3.839724]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_006_contactipm_push_box_angle_plus__segment_11",
+      "wall_time_seconds": 0.2826890199939953
+    },
+    {
+      "block_index": 6,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "angle_minus__segment_11",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 32.42109965599265,
+                "dominant_contact_mode_changes": 1,
+                "peak_contact_force_norm": 70.75098381174301
+              },
+              "angular_error": 0.004683189335534799,
+              "feasibility_ratios": {
+                "equality": 4.434565144697175e-11,
+                "physical_complementarity": 0.09581532146493198,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 4.434565144697176e-16,
+              "max_side_violation": 0.0,
+              "objective": 29.691604169202478,
+              "objective_components": {
+                "force_effort": 29.536715443357725,
+                "terminal_tracking": 0.15488872584475277
+              },
+              "physical_mpcc": 9.581532146493199e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03907627152243495
+            }
+          ],
+          "objective": 29.691604169202478,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.004683189335534799,
+          "worst_equality": 4.434565144697176e-16,
+          "worst_physical_mpcc": 9.581532146493199e-07,
+          "worst_position_error": 0.03907627152243495,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.144860 s\nIterations:          242 total\nObjective:           2.969160417e+01\nDynamics defect:     4.435e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.582e-07\nTranslation error:   0.039076\nAngular error:       0.004683\nTerminal state:      [-2.286305, -1.891120, 3.844408]\nTarget state:        [-2.298133, -1.928363, 3.839724]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_007_contactipm_push_box_angle_minus__segment_11",
+      "wall_time_seconds": 0.1572361050057225
+    },
+    {
+      "block_index": 7,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "angle_plus__segment_13",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.0682266701893,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.507604131073291
+              },
+              "angular_error": 0.01367492395401726,
+              "feasibility_ratios": {
+                "equality": 4.4408920985006255e-11,
+                "physical_complementarity": 0.04997199512448323,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 4.440892098500626e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.646674977342357,
+              "objective_components": {
+                "force_effort": 18.516377326050723,
+                "terminal_tracking": 0.13029765129163343
+              },
+              "physical_mpcc": 4.997199512448323e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03340618158018332
+            }
+          ],
+          "objective": 18.646674977342357,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.01367492395401726,
+          "worst_equality": 4.440892098500626e-16,
+          "worst_physical_mpcc": 4.997199512448323e-07,
+          "worst_position_error": 0.03340618158018332,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.139824 s\nIterations:          277 total\nObjective:           1.864667498e+01\nDynamics defect:     4.580e-16\nPrimal infeas:       8.882e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       4.997e-07\nTranslation error:   0.033406\nAngular error:       0.013675\nTerminal state:      [-0.510153, -2.922808, 4.524181]\nTarget state:        [-0.520945, -2.954423, 4.537856]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_008_contactipm_push_box_angle_plus__segment_13",
+      "wall_time_seconds": 0.1574971679947339
+    },
+    {
+      "block_index": 8,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "source__segment_11",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.4913667205032,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.834434659434324
+              },
+              "angular_error": 0.013038451130481743,
+              "feasibility_ratios": {
+                "equality": 2.3592239273284573e-11,
+                "physical_complementarity": 0.05055784335715799,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.3592239273284576e-16,
+              "max_side_violation": 0.0,
+              "objective": 19.235515917877105,
+              "objective_components": {
+                "force_effort": 19.103296467842362,
+                "terminal_tracking": 0.13221945003474364
+              },
+              "physical_mpcc": 5.055784335715799e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03394397284446056
+            }
+          ],
+          "objective": 19.235515917877105,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013038451130481743,
+          "worst_equality": 2.3592239273284576e-16,
+          "worst_physical_mpcc": 5.055784335715799e-07,
+          "worst_position_error": 0.03394397284446056,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.165713 s\nIterations:          268 total\nObjective:           1.923551592e+01\nDynamics defect:     2.359e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.056e-07\nTranslation error:   0.033944\nAngular error:       0.013038\nTerminal state:      [-2.268030, -1.912678, 3.826686]\nTarget state:        [-2.298133, -1.928363, 3.839724]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_009_contactipm_push_box_source__segment_11",
+      "wall_time_seconds": 0.2150748330022907
+    },
+    {
+      "block_index": 9,
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "box_right__segment_13",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.21264055116778,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.640729553593289
+              },
+              "angular_error": 0.013443516460573512,
+              "feasibility_ratios": {
+                "equality": 3.7470027081099033e-11,
+                "physical_complementarity": 0.09765210563770313,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.7470027081099033e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.845843357368583,
+              "objective_components": {
+                "force_effort": 18.71530693250912,
+                "terminal_tracking": 0.13053642485946532
+              },
+              "physical_mpcc": 9.765210563770313e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03353559472812346
+            }
+          ],
+          "objective": 18.845843357368583,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013443516460573512,
+          "worst_equality": 3.7470027081099033e-16,
+          "worst_physical_mpcc": 9.765210563770313e-07,
+          "worst_position_error": 0.03353559472812346,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.099978 s\nIterations:          178 total\nObjective:           1.884584336e+01\nDynamics defect:     3.886e-16\nPrimal infeas:       2.776e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.765e-07\nTranslation error:   0.033536\nAngular error:       0.013444\nTerminal state:      [-0.509352, -2.922955, 4.524413]\nTarget state:        [-0.520945, -2.954423, 4.537856]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_010_contactipm_push_box_box_right__segment_13",
+      "wall_time_seconds": 0.12329655000939965
+    },
+    {
+      "block_index": 10,
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.298133329356935,
+          -1.9283628290596169,
+          3.8397243543875246
+        ]
+      },
+      "case_id": "box_right__segment_11",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.92371210078492,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 15.072968487931224
+              },
+              "angular_error": 0.012968892449336522,
+              "feasibility_ratios": {
+                "equality": 2.2204460492503128e-11,
+                "physical_complementarity": 0.0841161852465339,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.220446049250313e-16,
+              "max_side_violation": 0.0,
+              "objective": 19.84508967323999,
+              "objective_components": {
+                "force_effort": 19.709113516916727,
+                "terminal_tracking": 0.13597615632326274
+              },
+              "physical_mpcc": 8.411618524653391e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.0345191163251635
+            }
+          ],
+          "objective": 19.84508967323999,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.012968892449336522,
+          "worst_equality": 2.220446049250313e-16,
+          "worst_physical_mpcc": 8.411618524653391e-07,
+          "worst_position_error": 0.0345191163251635,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.190502 s\nIterations:          336 total\nObjective:           1.984508967e+01\nDynamics defect:     2.220e-16\nPrimal infeas:       2.776e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       8.412e-07\nTranslation error:   0.034519\nAngular error:       0.012969\nTerminal state:      [-2.267271, -1.912900, 3.826755]\nTarget state:        [-2.298133, -1.928363, 3.839724]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_011_contactipm_push_box_box_right__segment_11",
+      "wall_time_seconds": 0.21069866300967988
+    },
+    {
+      "block_index": 11,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "source__segment_14",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.034267923543602,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.532661531670831
+              },
+              "angular_error": 0.013935703211277684,
+              "feasibility_ratios": {
+                "equality": 3.885780586188048e-11,
+                "physical_complementarity": 0.09397908109989604,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.885780586188048e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.600731486753354,
+              "objective_components": {
+                "force_effort": 18.47040164947409,
+                "terminal_tracking": 0.1303298372792615
+              },
+              "physical_mpcc": 9.397908109989605e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03330307116167817
+            }
+          ],
+          "objective": 18.600731486753354,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013935703211277684,
+          "worst_equality": 3.885780586188048e-16,
+          "worst_physical_mpcc": 9.397908109989605e-07,
+          "worst_position_error": 0.03330307116167817,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.099111 s\nIterations:          177 total\nObjective:           1.860073149e+01\nDynamics defect:     4.025e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.398e-07\nTranslation error:   0.033303\nAngular error:       0.013936\nTerminal state:      [0.519770, -2.921141, 4.872986]\nTarget state:        [0.520945, -2.954423, 4.886922]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_012_contactipm_push_box_source__segment_14",
+      "wall_time_seconds": 0.1452296739880694
+    },
+    {
+      "block_index": 12,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "angle_plus__source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.264498896689656,
+                "dominant_contact_mode_changes": 1,
+                "peak_contact_force_norm": 14.696812458919219
+              },
+              "angular_error": 0.013628358987144651,
+              "feasibility_ratios": {
+                "equality": 3.885780586188048e-11,
+                "physical_complementarity": 0.06749826142162839,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.885780586188048e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.922999846504542,
+              "objective_components": {
+                "force_effort": 18.791090469055924,
+                "terminal_tracking": 0.13190937744861952
+              },
+              "physical_mpcc": 6.74982614216284e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03366543636734431
+            }
+          ],
+          "objective": 18.922999846504542,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013628358987144651,
+          "worst_equality": 3.885780586188048e-16,
+          "worst_physical_mpcc": 6.74982614216284e-07,
+          "worst_position_error": 0.03366543636734431,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.088943 s\nIterations:          166 total\nObjective:           1.892299985e+01\nDynamics defect:     4.025e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       6.750e-07\nTranslation error:   0.033665\nAngular error:       0.013628\nTerminal state:      [-1.478487, -2.572181, 4.175162]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_013_contactipm_push_box_angle_plus__source",
+      "wall_time_seconds": 0.10847523198754061
+    },
+    {
+      "block_index": 13,
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "box_left__segment_14",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.050769685028087,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.523729935649595
+              },
+              "angular_error": 0.014368826104321109,
+              "feasibility_ratios": {
+                "equality": 4.1633363423443364e-11,
+                "physical_complementarity": 0.052289963222803916,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 4.163336342344337e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.623875589184948,
+              "objective_components": {
+                "force_effort": 18.492337460945073,
+                "terminal_tracking": 0.13153812823987288
+              },
+              "physical_mpcc": 5.228996322280392e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03330042220126509
+            }
+          ],
+          "objective": 18.623875589184948,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.014368826104321109,
+          "worst_equality": 4.163336342344337e-16,
+          "worst_physical_mpcc": 5.228996322280392e-07,
+          "worst_position_error": 0.03330042220126509,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.087631 s\nIterations:          177 total\nObjective:           1.862387559e+01\nDynamics defect:     4.025e-16\nPrimal infeas:       1.388e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.229e-07\nTranslation error:   0.033300\nAngular error:       0.014369\nTerminal state:      [0.518790, -2.921193, 4.872553]\nTarget state:        [0.520945, -2.954423, 4.886922]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_014_contactipm_push_box_box_left__segment_14",
+      "wall_time_seconds": 0.10454975700122304
+    },
+    {
+      "block_index": 14,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "angle_minus__segment_10",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 28.49962485280751,
+                "dominant_contact_mode_changes": 1,
+                "peak_contact_force_norm": 18.181680627068424
+              },
+              "angular_error": 0.00883613255075888,
+              "feasibility_ratios": {
+                "equality": 4.4408920985006255e-11,
+                "physical_complementarity": 0.056684416234706346,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 4.440892098500626e-16,
+              "max_side_violation": 0.0,
+              "objective": 20.733372792581616,
+              "objective_components": {
+                "force_effort": 20.605071545394125,
+                "terminal_tracking": 0.12830124718749195
+              },
+              "physical_mpcc": 5.668441623470635e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03471217701931613
+            }
+          ],
+          "objective": 20.733372792581616,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.00883613255075888,
+          "worst_equality": 4.440892098500626e-16,
+          "worst_physical_mpcc": 5.668441623470635e-07,
+          "worst_position_error": 0.03471217701931613,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.173621 s\nIterations:          285 total\nObjective:           2.073337279e+01\nDynamics defect:     4.366e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.668e-07\nTranslation error:   0.034712\nAngular error:       0.008836\nTerminal state:      [-2.788485, -1.009659, 3.499495]\nTarget state:        [-2.819078, -1.026060, 3.490659]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_015_contactipm_push_box_angle_minus__segment_10",
+      "wall_time_seconds": 0.19054080299974885
+    },
+    {
+      "block_index": 15,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "angle_minus__source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.11906272707326,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.587245726975933
+              },
+              "angular_error": 0.013568337298793587,
+              "feasibility_ratios": {
+                "equality": 2.2204460492503128e-11,
+                "physical_complementarity": 0.051828610314237536,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.220446049250313e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.717077821655444,
+              "objective_components": {
+                "force_effort": 18.586949384796483,
+                "terminal_tracking": 0.13012843685896222
+              },
+              "physical_mpcc": 5.182861031423754e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.033424311384616275
+            }
+          ],
+          "objective": 18.717077821655444,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013568337298793587,
+          "worst_equality": 2.220446049250313e-16,
+          "worst_physical_mpcc": 5.182861031423754e-07,
+          "worst_position_error": 0.033424311384616275,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.178598 s\nIterations:          284 total\nObjective:           1.871707782e+01\nDynamics defect:     2.220e-16\nPrimal infeas:       5.551e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.183e-07\nTranslation error:   0.033424\nAngular error:       0.013568\nTerminal state:      [-1.478718, -2.572303, 4.175222]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_016_contactipm_push_box_angle_minus__source",
+      "wall_time_seconds": 0.19969083000614773
+    },
+    {
+      "block_index": 16,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          -0.1
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "angle_minus__segment_13",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.03461175710648,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.522240977855597
+              },
+              "angular_error": 0.01384244940557533,
+              "feasibility_ratios": {
+                "equality": 3.191891195797325e-11,
+                "physical_complementarity": 0.05007403090558413,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.191891195797325e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.600521006458496,
+              "objective_components": {
+                "force_effort": 18.470583850254105,
+                "terminal_tracking": 0.1299371562043931
+              },
+              "physical_mpcc": 5.007403090558413e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.0332830010140014
+            }
+          ],
+          "objective": 18.600521006458496,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.01384244940557533,
+          "worst_equality": 3.191891195797325e-16,
+          "worst_physical_mpcc": 5.007403090558413e-07,
+          "worst_position_error": 0.0332830010140014,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.285005 s\nIterations:          478 total\nObjective:           1.860052101e+01\nDynamics defect:     3.192e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.007e-07\nTranslation error:   0.033283\nAngular error:       0.013842\nTerminal state:      [-0.510493, -2.922824, 4.524014]\nTarget state:        [-0.520945, -2.954423, 4.537856]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_017_contactipm_push_box_angle_minus__segment_13",
+      "wall_time_seconds": 0.3619442000053823
+    },
+    {
+      "block_index": 17,
+      "case": {
+        "initial_state": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "box_left__segment_10",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 23.27218991279621,
+                "dominant_contact_mode_changes": 7,
+                "peak_contact_force_norm": 26.3371259534981
+              },
+              "angular_error": 0.0007029471738020376,
+              "feasibility_ratios": {
+                "equality": 2.1558002169641245e-11,
+                "physical_complementarity": 0.0974722044192969,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.1558002169641248e-16,
+              "max_side_violation": 0.0,
+              "objective": 15.504299098767724,
+              "objective_components": {
+                "force_effort": 15.430746540414825,
+                "terminal_tracking": 0.07355255835289903
+              },
+              "physical_mpcc": 9.74722044192969e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.027111463420476475
+            }
+          ],
+          "objective": 15.504299098767724,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.0007029471738020376,
+          "worst_equality": 2.1558002169641248e-16,
+          "worst_physical_mpcc": 9.74722044192969e-07,
+          "worst_position_error": 0.027111463420476475,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.193455 s\nIterations:          315 total\nObjective:           1.550429910e+01\nDynamics defect:     2.156e-16\nPrimal infeas:       0.000e+00\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.747e-07\nTranslation error:   0.027111\nAngular error:       0.000703\nTerminal state:      [-2.796961, -1.010379, 3.491361]\nTarget state:        [-2.819078, -1.026060, 3.490659]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_018_contactipm_push_box_box_left__segment_10",
+      "wall_time_seconds": 0.21351542799675371
+    },
+    {
+      "block_index": 18,
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "box_right__source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.487443801167206,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.808096150049472
+              },
+              "angular_error": 0.01327251898743853,
+              "feasibility_ratios": {
+                "equality": 3.3306690738754696e-11,
+                "physical_complementarity": 0.05007718465427185,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.3306690738754696e-16,
+              "max_side_violation": 0.0,
+              "objective": 19.228823446330363,
+              "objective_components": {
+                "force_effort": 19.096270942931167,
+                "terminal_tracking": 0.1325525033991981
+              },
+              "physical_mpcc": 5.007718465427185e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.033902290095509255
+            }
+          ],
+          "objective": 19.228823446330363,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.01327251898743853,
+          "worst_equality": 3.3306690738754696e-16,
+          "worst_physical_mpcc": 5.007718465427185e-07,
+          "worst_position_error": 0.033902290095509255,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.232075 s\nIterations:          360 total\nObjective:           1.922882345e+01\nDynamics defect:     3.469e-16\nPrimal infeas:       5.551e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.008e-07\nTranslation error:   0.033902\nAngular error:       0.013273\nTerminal state:      [-1.477559, -2.572664, 4.175518]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_019_contactipm_push_box_box_right__source",
+      "wall_time_seconds": 0.2547207640018314
+    },
+    {
+      "block_index": 19,
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "box_right__segment_10",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 30.512621582873194,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 15.827511749139012
+              },
+              "angular_error": 0.06280026876401834,
+              "feasibility_ratios": {
+                "equality": 2.2204460492503128e-11,
+                "physical_complementarity": 0.050607397619489305,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.220446049250313e-16,
+              "max_side_violation": 0.0,
+              "objective": 24.04983048417064,
+              "objective_components": {
+                "force_effort": 23.515518130224027,
+                "terminal_tracking": 0.5343123539466159
+              },
+              "physical_mpcc": 5.060739761948931e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03740654732307195
+            }
+          ],
+          "objective": 24.04983048417064,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.06280026876401834,
+          "worst_equality": 2.220446049250313e-16,
+          "worst_physical_mpcc": 5.060739761948931e-07,
+          "worst_position_error": 0.03740654732307195,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.142847 s\nIterations:          199 total\nObjective:           2.404983048e+01\nDynamics defect:     2.220e-16\nPrimal infeas:       1.110e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       5.061e-07\nTranslation error:   0.037407\nAngular error:       0.062800\nTerminal state:      [-2.782829, -1.035295, 3.427858]\nTarget state:        [-2.819078, -1.026060, 3.490659]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_020_contactipm_push_box_box_right__segment_10",
+      "wall_time_seconds": 0.161949059998733
+    },
+    {
+      "block_index": 20,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "angle_plus__segment_10",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 23.98978973741891,
+                "dominant_contact_mode_changes": 9,
+                "peak_contact_force_norm": 53.71680110333495
+              },
+              "angular_error": 0.05079869648233304,
+              "feasibility_ratios": {
+                "equality": 3.885780586188048e-11,
+                "physical_complementarity": 0.09922896708996008,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.885780586188048e-16,
+              "max_side_violation": 0.0,
+              "objective": 19.98848226833822,
+              "objective_components": {
+                "force_effort": 19.61061751286946,
+                "terminal_tracking": 0.3778647554687594
+              },
+              "physical_mpcc": 9.922896708996009e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03461415881374844
+            }
+          ],
+          "objective": 19.98848226833822,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.05079869648233304,
+          "worst_equality": 3.885780586188048e-16,
+          "worst_physical_mpcc": 9.922896708996009e-07,
+          "worst_position_error": 0.03461415881374844,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.397588 s\nIterations:          523 total\nObjective:           1.998848227e+01\nDynamics defect:     3.886e-16\nPrimal infeas:       4.441e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.923e-07\nTranslation error:   0.034614\nAngular error:       0.050799\nTerminal state:      [-2.785029, -1.032292, 3.439860]\nTarget state:        [-2.819078, -1.026060, 3.490659]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_021_contactipm_push_box_angle_plus__segment_10",
+      "wall_time_seconds": 0.4185069819941418
+    },
+    {
+      "block_index": 21,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -2.8190778623577253,
+          -1.026060429977006,
+          3.490658503988659
+        ]
+      },
+      "case_id": "source__segment_10",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 23.708628302490116,
+                "dominant_contact_mode_changes": 9,
+                "peak_contact_force_norm": 15.366383135092121
+              },
+              "angular_error": 3.518657918810675e-06,
+              "feasibility_ratios": {
+                "equality": 2.2204460492503128e-11,
+                "physical_complementarity": 0.09428427455942977,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.220446049250313e-16,
+              "max_side_violation": 0.0,
+              "objective": 16.173100800958142,
+              "objective_components": {
+                "force_effort": 16.031392528452944,
+                "terminal_tracking": 0.14170827250519985
+              },
+              "physical_mpcc": 9.428427455942977e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.037644159077751295
+            }
+          ],
+          "objective": 16.173100800958142,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 3.518657918810675e-06,
+          "worst_equality": 2.220446049250313e-16,
+          "worst_physical_mpcc": 9.428427455942977e-07,
+          "worst_position_error": 0.037644159077751295,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.249462 s\nIterations:          410 total\nObjective:           1.617310080e+01\nDynamics defect:     2.179e-16\nPrimal infeas:       2.776e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.428e-07\nTranslation error:   0.037644\nAngular error:       0.000004\nTerminal state:      [-2.783919, -1.012608, 3.490662]\nTarget state:        [-2.819078, -1.026060, 3.490659]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_022_contactipm_push_box_source__segment_10",
+      "wall_time_seconds": 0.2741850599995814
+    },
+    {
+      "block_index": 22,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -1.5000000000000013,
+          -2.5980762113533156,
+          4.1887902047863905
+        ]
+      },
+      "case_id": "source__source",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.172541075402584,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.582259540130206
+              },
+              "angular_error": 0.013434756368267742,
+              "feasibility_ratios": {
+                "equality": 3.885780586188048e-11,
+                "physical_complementarity": 0.049941711687133544,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 3.885780586188048e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.790903906012844,
+              "objective_components": {
+                "force_effort": 18.6601577956952,
+                "terminal_tracking": 0.1307461103176443
+              },
+              "physical_mpcc": 4.994171168713355e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03357035037800071
+            }
+          ],
+          "objective": 18.790903906012844,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013434756368267742,
+          "worst_equality": 3.885780586188048e-16,
+          "worst_physical_mpcc": 4.994171168713355e-07,
+          "worst_position_error": 0.03357035037800071,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.202502 s\nIterations:          279 total\nObjective:           1.879090391e+01\nDynamics defect:     3.886e-16\nPrimal infeas:       0.000e+00\nBarrier residual:    2.118e-22\nPhysical MPCC:       4.994e-07\nTranslation error:   0.033570\nAngular error:       0.013435\nTerminal state:      [-1.478405, -2.572373, 4.175355]\nTarget state:        [-1.500000, -2.598076, 4.188790]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_023_contactipm_push_box_source__source",
+      "wall_time_seconds": 0.2249772069917526
+    },
+    {
+      "block_index": 23,
+      "case": {
+        "initial_state": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          0.5209445330007899,
+          -2.9544232590366244,
+          4.886921905584122
+        ]
+      },
+      "case_id": "box_right__segment_14",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.01817320306179,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.507939385695979
+              },
+              "angular_error": 0.01344774743419741,
+              "feasibility_ratios": {
+                "equality": 4.1633363423443364e-11,
+                "physical_complementarity": 0.0967507484468212,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 4.163336342344337e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.5769387958235,
+              "objective_components": {
+                "force_effort": 18.44812643705891,
+                "terminal_tracking": 0.12881235876458985
+              },
+              "physical_mpcc": 9.675074844682122e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.0332758422371536
+            }
+          ],
+          "objective": 18.5769387958235,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.01344774743419741,
+          "worst_equality": 4.163336342344337e-16,
+          "worst_physical_mpcc": 9.675074844682122e-07,
+          "worst_position_error": 0.0332758422371536,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.094524 s\nIterations:          129 total\nObjective:           1.857693880e+01\nDynamics defect:     4.025e-16\nPrimal infeas:       2.220e-16\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.675e-07\nTranslation error:   0.033276\nAngular error:       0.013448\nTerminal state:      [0.520754, -2.921148, 4.873474]\nTarget state:        [0.520945, -2.954423, 4.886922]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_024_contactipm_push_box_box_right__segment_14",
+      "wall_time_seconds": 0.12267798899847548
+    },
+    {
+      "block_index": 24,
+      "case": {
+        "initial_state": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_state": [
+          -0.520944533000791,
+          -2.954423259036624,
+          4.537856055185257
+        ]
+      },
+      "case_id": "source__segment_13",
+      "metrics": {
+        "trajectory_audit": {
+          "attempted_instances": 1,
+          "feasible_instances": 1,
+          "instances": [
+            {
+              "actuation": {
+                "active_contact_steps": 99,
+                "contact_impulse": 27.046588385360007,
+                "dominant_contact_mode_changes": 0,
+                "peak_contact_force_norm": 14.534598695736161
+              },
+              "angular_error": 0.013791163584159882,
+              "feasibility_ratios": {
+                "equality": 2.6367796834847465e-11,
+                "physical_complementarity": 0.09665667650472472,
+                "side": 0.0
+              },
+              "feasible": true,
+              "max_equality": 2.636779683484747e-16,
+              "max_side_violation": 0.0,
+              "objective": 18.61716341023097,
+              "objective_components": {
+                "force_effort": 18.48718094832775,
+                "terminal_tracking": 0.12998246190321747
+              },
+              "physical_mpcc": 9.665667650472473e-07,
+              "success": true,
+              "task_success": true,
+              "translation_error": 0.03331108563267065
+            }
+          ],
+          "objective": 18.61716341023097,
+          "successful_instances": 1,
+          "task_successful_instances": 1,
+          "worst_angular_error": 0.013791163584159882,
+          "worst_equality": 2.636779683484747e-16,
+          "worst_physical_mpcc": 9.665667650472473e-07,
+          "worst_position_error": 0.03331108563267065,
+          "worst_side_violation": 0.0,
+          "worst_velocity_error": 0.0
+        }
+      },
+      "order_in_block": 0,
+      "problem": "push_box",
+      "repetition": 0,
+      "returncode": 0,
+      "solver": "ContactIPM",
+      "stderr": "",
+      "stdout": "\n=== PUSH BOX ===\nOptimizer status:    Success\nTask success:        yes\nSolve time:          0.206079 s\nIterations:          292 total\nObjective:           1.861716341e+01\nDynamics defect:     2.776e-16\nPrimal infeas:       5.551e-17\nBarrier residual:    2.118e-22\nPhysical MPCC:       9.666e-07\nTranslation error:   0.033311\nAngular error:       0.013791\nTerminal state:      [-0.510355, -2.922840, 4.524065]\nTarget state:        [-0.520945, -2.954423, 4.537856]\n",
+      "trajectory_directory": "benchmarks/contact_ipm/results/2026-07-28_generic_recovery_push_box_ablation/gauss_newton_primary_trajectories/trial_025_contactipm_push_box_source__segment_13",
+      "wall_time_seconds": 0.22373657900607213
+    }
+  ],
+  "revision": {
+    "contactipm": "2c6fb1020780538b06f8a106d18780250c8390e0",
+    "contactipm_source_sha256": {
+      "push_box": "03fc7e5ef9a341fdfd420d75d3255b9369ac7db51b9b40dc46c949ad7531d36f"
+    },
+    "contactipm_tracked_dirty": false,
+    "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
+    "crisp_source_sha256": {},
+    "crisp_tracked_dirty": null,
+    "crisp_tracked_patch": null
+  },
+  "schema_version": 5
+}
