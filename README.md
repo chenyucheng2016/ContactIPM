@@ -119,13 +119,8 @@ submodules and tracks the frozen benchmark instances, fairness checks,
 independent trajectory audits, paired timing runners, and publication-facing
 result artifacts.
 
-Start with a recursive clone:
-
-```bash
-git clone --recurse-submodules \
-  https://github.com/chenyucheng2016/ContactIPM.git
-cd ContactIPM
-```
+Download and extract the anonymized repository archive from the URL provided
+in the paper.
 
 Follow [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for the complete Ubuntu
 setup and copy-paste commands to:

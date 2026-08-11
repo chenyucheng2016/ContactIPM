@@ -10,16 +10,21 @@ No execution time quoted by either competitor paper is imported into our
 tables. Exact wall times are machine-dependent; the frozen instances, solver
 outputs, independent audits, and paired timing protocol are reproducible.
 
-## 1. Clone the pinned sources
+## 1. Obtain the pinned sources
+
+Download and extract the anonymized repository archive from the URL provided
+in the paper, then enter its top-level directory. Because the anonymous archive
+does not include Git submodule contents, obtain the released competitor sources
+at the pinned revisions:
 
 ```bash
-git clone --recurse-submodules \
-  https://github.com/chenyucheng2016/ContactIPM.git
-cd ContactIPM
-git submodule status
+git clone https://github.com/ComputationalRobotics/CRISP.git benchmarks/CRISP
+git -C benchmarks/CRISP checkout d429c06e02b77bba33fbdc2da91d980d3088257b
+git clone https://github.com/JonasPflaume/IMPACT.git benchmarks/IMPACT
+git -C benchmarks/IMPACT checkout f56f1403659122bd4017ed36b21d83a490bc6687
 ```
 
-For an existing clone:
+For a Git clone with submodules configured, the equivalent command is:
 
 ```bash
 git submodule update --init --recursive
