@@ -2,7 +2,7 @@
 
 ## Provenance and protocol
 
-- ContactIPM revision: `caeebc84fe0aecc4d35f7e918e0db8109774334a`
+- ContactIPM source snapshot: `contactipm-src-14`
 - ContactIPM tracked worktree: clean in every raw artifact
 - Cases: the 25 frozen Push Box initial-state/target cases in
   `validation_cases.json`

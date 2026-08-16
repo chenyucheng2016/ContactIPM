@@ -373,7 +373,7 @@ tolerance. No completed trial has a missing touchdown or large-slip recurrence.
 This is a development boundary and causal implementation result, not a
 terrain-distribution robustness claim.
 
-The uncensored rerun at commit `c76c210` reproduces those exact aggregate
+The uncensored rerun from source snapshot `contactipm-src-13` reproduces those exact aggregate
 counts. Event-centered traces cover only the 300 ms before and after each
 planned touchdown and record the planned, WBC-support, and measured contact
 masks together with terrain gaps, vertical velocities, contact force, contact

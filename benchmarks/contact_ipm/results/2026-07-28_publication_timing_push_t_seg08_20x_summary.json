@@ -400,7 +400,7 @@
     "protocol_ready": true
   },
   "revision": {
-    "contactipm": "a2e639f670a2a9419a3dc08ce3234d5d99e7da6d",
+    "contactipm": "contactipm-src-11",
     "contactipm_source_sha256": {
       "push_t": "b5fce706ed746b9a415e52f205915d0a759ba71ae98ec1b286e38f59fbf64996"
     },

@@ -3285,7 +3285,7 @@
     }
   ],
   "revision": {
-    "contactipm": "933cc25f322d1e1cc304a0412acb00eecc919dcd",
+    "contactipm": "contactipm-src-08",
     "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
     "crisp_source_sha256": {
       "cartpole_soft_walls": "d24fca2c92d76cc510aaf5877f6074e68385f6bbb941b03d989b0d66a8a1ded4",

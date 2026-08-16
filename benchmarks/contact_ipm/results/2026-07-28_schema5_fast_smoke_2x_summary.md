@@ -4,7 +4,7 @@ Source artifact: `benchmarks/contact_ipm/results/2026-07-28_schema5_fast_smoke_2
 
 All execution times in this report were measured locally; no runtime reported in the CRISP paper is used.
 
-ContactIPM revision: `933cc25f322d1e1cc304a0412acb00eecc919dcd`
+ContactIPM source snapshot: `contactipm-src-08`
 
 This run is correctness/development evidence, not publication-ready timing evidence, because:
 

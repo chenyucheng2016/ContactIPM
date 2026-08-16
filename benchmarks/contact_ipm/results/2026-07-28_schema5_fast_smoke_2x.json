@@ -775,7 +775,7 @@
     }
   ],
   "revision": {
-    "contactipm": "933cc25f322d1e1cc304a0412acb00eecc919dcd",
+    "contactipm": "contactipm-src-08",
     "contactipm_source_sha256": {
       "cartpole_soft_walls": "f7f8976432d33048b3365008db341994a55237e0b8e70e2dde53459ad67bf48a",
       "push_box": "25e05844edadb89270fdac562b5db956220002cb13ba42248ada203ad3a18f88",

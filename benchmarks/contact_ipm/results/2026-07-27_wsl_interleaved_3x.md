@@ -1,6 +1,9 @@
 # WSL interleaved development benchmark - 2026-07-27
 
-This is a development milestone, not a publication-quality timing claim. The measured implementation is commit `bd6666c` (`Add exact contact curvature and robust continuations`). The raw runner recorded base revision `8a0450a` because the implementation was uncommitted during execution; `bd6666c` captures that measured solver/benchmark source plus its regression registrations.
+This is a development milestone, not a publication-quality timing claim. Source
+snapshot `contactipm-src-12` captures the measured solver and benchmark source
+plus its regression registrations. The raw runner recorded the earlier base
+snapshot `contactipm-src-06` because the measured changes were not yet frozen.
 
 ## Protocol
 

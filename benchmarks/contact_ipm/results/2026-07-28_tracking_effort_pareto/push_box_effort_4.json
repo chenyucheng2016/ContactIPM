@@ -206,7 +206,7 @@
     }
   ],
   "revision": {
-    "contactipm": "dde3b4476f8dfdba3a932f421cb57b4aff5b32c6",
+    "contactipm": "contactipm-src-16",
     "contactipm_source_sha256": {
       "push_box": "101f7e0f2c4e4da462c7a451dc33fe16a30283d8dbde50a3395778db3006d9fb"
     },

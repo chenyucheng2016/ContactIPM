@@ -33,7 +33,7 @@
   },
   "revision": {
     "acados": "dc6668f8538e49831f03a36ddf755de6e92d38ea",
-    "contactipm": "756a12cc457f775b33e5cab55495909bdc54e830"
+    "contactipm": "contactipm-src-05"
   },
   "schema_version": 1,
   "suite": "crisp",

@@ -279,7 +279,7 @@
     }
   ],
   "revision": {
-    "contactipm": "3ba5822598a60699fc99072008524f2a61d8f834",
+    "contactipm": "contactipm-src-03",
     "crisp": "d429c06e02b77bba33fbdc2da91d980d3088257b",
     "crisp_source_sha256": {
       "cartpole_soft_walls": "d24fca2c92d76cc510aaf5877f6074e68385f6bbb941b03d989b0d66a8a1ded4",

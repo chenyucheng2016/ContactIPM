@@ -4,7 +4,7 @@ Source artifact: `benchmarks/contact_ipm/results/2026-07-28_initial_target_sweep
 
 All execution times in this report were measured locally; no runtime reported in the CRISP paper is used.
 
-ContactIPM revision: `73a4a68dd39be639dcf9b0c85123523aaa9c80d0`
+ContactIPM source snapshot: `contactipm-src-04`
 
 This run is correctness/development evidence, not publication-ready timing evidence, because:
 

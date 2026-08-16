@@ -17,6 +17,7 @@ import sys
 import time
 from pathlib import Path
 
+from source_provenance import describe_source
 from trajectory_audit import CONTACT_ACTIVITY_TOLERANCE, audit
 
 
@@ -439,6 +440,7 @@ def main() -> int:
                     }
                 )
 
+    contactipm_source = describe_source(repo)
     document = {
         "schema_version": 5,
         "created_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -516,7 +518,8 @@ def main() -> int:
             ),
         },
         "revision": {
-            "contactipm": git_revision(repo),
+            "contactipm_source_snapshot": contactipm_source["snapshot"],
+            "contactipm_source_manifest": contactipm_source["manifest"],
             "contactipm_tracked_dirty": git_tracked_dirty(repo),
             "crisp": git_revision(repo / "benchmarks" / "CRISP"),
             "crisp_tracked_dirty": (

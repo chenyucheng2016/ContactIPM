@@ -320,6 +320,9 @@ def timing_cell(stats: dict | None) -> str:
 def render_markdown(summary: dict, source: Path) -> str:
     readiness = summary["readiness"]
     revision = summary.get("revision", {})
+    source_snapshot = revision.get(
+        "contactipm_source_snapshot", revision.get("contactipm", "unknown")
+    )
     lines = [
         "# Local contact benchmark summary",
         "",
@@ -330,7 +333,7 @@ def render_markdown(summary: dict, source: Path) -> str:
             "reported in the CRISP paper is used."
         ),
         "",
-        f"ContactIPM revision: `{revision.get('contactipm')}`",
+        f"ContactIPM source snapshot: `{source_snapshot}`",
         "",
     ]
     if readiness["issues"]:

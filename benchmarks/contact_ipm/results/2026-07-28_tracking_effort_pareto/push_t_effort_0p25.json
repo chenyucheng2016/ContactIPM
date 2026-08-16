@@ -233,7 +233,7 @@
     }
   ],
   "revision": {
-    "contactipm": "dde3b4476f8dfdba3a932f421cb57b4aff5b32c6",
+    "contactipm": "contactipm-src-16",
     "contactipm_source_sha256": {
       "push_t": "5b34641c6358e0ecba9f7dc02cbe2abbcd2a0687fdf1fce7df7e6086460238a2"
     },

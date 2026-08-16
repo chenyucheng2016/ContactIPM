@@ -326,7 +326,7 @@ robustness failures. Overall audited success is 47/55 versus 42/55. This is
 breadth/correctness evidence, not publication timing.
 
 The current audited timing artifacts combine the robustness and quality audits with 20-pair local
-timing on revision `2c6fb10`. Median paired CRISP/ContactIPM speedups are
+timing from source snapshot `contactipm-src-02`. Median paired CRISP/ContactIPM speedups are
 8.868x on Cartpole, 2.168x on Push Box, 2.337x on Transport, and 6.920x on the
 predeclared Push T segment 8. All 80 pairs pass the common audit and every
 timing-readiness gate. Earlier publication-timing artifacts remain useful
@@ -337,7 +337,7 @@ The [matched tracking-effort interpretation](results/2026-07-28_tracking_effort_
 shows that the Push Box objective gap is a force-versus-tracking tradeoff, not a
 quality failure. On Push T segment 8, ContactIPM converges and passes the common
 audit at all 7 weights, versus 2/7 for CRISP. The study records revision
-`dde3b44`; default-weight audit metrics are unchanged from the original source
+`contactipm-src-16`; default-weight audit metrics are unchanged from the original source
 objectives. Process times from this one-shot weight sweep are not used.
 
 The [duration-fixed MPCC scaling interpretation](results/2026-07-28_mpcc_scaling/interpretation.md)
@@ -359,7 +359,7 @@ it is intentionally marked underpowered.
 
 ## Historical WSL development baselines
 
-The exact contact-curvature milestone at implementation commit `bd6666c`
+The exact contact-curvature milestone in source snapshot `contactipm-src-12`
 passes all 10 WSL regression tests and all four ContactIPM task gates. Push T
 passes 50/50 source initial conditions with worst dynamics `6.580e-6`, side
 violation `8.499e-9`, and physical complementarity product `4.564e-6`.

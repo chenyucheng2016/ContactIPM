@@ -148,10 +148,14 @@ def timing_summary(pairs: list[dict[str, Any]]) -> dict[str, Any]:
 def summarize(
     robustness: dict[str, Any], timing: dict[str, Any] | None
 ) -> dict[str, Any]:
+    source_snapshot = robustness.get("contactipm_source_snapshot")
+    if timing is not None and timing.get("contactipm_source_snapshot") != source_snapshot:
+        raise ValueError("ContactIPM source snapshot differs between artifacts")
     problems = sorted({pair["problem"] for pair in robustness["pairs"]})
     result: dict[str, Any] = {
         "schema_version": 1,
         "paper_reported_times_used": False,
+        "contactipm_source_snapshot": source_snapshot,
         "robustness_artifact": robustness.get("comparison"),
         "problems": {},
     }

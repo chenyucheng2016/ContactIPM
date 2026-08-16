@@ -35,6 +35,22 @@ The expected competitor revisions are:
 - CRISP: `d429c06e02b77bba33fbdc2da91d980d3088257b`
 - IMPACT: `f56f1403659122bd4017ed36b21d83a490bc6687`
 
+Historical ContactIPM artifacts use the neutral labels `contactipm-src-01`
+through `contactipm-src-17`. Their exact source-only snapshots are included in
+`provenance/contactipm-source-snapshots.bundle`; the bundle digest and per-file
+SHA-256 manifests are listed in `provenance/source-snapshots.json`. For example:
+
+```bash
+git clone provenance/contactipm-source-snapshots.bundle /tmp/contactipm-sources
+git -C /tmp/contactipm-sources checkout contactipm-src-02
+(cd /tmp/contactipm-sources && sha256sum -c \
+  "$OLDPWD/provenance/manifests/contactipm-src-02.sha256")
+```
+
+The neutral snapshots contain source and build inputs but no generated results,
+media, repository history, or author metadata. Current SRBD source is present
+directly in this archive.
+
 ## 2. Common prerequisites
 
 ```bash
@@ -275,7 +291,8 @@ Publication-facing artifacts are tracked under:
 - `benchmarks/contact_ipm/results/`
 - `benchmarks/impact_comparison/results/`
 
-The JSON artifacts contain commands, revisions, executable/source hashes,
+The JSON artifacts contain commands, source snapshots, external dependency
+revisions, executable/source hashes,
 solver output, independent audit metrics, and paired timing observations.
 Per-trial raw trajectory directories use the `_raw` suffix and are deliberately
 not committed because of their size. Every new runner invocation creates its
@@ -307,8 +324,8 @@ cmake --build build-srbd-repro -j2 --target \
   test_quadruped_cito_rolling_audit \
   test_quadruped_cito_sustained_topology
 
-ctest --test-dir build-srbd-repro --output-on-failure \
-  -R 'QuadrupedCITO(RealtimeInvariants|RealtimeExecutionTiming|RollingAudit|SustainedTopology)$'
+(cd build-srbd-repro && ctest --output-on-failure \
+  -R 'QuadrupedCITO(RealtimeInvariants|RealtimeExecutionTiming|RollingAudit|SustainedTopology)$')
 ```
 
 Run the 40 s correctness experiment on the registered 2 cm sinusoidal terrain:

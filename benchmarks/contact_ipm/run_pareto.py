@@ -97,6 +97,10 @@ def fmt(value: float | None, precision: int = 4) -> str:
 
 
 def render_markdown(document: dict) -> str:
+    revision = document["revision"]
+    source_snapshot = revision.get(
+        "contactipm_source_snapshot", revision.get("contactipm", "unknown")
+    )
     lines = [
         "# Matched tracking-effort Pareto study",
         "",
@@ -106,7 +110,7 @@ def render_markdown(document: dict) -> str:
         "comparable across multipliers. Nondominance requires solver convergence "
         "and a successful common audit. Process times are diagnostic only.",
         "",
-        f"ContactIPM revision: `{document['revision']['contactipm']}`",
+        f"ContactIPM source snapshot: `{source_snapshot}`",
         "",
     ]
     for problem in document["problems"]:
@@ -182,7 +186,8 @@ def main() -> int:
     first_document = None
     source_hashes = {"contactipm": {}, "crisp": {}}
     stable_revision_fields = (
-        "contactipm",
+        "contactipm_source_snapshot",
+        "contactipm_source_manifest",
         "contactipm_tracked_dirty",
         "crisp",
         "crisp_tracked_dirty",

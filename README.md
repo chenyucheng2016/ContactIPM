@@ -131,7 +131,9 @@ and the [quadruped implementation notes](examples/quadruped_cito/README.md).
 The repository pins the exact CRISP and IMPACT source revisions as Git
 submodules and tracks the frozen benchmark instances, fairness checks,
 independent trajectory audits, paired timing runners, and publication-facing
-result artifacts.
+result artifacts. Historical ContactIPM result files use identity-neutral source
+snapshot labels; the corresponding source bytes and SHA-256 manifests are
+included under [`provenance/`](provenance/README.md).
 
 Download and extract the anonymized repository archive from the URL provided
 in the paper.
@@ -149,7 +151,7 @@ setup and copy-paste commands to:
 
 All competitor timings in this repository are locally measured. Values quoted
 by the CRISP or IMPACT papers are not used. Exact wall times depend on the
-machine, while source revisions, instances, solver outputs, physical audits,
+machine, while source snapshots, external revisions, instances, solver outputs, physical audits,
 and the randomized adjacent-pair protocol are recorded for verification.
 
 ### Reproduce the acados comparison

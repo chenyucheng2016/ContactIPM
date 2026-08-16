@@ -4,7 +4,7 @@ Source artifact: `benchmarks/contact_ipm/results/2026-07-28_publication_timing_f
 
 All execution times in this report were measured locally; no runtime reported in the CRISP paper is used.
 
-ContactIPM revision: `a2e639f670a2a9419a3dc08ce3234d5d99e7da6d`
+ContactIPM source snapshot: `contactipm-src-11`
 
 The timing protocol meets the configured readiness gates.
 

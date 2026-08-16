@@ -11,11 +11,16 @@ import random
 import re
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
 import run_impact_audit as audit_entry
+
+CONTACT_DIR = Path(__file__).resolve().parents[1] / "contact_ipm"
+sys.path.insert(0, str(CONTACT_DIR))
+from source_provenance import describe_source  # noqa: E402
 
 
 EXECUTABLES = {
@@ -167,6 +172,10 @@ def run_one(
             )
         except (OSError, ValueError) as error:
             audit_error = str(error)
+    repository = Path(__file__).resolve().parents[2]
+    contactipm_source = describe_source(
+        repository, (repository / "benchmarks" / "impact_comparison",)
+    )
     result = {
         "solver": solver,
         "command": command,
@@ -365,6 +374,8 @@ def main() -> int:
         "schema_version": 1,
         "created_unix_seconds": time.time(),
         "comparison": "ContactIPM versus locally executed IMPACT",
+        "contactipm_source_snapshot": contactipm_source["snapshot"],
+        "contactipm_source_manifest": contactipm_source["manifest"],
         "paper_reported_times_used": False,
         "case_suite": {
             "path": str(args.cases),

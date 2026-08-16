@@ -936,7 +936,7 @@
     "protocol_ready": true
   },
   "revision": {
-    "contactipm": "a2e639f670a2a9419a3dc08ce3234d5d99e7da6d",
+    "contactipm": "contactipm-src-11",
     "contactipm_source_sha256": {
       "cartpole_soft_walls": "5994cfca25234595e19c27381acd07b75d6ac4793b3f70f1c9bcd022d9e71fd7",
       "push_box": "7a7f92b808bd845fde47474d1fb16f90e209d67a21f889bcc7f6e998b6bc8fb7",

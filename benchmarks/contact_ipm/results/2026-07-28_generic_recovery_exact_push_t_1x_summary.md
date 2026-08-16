@@ -4,7 +4,7 @@ Source artifact: `benchmarks/contact_ipm/results/2026-07-28_generic_recovery_exa
 
 All execution times in this report were measured locally; no runtime reported in the CRISP paper is used.
 
-ContactIPM revision: `2c6fb1020780538b06f8a106d18780250c8390e0`
+ContactIPM source snapshot: `contactipm-src-02`
 
 This run is correctness/development evidence, not publication-ready timing evidence, because:
 

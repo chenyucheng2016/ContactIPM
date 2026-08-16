@@ -2,7 +2,7 @@
 
 Both solvers optimize the same source objective with the listed positive effort multiplier and a fixed tracking multiplier. Reported tracking and effort costs use the unscaled common audit definitions, so points remain comparable across multipliers. Nondominance requires solver convergence and a successful common audit. Process times are diagnostic only.
 
-ContactIPM revision: `dde3b4476f8dfdba3a932f421cb57b4aff5b32c6`
+ContactIPM source snapshot: `contactipm-src-16`
 
 ## Push Box
 

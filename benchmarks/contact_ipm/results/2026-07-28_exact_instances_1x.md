@@ -3,8 +3,8 @@
 This is a correctness and reproducibility milestone, not a
 publication-quality timing study. All execution times were measured locally by
 the common runner; no execution time reported in the CRISP paper was used.
-The JSON records base revision `cf7fe92` because the run preceded its commit;
-implementation commit `075fadb` captures the measured source tree exactly.
+The JSON records base source snapshot `contactipm-src-15`; source snapshot
+`contactipm-src-01` captures the measured source tree exactly.
 
 ## What is now identical
 

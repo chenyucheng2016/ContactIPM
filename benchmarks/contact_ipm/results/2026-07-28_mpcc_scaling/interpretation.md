@@ -61,8 +61,8 @@ in paired speedup claims. Solver exit status alone is not treated as success.
 
 ## Provenance and claim limits
 
-- Push Box records clean ContactIPM revision `97833fe`; Push T records clean
-  revision `a230e13`, which fixes scaled Push T audit routing without changing
+- Push Box records clean ContactIPM revision `contactipm-src-09`; Push T records clean
+  revision `contactipm-src-10`, which fixes scaled Push T audit routing without changing
   solver binaries.
 - Both record CRISP revision `d429c06` and the exact tracked instrumentation
   patch hash `93679cc1d7c6bbe7ac9973f5bc14bf3aba6c26e18f804757ecc2cf37e581cc48`.

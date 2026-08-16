@@ -474,8 +474,13 @@ def main() -> int:
             "cpu_count": os.cpu_count(),
         },
         "revision": {
-            "contactipm": git_revision(ROOT),
             "acados": git_revision(acados_repository),
+        },
+        "harness_source_sha256": {
+            "runner": sha256(Path(__file__)),
+            "formulation": sha256(HERE / "acados_contact_benchmarks.py"),
+            "crisp_audit": sha256(CONTACT_DIR / "trajectory_audit.py"),
+            "impact_audit": sha256(IMPACT_DIR / "impact_audit.py"),
         },
         "summary": summarize(trials),
         "trials": trials,

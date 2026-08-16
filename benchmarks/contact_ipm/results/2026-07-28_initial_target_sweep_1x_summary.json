@@ -940,7 +940,7 @@
     "protocol_ready": false
   },
   "revision": {
-    "contactipm": "73a4a68dd39be639dcf9b0c85123523aaa9c80d0",
+    "contactipm": "contactipm-src-04",
     "contactipm_source_sha256": {
       "cartpole_soft_walls": "5994cfca25234595e19c27381acd07b75d6ac4793b3f70f1c9bcd022d9e71fd7",
       "push_box": "7a7f92b808bd845fde47474d1fb16f90e209d67a21f889bcc7f6e998b6bc8fb7",

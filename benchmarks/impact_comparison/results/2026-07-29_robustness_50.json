@@ -5,6 +5,7 @@
     "sha256": "b684de6aed631ab3395c8dada092bb601e78c70b8518e8e0b6f6ad797724b02d"
   },
   "comparison": "ContactIPM versus locally executed IMPACT",
+  "contactipm_source_snapshot": "contactipm-src-17",
   "created_unix_seconds": 1785293349.2066126,
   "executable_hashes": {
     "cart_transport": {
