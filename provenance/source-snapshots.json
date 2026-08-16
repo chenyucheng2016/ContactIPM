@@ -1,80 +1,82 @@
 {
-  "schema_version": 1,
-  "bundle": "contactipm-source-snapshots.bundle",
-  "bundle_sha256": "7e0d9ef22654388ffdd6c06c2b5dd2168ef5b02f74fd0a1298671b723047ae7c",
+  "schema_version": 2,
+  "bundle_base64": "contactipm-source-snapshots.bundle.b64",
+  "decoded_bundle_sha256": "7e0d9ef22654388ffdd6c06c2b5dd2168ef5b02f74fd0a1298671b723047ae7c",
   "current_srbd_source_manifest": "srbd-closed-loop-source.sha256",
-  "current_srbd_source_manifest_sha256": "c47854db93cc77517c42efd991d54bacac57433f06093ef357d135b361083258",
+  "current_srbd_source_manifest_sha256": "48f6b389a13c961cefa84bf2e07dc227202c745e4d3d724b46f462902cd4db3c",
   "snapshot_scope": "Source, build, benchmark-input, runner, and test files; generated results, prose, media, and repository metadata are excluded.",
+  "snapshot_file_hash_basis": "Raw Git blob bytes",
+  "current_srbd_file_hash_basis": "Repository bytes normalized from CRLF to LF",
   "snapshots": {
     "contactipm-src-01": {
       "manifest": "manifests/contactipm-src-01.sha256",
-      "manifest_sha256": "adb698b01ebb710cf84eab92dab98d8eccf0e7e481a4de89dd011230f1b31501"
+      "manifest_sha256": "17b67fc1a951f534c67b1a915f0f9a88735222f7a4a3ea57c0bd887a51844bf7"
     },
     "contactipm-src-02": {
       "manifest": "manifests/contactipm-src-02.sha256",
-      "manifest_sha256": "686944b6c367893ab5eaba580e02070c80e463af35b8d3da5d1d4e6b50801beb",
+      "manifest_sha256": "e3911a4fff4dc340656e8038559ee71492a724fd7769da96a6373d7d73ab984a",
       "paper_evidence": "CRISP timing, robustness, and quality comparisons"
     },
     "contactipm-src-03": {
       "manifest": "manifests/contactipm-src-03.sha256",
-      "manifest_sha256": "adb698b01ebb710cf84eab92dab98d8eccf0e7e481a4de89dd011230f1b31501"
+      "manifest_sha256": "17b67fc1a951f534c67b1a915f0f9a88735222f7a4a3ea57c0bd887a51844bf7"
     },
     "contactipm-src-04": {
       "manifest": "manifests/contactipm-src-04.sha256",
-      "manifest_sha256": "251006cbb5028548450884eaa00a29615dd84b13088924896ab035280999b6a2"
+      "manifest_sha256": "6ad9eb18e5e5c131d724cf5c80c4f736f9554c8b552842250b77b80ff93801aa"
     },
     "contactipm-src-05": {
       "manifest": "manifests/contactipm-src-05.sha256",
-      "manifest_sha256": "5480bae0ea076de984dc6bf92a52d125f2c46a1ff1dfc9184a5303da077649da",
+      "manifest_sha256": "428b345ff1fafb4403b7fee265dd8664141a37fe9d09ca474f7fbfa73490914b",
       "paper_evidence": "acados comparisons"
     },
     "contactipm-src-06": {
       "manifest": "manifests/contactipm-src-06.sha256",
-      "manifest_sha256": "6cf7811a28903120c7c564545e7271e28888cf7b69c112cd7cd0c62a6a73f48c"
+      "manifest_sha256": "2ae28b5708c46b8a6fec0468876aab08f092af2043603c0439f2f1e046da2aa6"
     },
     "contactipm-src-07": {
       "manifest": "manifests/contactipm-src-07.sha256",
-      "manifest_sha256": "aab84dfd9a9bb753c4bab68701feda9fd92be5a8896a7c1bfe4740da7d396187"
+      "manifest_sha256": "bcab6cccffa3473b08c1d7a134830d08816493c544cba5c959bf40fc3bc060d6"
     },
     "contactipm-src-08": {
       "manifest": "manifests/contactipm-src-08.sha256",
-      "manifest_sha256": "a89a330aead432fa19e1b04a04de4446a8bb9aa95aaeee36966460752414cb1d"
+      "manifest_sha256": "1c7add240619f25ad316e936523cefecd3bb6ff21c247bed157ca87355ac403f"
     },
     "contactipm-src-09": {
       "manifest": "manifests/contactipm-src-09.sha256",
-      "manifest_sha256": "c7f0b2b81d3e48234ea7d9046812e6d2d2a128b0bf6d52a3d3a93ae83e2a479b"
+      "manifest_sha256": "ee4dcf94b281862660efb99d46ba0ab469e7d1c30a4fd2808283ed039a0f4799"
     },
     "contactipm-src-10": {
       "manifest": "manifests/contactipm-src-10.sha256",
-      "manifest_sha256": "7df06f933d643c9c9ef4f55bc9cb3c75bdbd4b00d33c96817cbe26af0c6e90aa"
+      "manifest_sha256": "72946b974629658d4260fdcac9b19fae88dc3f818fee26847230efb867f00a16"
     },
     "contactipm-src-11": {
       "manifest": "manifests/contactipm-src-11.sha256",
-      "manifest_sha256": "494a4516cd3b7d5b9b1316b5c0226df409fb4c66bcc1fdfc3b38b32cf19cd704"
+      "manifest_sha256": "8df98c5ce691cc9ef429db51ba3ef5f4c8264acc91072b18e617a049853116b5"
     },
     "contactipm-src-12": {
       "manifest": "manifests/contactipm-src-12.sha256",
-      "manifest_sha256": "3626ea862ac17d68e1ccf017b327fc431e791e23eed794968640e9c5b7d8b2d2"
+      "manifest_sha256": "f8259156c1a3a51fa99534c4c4b524ce8bb5c532b7196278506322e3e73cad9c"
     },
     "contactipm-src-13": {
       "manifest": "manifests/contactipm-src-13.sha256",
-      "manifest_sha256": "7d1e3af91f71fffbf57e174ea41b67d5356bc05e4a817566f78818c6c741603b"
+      "manifest_sha256": "3e807c2c333b483346d5b5e0df06583cc7f979028b313ed3288a43ce74a70894"
     },
     "contactipm-src-14": {
       "manifest": "manifests/contactipm-src-14.sha256",
-      "manifest_sha256": "cfc8be7010d29934669a3391d996958e3444cae3564969a75449d68b95737166"
+      "manifest_sha256": "ff8065af748285cb7e8caffa232c429ea49c1f825a9359baba8c7e2fc4118d66"
     },
     "contactipm-src-15": {
       "manifest": "manifests/contactipm-src-15.sha256",
-      "manifest_sha256": "3626ea862ac17d68e1ccf017b327fc431e791e23eed794968640e9c5b7d8b2d2"
+      "manifest_sha256": "f8259156c1a3a51fa99534c4c4b524ce8bb5c532b7196278506322e3e73cad9c"
     },
     "contactipm-src-16": {
       "manifest": "manifests/contactipm-src-16.sha256",
-      "manifest_sha256": "b27ad8314939ebb7a1d59a8e61d9eb4891c8ca9e3614b8db9004f5686fd24f3c"
+      "manifest_sha256": "0b9bba4332828ab5d7c511643612f0ec6d9cc4d3d64a5aad609481f7a0510fb5"
     },
     "contactipm-src-17": {
       "manifest": "manifests/contactipm-src-17.sha256",
-      "manifest_sha256": "e55b33d3cad2faacfe2eef15eaa6de17f8a0264f24c97ba23f0da64981da63ec",
+      "manifest_sha256": "24b143239c894fd666090b4c86e93bdb517849189060f5bedd9a25330eed138d",
       "paper_evidence": "IMPACT timing, robustness, and quality comparisons"
     }
   }

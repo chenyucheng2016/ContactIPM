@@ -1,1 +1,5 @@
 *.sh text eol=lf
+provenance/*.b64 text eol=lf
+provenance/*.json text eol=lf
+provenance/*.sha256 text eol=lf
+provenance/manifests/*.sha256 text eol=lf

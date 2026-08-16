@@ -37,11 +37,16 @@ The expected competitor revisions are:
 
 Historical ContactIPM artifacts use the neutral labels `contactipm-src-01`
 through `contactipm-src-17`. Their exact source-only snapshots are included in
-`provenance/contactipm-source-snapshots.bundle`; the bundle digest and per-file
-SHA-256 manifests are listed in `provenance/source-snapshots.json`. For example:
+the ASCII-armored `provenance/contactipm-source-snapshots.bundle.b64`; the
+decoded bundle digest and per-file SHA-256 manifests are listed in
+`provenance/source-snapshots.json`. Verify all snapshots with
+`python3 provenance/verify_snapshots.py`. To inspect one snapshot manually:
 
 ```bash
-git clone provenance/contactipm-source-snapshots.bundle /tmp/contactipm-sources
+base64 --decode provenance/contactipm-source-snapshots.bundle.b64 \
+  > /tmp/contactipm-source-snapshots.bundle
+git -c core.autocrlf=false clone \
+  /tmp/contactipm-source-snapshots.bundle /tmp/contactipm-sources
 git -C /tmp/contactipm-sources checkout contactipm-src-02
 (cd /tmp/contactipm-sources && sha256sum -c \
   "$OLDPWD/provenance/manifests/contactipm-src-02.sha256")
