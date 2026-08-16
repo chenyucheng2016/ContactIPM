@@ -224,6 +224,121 @@ void test_regularization() {
     PASS();
 }
 
+void test_relative_regularization_is_scale_invariant() {
+    TEST("Relative regularization is scale invariant");
+
+    constexpr int nx = 1, nu = 2, nc = 1, N = 1;
+    using Stage = StageData<nx, nu, nc>;
+    using WS = RiccatiWorkspace<nx, nu, N>;
+    using Ricc = RiccatiSolver<nx, nu, nc, N>;
+
+    auto setup = [](Stage stages[], double scale0, double scale1,
+                    double correlation) {
+        for (int k = 0; k <= N; ++k) {
+            stages[k].A.zero();
+            stages[k].B.zero();
+            stages[k].Qxx.set_identity();
+            stages[k].Quu.zero();
+            stages[k].Qux.zero();
+            stages[k].qx.zero();
+            stages[k].qu.zero();
+            stages[k].c.zero();
+        }
+        stages[0].Quu(0, 0) = scale0 * scale0;
+        stages[0].Quu(1, 0) = scale0 * scale1 * correlation;
+        stages[0].Quu(1, 1) = scale1 * scale1;
+        stages[0].qu[0] = scale0;
+        stages[0].qu[1] = -scale1;
+    };
+
+    constexpr double base_regularization = 1e-8;
+    constexpr double correlation = 1.0 - 1e-12;
+    constexpr double scale0 = 32.0;
+    constexpr double scale1 = 1.0 / 32.0;
+
+    Stage base_stages[N + 1];
+    Stage scaled_stages[N + 1];
+    WS base_workspace;
+    WS scaled_workspace;
+    setup(base_stages, 1.0, 1.0, correlation);
+    setup(scaled_stages, scale0, scale1, correlation);
+
+    double base_reg_used = 0.0;
+    double scaled_reg_used = 0.0;
+    Status base_status = Ricc::backward_lhs(
+        base_stages, base_workspace, base_regularization, base_reg_used,
+        1e12, 0.0);
+    Status scaled_status = Ricc::backward_lhs(
+        scaled_stages, scaled_workspace, base_regularization,
+        scaled_reg_used, 1e12, 0.0);
+    if (base_status != Status::SUCCESS || scaled_status != Status::SUCCESS) {
+        FAIL("regularized factorization failed"); return;
+    }
+    if (base_reg_used != base_regularization ||
+        scaled_reg_used != base_regularization) {
+        FAIL("congruent systems changed the relative base shift"); return;
+    }
+    if (Ricc::backward_rhs(base_stages, base_workspace) != Status::SUCCESS ||
+        Ricc::backward_rhs(scaled_stages, scaled_workspace) !=
+            Status::SUCCESS) {
+        FAIL("regularized RHS solve failed"); return;
+    }
+    for (int i = 0; i < nu; ++i) {
+        const double scale = i == 0 ? scale0 : scale1;
+        const double mapped = scaled_workspace.d[0][i] * scale;
+        const double tolerance =
+            1e-6 * std::max(1.0, std::fabs(base_workspace.d[0][i]));
+        if (!std::isfinite(mapped) ||
+            std::fabs(mapped - base_workspace.d[0][i]) > tolerance) {
+            FAIL("regularized solutions are not congruence-equivalent"); return;
+        }
+    }
+
+    Stage identity_stages[N + 1];
+    WS identity_workspace;
+    setup(identity_stages, 1.0, 1.0, 0.0);
+    double identity_reg_used = 0.0;
+    if (Ricc::backward_lhs(
+            identity_stages, identity_workspace, base_regularization,
+            identity_reg_used, 1e12, 0.0) !=
+            Status::SUCCESS ||
+        identity_reg_used != base_regularization) {
+        FAIL("well-conditioned identity was unnecessarily retried"); return;
+    }
+
+    PASS();
+}
+
+void test_failed_factorization_reports_attempted_regularization() {
+    TEST("Failed factorization reports attempted regularization");
+
+    constexpr int nx = 1, nu = 2, nc = 1, N = 1;
+    using Stage = StageData<nx, nu, nc>;
+    using WS = RiccatiWorkspace<nx, nu, N>;
+    using Ricc = RiccatiSolver<nx, nu, nc, N>;
+
+    Stage stages[N + 1];
+    WS workspace;
+    for (int k = 0; k <= N; ++k) {
+        stages[k].A.zero();
+        stages[k].B.zero();
+        stages[k].Qxx.set_identity();
+        stages[k].Quu.set_identity();
+        stages[k].Qux.zero();
+    }
+
+    double reg_used = 0.0;
+    const Status status = Ricc::backward_lhs(
+        stages, workspace, 1e-12, reg_used, 1e12, 2.0);
+    if (status != Status::KKT_SINGULAR) {
+        FAIL("expected retry exhaustion"); return;
+    }
+    if (!(reg_used > 1e4 && reg_used < 1e5)) {
+        FAIL("maximum attempted regularization was not reported"); return;
+    }
+    PASS();
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  Main
 // ─────────────────────────────────────────────────────────────────────────────
@@ -237,6 +352,8 @@ int main() {
     test_riccati_lqr();
     test_riccati_forward();
     test_regularization();
+    test_relative_regularization_is_scale_invariant();
+    test_failed_factorization_reports_attempted_regularization();
 
     printf("\n─── Results: %d/%d passed ───\n", pass_count, test_count);
     return (pass_count == test_count) ? 0 : 1;

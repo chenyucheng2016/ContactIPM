@@ -246,6 +246,39 @@ void test_filter_ls_failed() {
     PASS();
 }
 
+struct DeadlineEvaluator : BadEvaluator {
+    mutable int checks = 0;
+    int evaluations = 0;
+
+    bool time_limit_reached() const override {
+        return checks++ >= 2;
+    }
+    bool evaluate(double alpha, double& out_theta, double& out_phi) override {
+        ++evaluations;
+        return BadEvaluator::evaluate(alpha, out_theta, out_phi);
+    }
+};
+
+void test_filter_ls_time_limit() {
+    TEST("Filter line-search: hard time limit");
+
+    DeadlineEvaluator eval;
+    FilterLineSearch<2, 1, 5> fls;
+    FilterLSParams flp;
+    flp.alpha_min = 1e-20;
+    flp.soc_max = 0;
+    fls.init(flp);
+
+    LSResult result = fls.search(eval, 1.0);
+    if (result.status != LSStatus::TIME_LIMIT) {
+        FAIL("deadline was reported as ordinary line-search failure"); return;
+    }
+    if (eval.evaluations > 1) {
+        FAIL("line search continued evaluating after deadline"); return;
+    }
+    PASS();
+}
+
 // ═══════════════════════════════════════════════════════════════════
 
 struct CandidateEvaluator : TrialPointEvaluator<2, 1, 5> {
@@ -332,6 +365,7 @@ int main() {
     test_bi_objective();
     test_filter_ls_search();
     test_filter_ls_failed();
+    test_filter_ls_time_limit();
     test_candidate_selection();
 
     printf("\n─── Results: %d/%d passed ───\n", pass_count, test_count);

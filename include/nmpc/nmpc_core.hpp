@@ -42,6 +42,7 @@ enum class Status : int32_t {
     DIVERGING              = 6,   // Cost increasing despite regularization
     BAD_ARGUMENT           = 7,   // Invalid dimensions or nullptr
     NOT_INITIALIZED        = 8,   // Solver not initialized
+    TIME_LIMIT             = 9,   // Configured wall-clock deadline reached
     STAGNATION             = 10,  // Stagnation break but KKT tol not met
     INTERNAL_ERROR         = 99
 };
@@ -57,6 +58,7 @@ inline const char* status_string(Status s) {
     case Status::DIVERGING:           return "Diverging";
     case Status::BAD_ARGUMENT:        return "Bad argument";
     case Status::NOT_INITIALIZED:     return "Not initialized";
+    case Status::TIME_LIMIT:          return "Time limit reached";
     case Status::STAGNATION:          return "Stagnation (KKT tol not met)";
     default:                          return "Unknown error";
     }
@@ -369,6 +371,16 @@ struct SolverStats {
     int32_t  inner_iterations   = 0;  // total SQP iterations
     int32_t  riccati_failures   = 0;  // regularization activations
     int32_t  line_search_evals  = 0;
+    int32_t  warm_near_full_step_trials = 0;
+    int32_t  warm_near_full_step_accepts = 0;
+    int32_t  model_evaluations  = 0;
+    int32_t  kkt_assemblies     = 0;
+    int32_t  riccati_factorizations = 0;
+    int32_t  riccati_rhs_solves = 0;
+    int32_t  exact_hessian_analytic_calls = 0;
+    int32_t  exact_hessian_fd_calls = 0;
+    int32_t  deadline_checks    = 0;
+    int32_t  time_limit_hit     = 0;
     double   barrier_param      = 0.0;
     double   primal_infeas      = 0.0;  // ||dynamics residual||∞
     double   dual_infeas        = 0.0;  // ||KKT residual||∞
@@ -379,6 +391,8 @@ struct SolverStats {
     double   alpha_primal       = 0.0;  // step size accepted
     double   alpha_dual         = 0.0;
     double   regularization     = 0.0;  // last LM regularization used
+    double   max_regularization = 0.0;  // maximum over this solve
+    double   first_regularization = 0.0; // first Riccati factorization in solve
     double   condition_estimate = 0.0;  // repurposed: s/λ inequality violation (negative = bad)
     int32_t  watchdog_resets    = 0;
     int32_t  soc_steps         = 0;     // total SOC corrections applied
@@ -388,6 +402,19 @@ struct SolverStats {
     double   linear_kkt_abs    = 0.0;   // max absolute linear KKT residual
     double   linear_kkt_rel    = 0.0;   // max relative linear KKT residual
     int32_t  linear_kkt_quality= 0;     // 0=well_solved, 1=acceptable, 2=marginal, 3=poor
+    double   solve_time_ms      = 0.0;
+    double   model_eval_time_ms = 0.0;
+    double   dynamics_eval_time_ms = 0.0;
+    double   dynamics_jacobian_time_ms = 0.0;
+    double   cost_derivative_time_ms = 0.0;
+    double   constraint_eval_time_ms = 0.0;
+    double   constraint_jacobian_time_ms = 0.0;
+    double   constraint_value_jacobian_time_ms = 0.0;
+    double   residual_eval_time_ms = 0.0;
+    double   kkt_assembly_time_ms = 0.0;
+    double   riccati_time_ms    = 0.0;
+    double   line_search_time_ms = 0.0;
+    double   finalization_time_ms = 0.0;
 
     void reset() { *this = SolverStats{}; }
 };

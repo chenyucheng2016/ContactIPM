@@ -27,6 +27,7 @@
 #include "nmpc_barrier_manager.hpp"
 #include "nmpc_filter_ls.hpp"
 #include <algorithm>
+#include <chrono>
 #include "nmpc_preconditioner.hpp"
 
 namespace nmpc {
@@ -112,6 +113,15 @@ struct PaperIPMParams {
 
     // Output
     int    verbosity     = 0;
+    // Capture optional debug snapshots and per-iteration diagnostic records.
+    // Disabling this does not skip residuals used by solver decisions; debug
+    // getters retain their last captured values until diagnostics are enabled.
+    bool   enable_runtime_diagnostics = true;
+
+    // Wall-clock watchdog. A non-positive value preserves the legacy
+    // unbounded behavior. On expiry, solve returns TIME_LIMIT and restores the
+    // trajectory that was supplied at solve entry.
+    double time_limit_ms = 0.0;
 
     // Debug: freeze μ after N iterations (-1 = disabled)
     int    freeze_mu_after = -1;
@@ -130,6 +140,8 @@ struct PaperIPMParams {
     // Adaptive Gauss-Newton -> exact-curvature transition. The switch requires
     // local feasibility, stalled stationarity, and repeated disagreement between
     // accepted nonlinear reductions and the GN prediction.
+    // Set false together with exact_hessian=false to remain in Gauss-Newton.
+    bool   adaptive_exact_hessian     = true;
     int    gn_exact_min_iters        = 5;
     int    gn_exact_stall_window     = 3;
     int    gn_exact_poor_model_limit = 2;
@@ -140,14 +152,15 @@ struct PaperIPMParams {
     bool   exact_hessian        = true;
     double exact_hessian_fd_eps = 1e-4;   // step for central 2nd finite-diff
 
-    // === Indefinite-Hessian guard (for exact_hessian=true) ===
+    // === Riccati regularization and indefinite-Hessian guard ===
     // The exact Lagrangian Hessian is indefinite away from the solution;
     // the Riccati factorization must detect this and abort to the
     // Gauss-Newton fallback (caller handles this when backward_lhs
     // returns KKT_SINGULAR).
-    //   reg_max         : abort if the per-stage regularization exceeds this.
-    //                     A well-posed Newton step needs reg ≪ ‖S‖; reg>1e12
-    //                     reliably signals a hopeless Schur complement.
+    //   riccati_relative_regularization: dimensionless diagonal shift applied
+    //                     to Riccati value Hessians and stage Schur matrices.
+    //   reg_max         : cap on the dimensionless per-stage relative shift;
+    //                     exceeding it signals a hopeless Schur complement.
     //   inertia_min_pivot: require min(D_pivot)/max(D_pivot) ≥ this after
     //                     LDLT. Catches the "small positive pivot" case
     //                     where LDLT succeeds but κ(S)≈1e20 silently
@@ -156,9 +169,30 @@ struct PaperIPMParams {
     //                     sufficient to abort the pathologically indefinite
     //                     case. Set to e.g. 1e-12 to additionally reject
     //                     mild conditioning issues proactively.
+    double riccati_relative_regularization = 1e-12;
     double reg_max              = 1e12;
     double inertia_min_pivot    = 0.0;
 };
+
+namespace paper_ipm_detail {
+
+inline double initial_cold_slack(
+    double constraint_value, double mu, const PaperIPMParams& params) {
+    const double floor = std::max(mu, params.s_min_init);
+    return constraint_value > 0.0
+        ? floor
+        : std::max(-constraint_value + params.delta_slack, floor);
+}
+
+inline double initial_warm_slack(
+    double constraint_value, double mu, const PaperIPMParams& params) {
+    const double interior_floor = std::max(
+        params.bound_s_min, std::min(mu, params.s_min_init));
+    return std::max(
+        -constraint_value, std::max(std::sqrt(mu), interior_floor));
+}
+
+}  // namespace paper_ipm_detail
 // ─────────────────────────────────────────────────────────────────────────────
 //  Linear KKT residual diagnostics
 // ─────────────────────────────────────────────────────────────────────────────
@@ -329,6 +363,19 @@ public:
     using WS    = RiccatiWorkspace<NX, NU, HORIZON>;
     using Ricc  = RiccatiSolver<NX, NU, NC, HORIZON>;
     using Prec  = HessianPreconditioner<NX, NU, HORIZON>;
+    using Clock = std::chrono::steady_clock;
+
+    struct PhaseTimer {
+        explicit PhaseTimer(double* accumulator)
+            : accumulator_(accumulator), start_(Clock::now()) {}
+        ~PhaseTimer() {
+            if (accumulator_)
+                *accumulator_ += std::chrono::duration<double, std::milli>(
+                    Clock::now() - start_).count();
+        }
+        double* accumulator_;
+        Clock::time_point start_;
+    };
 
     PaperIPMSolver() = default;
 
@@ -391,6 +438,7 @@ public:
     Status init(const PaperIPMParams& params = PaperIPMParams{}) {
         params_ = params;
         mu_     = params_.mu_init;
+        warm_start_ready_ = false;
 
         // Auto-derive stationarity tolerance from mu_min if not set
         if (params_.tol_stat < 0.0) {
@@ -402,21 +450,83 @@ public:
         return Status::SUCCESS;
     }
 
+    // Update only the watchdog budget; unlike init(), this preserves all warm
+    // primal-dual/barrier state.
+    void set_time_limit_ms(double time_limit_ms) {
+        params_.time_limit_ms = time_limit_ms;
+    }
+
     // ── Main solve (true single-loop IPM) ─────────────────────────
 
     Status solve(Prob& problem, SolverStats& out_stats) {
-        Status st = problem.validate();
-        if (st != Status::SUCCESS) return st;
+        return solve_impl(problem, out_stats, false);
+    }
+
+    Status solve_warm(Prob& problem, SolverStats& out_stats) {
+        if (!warm_start_ready_) return Status::NOT_INITIALIZED;
+        return solve_impl(problem, out_stats, true);
+    }
+
+    // A horizon shift invalidates the dynamic-programming costates. They are
+    // recomputed by the first Riccati pass of the next warm solve.
+    void invalidate_shifted_costates() {
+        has_costates_ = false;
+        for (int k = 0; k <= HORIZON; ++k)
+            riccati_ws_.p[k].zero();
+    }
+
+private:
+    Status solve_impl(Prob& problem, SolverStats& out_stats, bool warm_start) {
+        out_stats.reset();
+        active_stats_ = &out_stats;
+        solve_start_ = Clock::now();
+        deadline_enabled_ = params_.time_limit_ms > 0.0;
+        if (deadline_enabled_) {
+            deadline_ = solve_start_ + std::chrono::duration_cast<Clock::duration>(
+                std::chrono::duration<double, std::milli>(params_.time_limit_ms));
+        }
+        timed_out_ = false;
+        current_iteration_ = 0;
+        entry_mu_ = mu_;
+        entry_bound_pd_mode_ = bound_pd_mode_;
+        entry_has_costates_ = has_costates_;
+        entry_exact_hessian_ = params_.exact_hessian;
+        entry_warm_start_ready_ = warm_start_ready_;
+        current_solve_warm_ = warm_start;
+        const bool capture_diagnostics = params_.enable_runtime_diagnostics
+            || params_.verbosity > 0 || diag_csv_ != nullptr;
+        entry_sigma_ = sigma_;
+        entry_alpha_lambda_ = alpha_lambda_;
+        entry_last_alpha_p_ = last_alpha_p_;
+        entry_low_ftb_count_ = low_ftb_count_;
+        for (int k = 0; k <= HORIZON; ++k)
+            entry_costates_[k] = riccati_ws_.p[k];
 
         prob_ = &problem;
-        st = validate_complementarity_structure();
-        if (st != Status::SUCCESS) return st;
+        for (int k = 0; k <= HORIZON; ++k)
+            entry_stages_[k] = problem.stages[k];
 
-        mu_ = params_.mu_init;
-        bound_pd_mode_ = false;
+        Status st = problem.validate();
+        if (st != Status::SUCCESS) return finish_early(st);
 
-        initialize_from_problem();
-        evaluate_model();          // refresh after init modified stages
+        st = cache_constraint_metadata();
+        if (st != Status::SUCCESS) return finish_early(st);
+
+        if (!warm_start) {
+            mu_ = params_.mu_init;
+            bound_pd_mode_ = false;
+            initialize_from_problem();
+            has_costates_ = false;
+            for (int k = 0; k <= HORIZON; ++k)
+                riccati_ws_.p[k].zero();
+        } else {
+            // Preserve the current barrier and valid shifted primal-dual data.
+            // Only newly appended or otherwise invalid entries are initialized.
+            prepare_warm_start_from_problem();
+        }
+        st = evaluate_model();      // refresh after initialization/shift
+        if (st != Status::SUCCESS) return finish_early(st);
+        if (deadline_reached()) return finish_time_limit();
 
         // Compute preconditioner scaling ONCE per MPC solve (outside Newton loop)
         if (params_.enable_preconditioner) {
@@ -431,9 +541,6 @@ public:
         }
 
         // mu_ already set by adaptive μ₀ above (or params_.mu_init if no constraints)
-        cond_estimate_ = 1.0;
-        has_costates_ = false;
-
         // Initialize barrier strategy
         {
             BarrierUpdateParams bup;
@@ -485,7 +592,6 @@ public:
         // Per-iteration state tracking
         double alpha_p = 1.0, alpha_d = 1.0;
         int    ls_iters = 1;
-        bool   accepted = false;
         bool   ls_failed = false;  // line search failure flag
         int    ls_fail_count = 0;  // consecutive filter-exhaustion count
         bool   model_evaluated = true;  // evaluate_model() already done before loop
@@ -507,10 +613,13 @@ public:
 
         const bool requested_exact_hessian = params_.exact_hessian;
         for (iter = 0; iter < params_.max_iters; ++iter) {
+            current_iteration_ = iter;
+            if (deadline_reached()) break;
             // Apply an adaptive transition requested by the preceding GN
             // residual/model-agreement window. Force a physical model refresh
             // because an accepted iterate may already have been evaluated GN.
-            if (gn_switch_pending && !params_.exact_hessian) {
+            if (params_.adaptive_exact_hessian
+                && gn_switch_pending && !params_.exact_hessian) {
                 params_.exact_hessian = true;
                 model_evaluated = false;
                 if (params_.verbosity >= 1)
@@ -522,7 +631,8 @@ public:
             // 1. Evaluate model at current iterate (skip if already evaluated)
             if (!model_evaluated) {
                 st = evaluate_model();
-                if (st != Status::SUCCESS) return st;
+                if (st != Status::SUCCESS) return finish_early(st);
+                if (deadline_reached()) break;
             }
             model_evaluated = false;
             stages_scaled_ = false;
@@ -547,7 +657,8 @@ public:
                 // Save scaled residuals
                 double s_stat = stat_inf_, s_prim = primal_inf_, s_compl = compl_inf_;
                 // Evaluate physical model and compute physical KKT
-                evaluate_model();
+                st = evaluate_model();
+                if (st != Status::SUCCESS) return finish_early(st);
                 stages_scaled_ = false;
                 compute_kkt_residuals();
                 double p_stat = stat_inf_, p_prim = primal_inf_, p_compl = compl_inf_;
@@ -594,8 +705,25 @@ public:
             }
 
             // 4. ── Build LHS once, factorize ─────────────────────────────
-            build_kkt_lhs();
-            st = solve_kkt_lhs();
+            {
+                const auto phase_start = Clock::now();
+                build_kkt_lhs();
+                ++out_stats.kkt_assemblies;
+                add_phase_ms(out_stats.kkt_assembly_time_ms, phase_start);
+            }
+            if (deadline_reached()) break;
+            {
+                const auto phase_start = Clock::now();
+                ++out_stats.riccati_factorizations;
+                st = solve_kkt_lhs();
+                add_phase_ms(out_stats.riccati_time_ms, phase_start);
+            }
+            out_stats.regularization = reg_used_;
+            out_stats.max_regularization = std::max(
+                out_stats.max_regularization, reg_used_);
+            if (out_stats.riccati_factorizations == 1) {
+                out_stats.first_regularization = reg_used_;
+            }
             if (st != Status::SUCCESS && params_.exact_hessian && has_costates_) {
                 // Exact Hessian can be indefinite → Riccati factorization may
                 // fail.  Fall back to Gauss-Newton for THIS iteration:
@@ -606,7 +734,7 @@ public:
                 params_.exact_hessian = false;
                 st = evaluate_model();
                 params_.exact_hessian = saved;
-                if (st != Status::SUCCESS) return st;
+                if (st != Status::SUCCESS) return finish_early(st);
                 stages_scaled_ = false;
                 if (params_.enable_preconditioner) {
                     if (params_.bound_aware_preconditioner)
@@ -616,10 +744,24 @@ public:
                     prec_.transform_qp(prob_->stages);
                     stages_scaled_ = true;
                 }
-                build_kkt_lhs();
-                st = solve_kkt_lhs();
+                {
+                    const auto phase_start = Clock::now();
+                    build_kkt_lhs();
+                    ++out_stats.kkt_assemblies;
+                    add_phase_ms(out_stats.kkt_assembly_time_ms, phase_start);
+                }
+                {
+                    const auto phase_start = Clock::now();
+                    ++out_stats.riccati_factorizations;
+                    st = solve_kkt_lhs();
+                    add_phase_ms(out_stats.riccati_time_ms, phase_start);
+                }
+                out_stats.regularization = reg_used_;
+                out_stats.max_regularization = std::max(
+                    out_stats.max_regularization, reg_used_);
             }
-            if (st != Status::SUCCESS) return st;
+            if (st != Status::SUCCESS) return finish_early(st);
+            if (deadline_reached()) break;
 
             // ── Inertia check: D pivots of S_fact[k] ──────────────
             if (params_.verbosity >= 2) {
@@ -654,25 +796,39 @@ public:
             debug_primal_inf_ = primal_inf_;
             debug_compl_inf_ = compl_inf_;
 
-            build_kkt_rhs();
+            {
+                const auto phase_start = Clock::now();
+                build_kkt_rhs();
+                add_phase_ms(out_stats.kkt_assembly_time_ms, phase_start);
+            }
+            if (deadline_reached()) break;
 
-            // Save PRISTINE Riccati stages right after KKT build (before SOC/LS)
-            for (int kk = 0; kk <= HORIZON; ++kk) {
-                debug_pristine_stages_[kk] = riccati_stages_[kk];
+            if (capture_diagnostics) {
+                // Save PRISTINE Riccati stages right after KKT build (before SOC/LS)
+                for (int kk = 0; kk <= HORIZON; ++kk)
+                    debug_pristine_stages_[kk] = riccati_stages_[kk];
+
+                // Save Riccati internals for invariance debugging (before forward pass)
+                debug_P_term_ = riccati_ws_.P[HORIZON];
+                debug_S_fact0_ = riccati_ws_.S_fact[0];
             }
 
-            // Save Riccati internals for invariance debugging (before forward pass)
-            debug_P_term_ = riccati_ws_.P[HORIZON];
-            debug_S_fact0_ = riccati_ws_.S_fact[0];
+            {
+                const auto phase_start = Clock::now();
+                ++out_stats.riccati_rhs_solves;
+                st = solve_kkt_rhs_and_forward();
+                add_phase_ms(out_stats.riccati_time_ms, phase_start);
+            }
+            if (st != Status::SUCCESS) return finish_early(st);
+            if (deadline_reached()) break;
 
-            st = solve_kkt_rhs_and_forward();
-            if (st != Status::SUCCESS) return st;
-
-            // Re-save Riccati internals AFTER forward pass
-            for (int i = 0; i < NU; ++i) {
-                debug_d0_[i] = riccati_ws_.d[0][i];
-                for (int j = 0; j < NX; ++j)
-                    debug_K0_(i, j) = riccati_ws_.K[0](i, j);
+            if (capture_diagnostics) {
+                // Re-save Riccati internals AFTER forward pass
+                for (int i = 0; i < NU; ++i) {
+                    debug_d0_[i] = riccati_ws_.d[0][i];
+                    for (int j = 0; j < NX; ++j)
+                        debug_K0_(i, j) = riccati_ws_.K[0](i, j);
+                }
             }
 
             // ── Nonlinear KKT iterative refinement (DISABLED) ────
@@ -809,12 +965,14 @@ public:
             // from scaled to physical space.
             compute_post_riccati_stationarity();
 
-            // Save Newton step BEFORE recovery (scaled space for precond)
-            for (int kk = 0; kk <= HORIZON; ++kk) {
-                debug_scaled_dx_[kk] = riccati_ws_.dx[kk];
-                debug_scaled_p_[kk]  = riccati_ws_.p[kk];
-                if (kk < HORIZON)
-                    debug_scaled_du_[kk] = riccati_ws_.du[kk];
+            if (capture_diagnostics) {
+                // Save Newton step BEFORE recovery (scaled space for precond)
+                for (int kk = 0; kk <= HORIZON; ++kk) {
+                    debug_scaled_dx_[kk] = riccati_ws_.dx[kk];
+                    debug_scaled_p_[kk]  = riccati_ws_.p[kk];
+                    if (kk < HORIZON)
+                        debug_scaled_du_[kk] = riccati_ws_.du[kk];
+                }
             }
 
             // Recover physical step from scaled Riccati solution
@@ -823,12 +981,14 @@ public:
                 prec_.recover_dual_step(riccati_ws_);
             }
 
-            // Save Newton step AFTER recovery (physical space for both)
-            for (int kk = 0; kk <= HORIZON; ++kk) {
-                debug_phys_dx_[kk] = riccati_ws_.dx[kk];
-                debug_phys_p_[kk]  = riccati_ws_.p[kk];
-                if (kk < HORIZON)
-                    debug_phys_du_[kk] = riccati_ws_.du[kk];
+            if (capture_diagnostics) {
+                // Save Newton step AFTER recovery (physical space for both)
+                for (int kk = 0; kk <= HORIZON; ++kk) {
+                    debug_phys_dx_[kk] = riccati_ws_.dx[kk];
+                    debug_phys_p_[kk]  = riccati_ws_.p[kk];
+                    if (kk < HORIZON)
+                        debug_phys_du_[kk] = riccati_ws_.du[kk];
+                }
             }
             has_costates_ = true;  // costates now valid for stationarity check
 
@@ -868,7 +1028,7 @@ public:
             // with GN and stationarity stalls. At the barrier floor, two locally
             // feasible samples suffice; otherwise globalization rejection plus a
             // stalled full window is the trigger.
-            if (!params_.exact_hessian) {
+            if (params_.adaptive_exact_hessian && !params_.exact_hessian) {
                 if (gn_window_samples == 0)
                     gn_window_start_stat = std::max(stat_inf_, 1e-16);
                 ++gn_window_samples;
@@ -997,9 +1157,7 @@ public:
 
                 if (worst_k >= 0) {
                     const Stage& stg = prob_->stages[worst_k];
-                    double g_val = stg.d[worst_j];
                     double s_val = stg.s[worst_j];
-                    double g_plus_s = g_val + s_val;
                     double C_dz = 0.0;
                     for (int i = 0; i < NX; ++i)
                         C_dz += stg.Cx(worst_j, i) * riccati_ws_.dx[worst_k][i];
@@ -1209,10 +1367,12 @@ public:
             log_iteration(iter, sigma_, alpha_p, alpha_d);
             alpha_lambda_ = alpha_d;  // FTB step for λ (independent of line search)
 
-            // ── Diagnostic snapshot (before line search) ──
-            last_diag_ = compute_iter_diagnostics();
-            last_diag_.alpha_p = alpha_p;
-            last_diag_.alpha_d = alpha_d;
+            if (capture_diagnostics) {
+                // ── Diagnostic snapshot (before line search) ──
+                last_diag_ = compute_iter_diagnostics();
+                last_diag_.alpha_p = alpha_p;
+                last_diag_.alpha_d = alpha_d;
+            }
 
             // ── FTB bottleneck diagnostic (periodic, verbose only) ──
             if (params_.verbosity >= 2 && iter % 25 == 0 && iter > 0) {
@@ -1434,7 +1594,6 @@ public:
                     // IMPORTANT: S_aug is in SCALED space (from transform_qp),
                     // so we must use the SCALED du (before recover_primal_step).
                     const auto& du_scaled = debug_scaled_du_[bkw];
-                    const auto& dx_scaled = debug_scaled_dx_[bkw];
                     // Solve S * x = r_full via eigendecomposition
                     // S^{-1} r = V diag(1/lambda) V^T r
                     double Vt_r[NU];
@@ -1594,7 +1753,6 @@ public:
 
                     // ── Check D: Barrier parameter health ──
                     double smu = sigma_ * mu_;
-                    double implied_floor = 0.1 * mu_;  // tau * mu is the FTB target
                     printf("  [verify] D: mu=%.3e  sigma=%.3e  sigma*mu=%.3e  tau*mu=%.3e  s/(tau*mu)=%.2f\n",
                            mu_, sigma_, smu, params_.tau * mu_,
                            stg_b.s[bjw] / (params_.tau * mu_ + 1e-30));
@@ -1624,7 +1782,6 @@ public:
             }
 
             ls_iters = 1;
-            accepted = false;
             double alpha = alpha_p;
 
             // ── Globalization: filter line search ────────────────
@@ -1657,10 +1814,25 @@ public:
                        theta_dyn_0, theta_ineq_0, alpha_p, alpha_d);
             }
 
+            const auto line_search_start = Clock::now();
+            const bool warm_near_full_step_trial = current_solve_warm_
+                && alpha_p >= 0.99;
+            if (warm_near_full_step_trial)
+                ++out_stats.warm_near_full_step_trials;
             LSResult ls_result = filter_ls_.search(evaluator_, alpha_p);
+            add_phase_ms(out_stats.line_search_time_ms, line_search_start);
+            if (warm_near_full_step_trial
+                && ls_result.status == LSStatus::ACCEPTED
+                && ls_result.ls_iters == 1
+                && ls_result.candidate == 0)
+                ++out_stats.warm_near_full_step_accepts;
+
+            if (ls_result.status == LSStatus::TIME_LIMIT) {
+                timed_out_ = true;
+                break;
+            }
 
             if (ls_result.status == LSStatus::ACCEPTED) {
-                accepted = true;
                 ls_fail_count = 0;
                 alpha = ls_result.alpha;
                 ls_iters = ls_result.ls_iters;
@@ -1695,11 +1867,13 @@ public:
                 }
 
                 // Apply the accepted step — the ONLY place variables are updated
+                if (deadline_reached()) break;
                 apply_primal_dual_step(alpha, alpha_lambda_, ls_result.candidate);
+                if (deadline_reached()) break;
 
                 // Re-evaluate model at new point for accurate theta reporting
                 st = evaluate_model();
-                if (st != Status::SUCCESS) return st;
+                if (st != Status::SUCCESS) return finish_early(st);
                 model_evaluated = true;
                 stages_scaled_ = false;
                 recenter_feasible_slacks();
@@ -1712,16 +1886,20 @@ public:
                            ls_result.soc_used ? "yes" : "no",
                            compute_objective(), compute_theta());
                 }
-                // ── Diagnostic: update with LS results ──
-                last_diag_.ls_iters   = ls_result.ls_iters;
-                last_diag_.ls_rejected = false;
-                last_diag_.alpha_p    = alpha;
+                if (capture_diagnostics) {
+                    // ── Diagnostic: update with LS results ──
+                    last_diag_.ls_iters   = ls_result.ls_iters;
+                    last_diag_.ls_rejected = false;
+                    last_diag_.alpha_p    = alpha;
+                }
                 // theta_dyn/theta_ineq already in pre-LS snapshot
             } else {
                 alpha = ls_result.alpha;
                 ++ls_fail_count;
-                last_diag_.ls_rejected = true;
-                last_diag_.alpha_p = alpha;
+                if (capture_diagnostics) {
+                    last_diag_.ls_rejected = true;
+                    last_diag_.alpha_p = alpha;
+                }
                 if (params_.verbosity >= 1)
                     printf("  [LS fail: a=%.3e alam=%.2e ls=%d fail_count=%d] step too tiny\n",
                            alpha, alpha_lambda_, ls_result.ls_iters, ls_fail_count);
@@ -1826,18 +2004,25 @@ public:
             }
         }
 
+        if (timed_out_ || deadline_reached())
+            return finish_time_limit();
+
+        const auto finalization_start = Clock::now();
         // ── Solve summary ─────────────────────────────────────────
         // Re-evaluate for accurate final primal/complementarity stats.
         // Save the riccati-based stationarity (the convergence metric)
         // before re-evaluation overwrites it.
         double saved_stat = stat_inf_;
-        evaluate_model();
+        st = evaluate_model();
+        if (st != Status::SUCCESS) return finish_early(st);
+        if (deadline_reached()) return finish_time_limit();
         // Restore scaled stages so compute_linear_kkt_residual is consistent
         // with the scaled Riccati workspace (dx, du, P, p).
         if (params_.enable_preconditioner) {
             prec_.transform_qp(prob_->stages);
         }
         compute_kkt_residuals();
+        if (deadline_reached()) return finish_time_limit();
         stat_inf_ = saved_stat;  // restore Riccati-consistent stationarity
 
         out_stats.inner_iterations = iter;
@@ -1962,33 +2147,93 @@ public:
         }
 
         params_.exact_hessian = requested_exact_hessian;
+        if (!warm_start)
+            warm_start_ready_ = (final_status == Status::SUCCESS);
+        add_phase_ms(out_stats.finalization_time_ms, finalization_start);
+        out_stats.solve_time_ms = elapsed_ms(solve_start_);
+        if (warm_start && final_status != Status::SUCCESS)
+            restore_solve_entry();
+        active_stats_ = nullptr;
         return final_status;
     }
 
-private:
+    static double elapsed_ms(const Clock::time_point& start) {
+        return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
+    }
+
+    static void add_phase_ms(double& accumulator,
+                             const Clock::time_point& start) {
+        accumulator += elapsed_ms(start);
+    }
+
+    bool deadline_reached() {
+        if (active_stats_) ++active_stats_->deadline_checks;
+        if (!deadline_enabled_) return false;
+        if (Clock::now() < deadline_) return false;
+        timed_out_ = true;
+        return true;
+    }
+
+    Status finish_early(Status status) {
+        if (status == Status::TIME_LIMIT) return finish_time_limit();
+        if (active_stats_)
+            active_stats_->solve_time_ms = elapsed_ms(solve_start_);
+        if (current_solve_warm_ && status != Status::SUCCESS)
+            restore_solve_entry();
+        else
+            params_.exact_hessian = entry_exact_hessian_;
+        active_stats_ = nullptr;
+        return status;
+    }
+
+    void restore_solve_entry() {
+        if (prob_) {
+            for (int k = 0; k <= HORIZON; ++k)
+                prob_->stages[k] = entry_stages_[k];
+        }
+        mu_ = entry_mu_;
+        bound_pd_mode_ = entry_bound_pd_mode_;
+        has_costates_ = entry_has_costates_;
+        params_.exact_hessian = entry_exact_hessian_;
+        warm_start_ready_ = entry_warm_start_ready_;
+        sigma_ = entry_sigma_;
+        alpha_lambda_ = entry_alpha_lambda_;
+        last_alpha_p_ = entry_last_alpha_p_;
+        low_ftb_count_ = entry_low_ftb_count_;
+        for (int k = 0; k <= HORIZON; ++k)
+            riccati_ws_.p[k] = entry_costates_[k];
+    }
+
+    Status finish_time_limit() {
+        timed_out_ = true;
+        restore_solve_entry();
+        if (active_stats_) {
+            active_stats_->time_limit_hit = 1;
+            active_stats_->inner_iterations = current_iteration_;
+            active_stats_->barrier_param = mu_;
+            active_stats_->solve_time_ms = elapsed_ms(solve_start_);
+        }
+        active_stats_ = nullptr;
+        return Status::TIME_LIMIT;
+    }
     // ═════════════════════════════════════════════════════════════════════
     //  Initialize barrier variables from problem data
     // ═════════════════════════════════════════════════════════════════════
 
     int base_constraints(int k) const {
-        if (!prob_ || !prob_->constraints) return 0;
-        return std::clamp(prob_->constraints->num_constraints(k), 0, NC);
+        return constraint_metadata_cached_ ? base_constraints_cache_[k] : 0;
     }
 
     int complementarity_pairs(int k) const {
-        if (!prob_ || !prob_->constraints) return 0;
-        return std::max(0, prob_->constraints->num_complementarity_pairs(k));
+        return constraint_metadata_cached_ ? complementarity_pairs_cache_[k] : 0;
     }
 
     int active_constraints(int k) const {
-        return std::min(NC, base_constraints(k) + complementarity_pairs(k));
+        return constraint_metadata_cached_ ? active_constraints_cache_[k] : 0;
     }
 
     bool has_complementarity() const {
-        if (!prob_ || !prob_->constraints) return false;
-        for (int k = 0; k <= HORIZON; ++k)
-            if (complementarity_pairs(k) > 0) return true;
-        return false;
+        return constraint_metadata_cached_ && has_complementarity_cache_;
     }
 
     double mpcc_relaxation() const {
@@ -2004,13 +2249,25 @@ private:
         return std::min(params_.mu_min, mpcc_floor);
     }
 
-    Status validate_complementarity_structure() const {
-        if (!prob_ || !prob_->constraints) return Status::SUCCESS;
+    Status cache_constraint_metadata() {
+        constraint_metadata_cached_ = false;
+        has_complementarity_cache_ = false;
+        for (int k = 0; k <= HORIZON; ++k) {
+            base_constraints_cache_[k] = 0;
+            complementarity_pairs_cache_[k] = 0;
+            active_constraints_cache_[k] = 0;
+        }
+        if (!prob_ || !prob_->constraints) {
+            constraint_metadata_cached_ = true;
+            return Status::SUCCESS;
+        }
         if (params_.mpcc_relaxation_scale < 0.0 || params_.tol_mpcc < 0.0)
             return Status::BAD_ARGUMENT;
         for (int k = 0; k <= HORIZON; ++k) {
-            const int base = base_constraints(k);
-            const int pairs = complementarity_pairs(k);
+            const int base = std::clamp(
+                prob_->constraints->num_constraints(k), 0, NC);
+            const int pairs = std::max(
+                0, prob_->constraints->num_complementarity_pairs(k));
             if (base + pairs > NC) return Status::BAD_ARGUMENT;
             if (pairs > 0 && (params_.mpcc_relaxation_scale <= 0.0 ||
                               params_.tol_mpcc <= 0.0))
@@ -2023,8 +2280,15 @@ private:
                 if (first < 0 || first >= base || second < 0 ||
                     second >= base || first == second)
                     return Status::BAD_ARGUMENT;
+                complementarity_first_cache_[k][p] = first;
+                complementarity_second_cache_[k][p] = second;
             }
+            base_constraints_cache_[k] = base;
+            complementarity_pairs_cache_[k] = pairs;
+            active_constraints_cache_[k] = base + pairs;
+            has_complementarity_cache_ = has_complementarity_cache_ || pairs > 0;
         }
+        constraint_metadata_cached_ = true;
         return Status::SUCCESS;
     }
 
@@ -2033,10 +2297,8 @@ private:
         const int pairs = complementarity_pairs(k);
         const double theta = mpcc_relaxation();
         for (int p = 0; p < pairs; ++p) {
-            int first = -1, second = -1;
-            if (!prob_->constraints->complementarity_pair(
-                    k, p, first, second))
-                return Status::BAD_ARGUMENT;
+            const int first = complementarity_first_cache_[k][p];
+            const int second = complementarity_second_cache_[k][p];
             g[base + p] = g[first] * g[second] - theta;
         }
         return Status::SUCCESS;
@@ -2057,19 +2319,15 @@ private:
     }
 
     Status jacobian_constraints(const Vec<NX>& x, const Vec<NU>& u, int k,
+                                const Vec<NC>& g,
                                 Mat<NC, NX>& Cx, Mat<NC, NU>& Cu) const {
         Status st = prob_->constraints->jacobian(x, u, k, Cx, Cu);
-        if (st != Status::SUCCESS) return st;
-        Vec<NC> g;
-        st = prob_->constraints->evaluate(x, u, k, g);
         if (st != Status::SUCCESS) return st;
         const int base = base_constraints(k);
         const int pairs = complementarity_pairs(k);
         for (int p = 0; p < pairs; ++p) {
-            int first = -1, second = -1;
-            if (!prob_->constraints->complementarity_pair(
-                    k, p, first, second))
-                return Status::BAD_ARGUMENT;
+            const int first = complementarity_first_cache_[k][p];
+            const int second = complementarity_second_cache_[k][p];
             const int row = base + p;
             for (int i = 0; i < NX; ++i)
                 Cx(row, i) = g[second] * Cx(first, i) +
@@ -2081,20 +2339,59 @@ private:
         return Status::SUCCESS;
     }
 
-    Status jacobian_terminal_constraints(const Vec<NX>& x,
+    Status evaluate_with_jacobian_constraints(
+        const Vec<NX>& x, const Vec<NU>& u, int k, Vec<NC>& g,
+        Mat<NC, NX>& Cx, Mat<NC, NU>& Cu) const {
+        Status st = prob_->constraints->evaluate_with_jacobian(
+            x, u, k, g, Cx, Cu);
+        if (st != Status::SUCCESS) return st;
+        st = append_complementarity_values(k, g);
+        if (st != Status::SUCCESS) return st;
+        const int base = base_constraints(k);
+        const int pairs = complementarity_pairs(k);
+        for (int p = 0; p < pairs; ++p) {
+            const int first = complementarity_first_cache_[k][p];
+            const int second = complementarity_second_cache_[k][p];
+            const int row = base + p;
+            for (int i = 0; i < NX; ++i)
+                Cx(row, i) = g[second] * Cx(first, i) +
+                             g[first] * Cx(second, i);
+            for (int i = 0; i < NU; ++i)
+                Cu(row, i) = g[second] * Cu(first, i) +
+                             g[first] * Cu(second, i);
+        }
+        return Status::SUCCESS;
+    }
+
+    Status jacobian_terminal_constraints(const Vec<NX>& x, const Vec<NC>& g,
                                          Mat<NC, NX>& Cx) const {
         Status st = prob_->constraints->jacobian_terminal(x, Cx);
-        if (st != Status::SUCCESS) return st;
-        Vec<NC> g;
-        st = prob_->constraints->evaluate_terminal(x, g);
         if (st != Status::SUCCESS) return st;
         const int base = base_constraints(HORIZON);
         const int pairs = complementarity_pairs(HORIZON);
         for (int p = 0; p < pairs; ++p) {
-            int first = -1, second = -1;
-            if (!prob_->constraints->complementarity_pair(
-                    HORIZON, p, first, second))
-                return Status::BAD_ARGUMENT;
+            const int first = complementarity_first_cache_[HORIZON][p];
+            const int second = complementarity_second_cache_[HORIZON][p];
+            const int row = base + p;
+            for (int i = 0; i < NX; ++i)
+                Cx(row, i) = g[second] * Cx(first, i) +
+                             g[first] * Cx(second, i);
+        }
+        return Status::SUCCESS;
+    }
+
+    Status evaluate_terminal_with_jacobian_constraints(
+        const Vec<NX>& x, Vec<NC>& g, Mat<NC, NX>& Cx) const {
+        Status st = prob_->constraints->evaluate_terminal_with_jacobian(
+            x, g, Cx);
+        if (st != Status::SUCCESS) return st;
+        st = append_complementarity_values(HORIZON, g);
+        if (st != Status::SUCCESS) return st;
+        const int base = base_constraints(HORIZON);
+        const int pairs = complementarity_pairs(HORIZON);
+        for (int p = 0; p < pairs; ++p) {
+            const int first = complementarity_first_cache_[HORIZON][p];
+            const int second = complementarity_second_cache_[HORIZON][p];
             const int row = base + p;
             for (int i = 0; i < NX; ++i)
                 Cx(row, i) = g[second] * Cx(first, i) +
@@ -2109,9 +2406,8 @@ private:
         for (int k = 0; k <= HORIZON; ++k) {
             const int pairs = complementarity_pairs(k);
             for (int p = 0; p < pairs; ++p) {
-                int first = -1, second = -1;
-                prob_->constraints->complementarity_pair(
-                    k, p, first, second);
+                const int first = complementarity_first_cache_[k][p];
+                const int second = complementarity_second_cache_[k][p];
                 residual = std::max(
                     residual,
                     std::fabs(prob_->stages[k].d[first] *
@@ -2185,12 +2481,12 @@ private:
                     double s_init;
                     if (gj > 0.0) {
                         // Violated: small slack so g+s stays ≈ g, not 2g.
-                        s_init = std::max(mu_, params_.s_min_init);
+                        s_init = paper_ipm_detail::initial_cold_slack(
+                            gj, mu_, params_);
                     } else {
                         // Feasible: slack = distance from boundary + margin.
-                        s_init = std::max(
-                            -gj + params_.delta_slack,
-                            std::max(mu_, params_.s_min_init));
+                        s_init = paper_ipm_detail::initial_cold_slack(
+                            gj, mu_, params_);
                     }
                     s[k].s[j] = s_init;
                     s[k].lambda[j] = mu_ / s[k].s[j];
@@ -2216,6 +2512,96 @@ private:
                     double dU = std::max(prob_->x_ub[i] - s[k].x[i], 0.0) + params_.bound_s_min;
                     s[k].z_L_x[i] = mu_ / dL;
                     s[k].z_U_x[i] = mu_ / dU;
+                }
+            }
+        }
+    }
+
+    void prepare_warm_start_from_problem() {
+        const int N = HORIZON;
+        Stage* s = prob_->stages;
+
+        for (int k = 0; k <= N; ++k) {
+            // Keep the shifted primal guess strictly inside finite bounds.
+            // x[0] remains the measured fixed initial state.
+            if (k > 0 && prob_->n_bound_x > 0) {
+                for (int i = 0; i < NX; ++i) {
+                    if (prob_->x_lb[i] > -1e19)
+                        s[k].x[i] = std::max(
+                            s[k].x[i], prob_->x_lb[i] + params_.bound_s_min);
+                    if (prob_->x_ub[i] < 1e19)
+                        s[k].x[i] = std::min(
+                            s[k].x[i], prob_->x_ub[i] - params_.bound_s_min);
+                }
+            }
+            if (k < N && prob_->n_bound_u > 0) {
+                for (int i = 0; i < NU; ++i) {
+                    if (prob_->u_lb[i] > -1e19)
+                        s[k].u[i] = std::max(
+                            s[k].u[i], prob_->u_lb[i] + params_.bound_s_min);
+                    if (prob_->u_ub[i] < 1e19)
+                        s[k].u[i] = std::min(
+                            s[k].u[i], prob_->u_ub[i] - params_.bound_s_min);
+                }
+            }
+
+            if (prob_->constraints) {
+                if (k < N)
+                    evaluate_constraints(s[k].x, s[k].u, k, s[k].d);
+                else
+                    evaluate_terminal_constraints(s[k].x, s[k].d);
+
+                const int active = active_constraints(k);
+                for (int j = 0; j < active; ++j) {
+                    const bool slack_valid = std::isfinite(s[k].s[j])
+                        && s[k].s[j] > params_.bound_s_min;
+                    const bool dual_valid = std::isfinite(s[k].lambda[j])
+                        && s[k].lambda[j] > params_.bound_s_min;
+                    if (!slack_valid) {
+                        const double gj = s[k].d[j];
+                        // Avoid adding the cold-start margin to every newly
+                        // appended row. For near-active rows, sqrt(mu) keeps
+                        // the new slack/dual pair centered; safely inactive
+                        // rows can satisfy g + s = 0 immediately.
+                        s[k].s[j] =
+                            paper_ipm_detail::initial_warm_slack(
+                                gj, mu_, params_);
+                    }
+                    if (!dual_valid)
+                        s[k].lambda[j] = mu_ / s[k].s[j];
+                }
+            }
+
+            if (prob_->n_bound_u > 0 && k < N) {
+                for (int i = 0; i < NU; ++i) {
+                    const double dL = std::max(
+                        s[k].u[i] - prob_->u_lb[i], 0.0)
+                        + params_.bound_s_min;
+                    const double dU = std::max(
+                        prob_->u_ub[i] - s[k].u[i], 0.0)
+                        + params_.bound_s_min;
+                    if (!(std::isfinite(s[k].z_L_u[i])
+                          && s[k].z_L_u[i] > params_.bound_s_min))
+                        s[k].z_L_u[i] = mu_ / dL;
+                    if (!(std::isfinite(s[k].z_U_u[i])
+                          && s[k].z_U_u[i] > params_.bound_s_min))
+                        s[k].z_U_u[i] = mu_ / dU;
+                }
+            }
+            if (prob_->n_bound_x > 0) {
+                for (int i = 0; i < NX; ++i) {
+                    const double dL = std::max(
+                        s[k].x[i] - prob_->x_lb[i], 0.0)
+                        + params_.bound_s_min;
+                    const double dU = std::max(
+                        prob_->x_ub[i] - s[k].x[i], 0.0)
+                        + params_.bound_s_min;
+                    if (!(std::isfinite(s[k].z_L_x[i])
+                          && s[k].z_L_x[i] > params_.bound_s_min))
+                        s[k].z_L_x[i] = mu_ / dL;
+                    if (!(std::isfinite(s[k].z_U_x[i])
+                          && s[k].z_U_x[i] > params_.bound_s_min))
+                        s[k].z_U_x[i] = mu_ / dU;
                 }
             }
         }
@@ -2252,6 +2638,7 @@ private:
     // Hessians  Σ_m p_m ∇²f_m  and  Σ_j λ_j ∇²g_j  and accumulate them onto
     // the cost Hessian blocks (Qxx, Qux, Quu) in O(1) model calls per stage.
     void add_exact_hessian_analytic(int k) {
+        if (active_stats_) ++active_stats_->exact_hessian_analytic_calls;
         const int N = HORIZON;
         Stage& sk = prob_->stages[k];
         const bool has_ctrl = (k < N);
@@ -2265,9 +2652,8 @@ private:
             const int base = base_constraints(k);
             const int pairs = complementarity_pairs(k);
             for (int p = 0; p < pairs; ++p) {
-                int first = -1, second = -1;
-                prob_->constraints->complementarity_pair(
-                    k, p, first, second);
+                const int first = complementarity_first_cache_[k][p];
+                const int second = complementarity_second_cache_[k][p];
                 const double xi = sk.lambda[base + p];
                 lambda_effective[first] += xi * sk.d[second];
                 lambda_effective[second] += xi * sk.d[first];
@@ -2303,6 +2689,7 @@ private:
     // Finite-difference exact-Newton curvature (fallback used when the
     // models do not provide analytic adjoint Hessians).
     void add_exact_hessian_fd(int k) {
+        if (active_stats_) ++active_stats_->exact_hessian_fd_calls;
         const int N = HORIZON;
         Stage& sk = prob_->stages[k];
         const bool has_ctrl = (k < N);
@@ -2381,24 +2768,37 @@ private:
     // ═════════════════════════════════════════════════════════════════════
 
     Status evaluate_model() {
+        if (active_stats_) ++active_stats_->model_evaluations;
+        PhaseTimer timer(active_stats_ ? &active_stats_->model_eval_time_ms
+                                       : nullptr);
         const int N = HORIZON;
         Stage* s = prob_->stages;
 
         for (int k = 0; k < N; ++k) {
+            if (deadline_reached()) return Status::TIME_LIMIT;
             // Dynamics defect: c_k = f(x_k, u_k) - x_{k+1}
             Vec<NX> fk;
+            const auto dynamics_eval_start = Clock::now();
             Status st = prob_->dynamics->discrete_step(s[k].x, s[k].u,
                                                         prob_->dt, fk, k);
+            if (active_stats_)
+                add_phase_ms(active_stats_->dynamics_eval_time_ms,
+                             dynamics_eval_start);
             if (st != Status::SUCCESS) return st;
             for (int i = 0; i < NX; ++i)
                 s[k].c[i] = fk[i] - s[k + 1].x[i];
 
             // Dynamics Jacobians
+            const auto dynamics_jacobian_start = Clock::now();
             st = prob_->dynamics->linearize(s[k].x, s[k].u, prob_->dt,
                                             s[k].A, s[k].B, k);
+            if (active_stats_)
+                add_phase_ms(active_stats_->dynamics_jacobian_time_ms,
+                             dynamics_jacobian_start);
             if (st != Status::SUCCESS) return st;
 
             // Cost
+            const auto cost_derivative_start = Clock::now();
             s[k].cost = prob_->cost->stage_cost(s[k].x, s[k].u, k);
             st = prob_->cost->stage_gradient(s[k].x, s[k].u, k,
                                               s[k].qx, s[k].qu);
@@ -2406,14 +2806,20 @@ private:
             
             st = prob_->cost->stage_hessian(s[k].x, s[k].u, k,
                                              s[k].Qxx, s[k].Quu, s[k].Qux);
+            if (active_stats_)
+                add_phase_ms(active_stats_->cost_derivative_time_ms,
+                             cost_derivative_start);
             if (st != Status::SUCCESS) return st;
 
             // Constraints
             if (prob_->constraints) {
-                st = evaluate_constraints(s[k].x, s[k].u, k, s[k].d);
-                if (st != Status::SUCCESS) return st;
-                st = jacobian_constraints(s[k].x, s[k].u, k,
-                                                   s[k].Cx, s[k].Cu);
+                const auto constraint_start = Clock::now();
+                st = evaluate_with_jacobian_constraints(
+                    s[k].x, s[k].u, k, s[k].d, s[k].Cx, s[k].Cu);
+                if (active_stats_)
+                    add_phase_ms(
+                        active_stats_->constraint_value_jacobian_time_ms,
+                        constraint_start);
                 if (st != Status::SUCCESS) return st;
             }
 
@@ -2437,9 +2843,13 @@ private:
         if (st != Status::SUCCESS) return st;
 
         if (prob_->constraints) {
-            st = evaluate_terminal_constraints(s[N].x, s[N].d);
-            if (st != Status::SUCCESS) return st;
-            st = jacobian_terminal_constraints(s[N].x, s[N].Cx);
+            const auto constraint_start = Clock::now();
+            st = evaluate_terminal_with_jacobian_constraints(
+                s[N].x, s[N].d, s[N].Cx);
+            if (active_stats_)
+                add_phase_ms(
+                    active_stats_->constraint_value_jacobian_time_ms,
+                    constraint_start);
             if (st != Status::SUCCESS) return st;
         }
 
@@ -2505,8 +2915,9 @@ private:
                 trial_stages_[k].d = d_trial;
 
                 // Jacobians at trial point
-                st = jacobian_constraints(x_trial, u_trial, k,
-                                                   trial_stages_[k].Cx, trial_stages_[k].Cu);
+                st = jacobian_constraints(
+                    x_trial, u_trial, k, d_trial,
+                    trial_stages_[k].Cx, trial_stages_[k].Cu);
                 if (st != Status::SUCCESS) return false;
             }
         }
@@ -2526,7 +2937,8 @@ private:
             if (st != Status::SUCCESS) return false;
             trial_stages_[N].d = dN_trial;
 
-            st = jacobian_terminal_constraints(xN_trial, trial_stages_[N].Cx);
+            st = jacobian_terminal_constraints(
+                xN_trial, dN_trial, trial_stages_[N].Cx);
             if (st != Status::SUCCESS) return false;
         }
 
@@ -2952,6 +3364,8 @@ private:
     }
 
     void compute_kkt_residuals() {
+        PhaseTimer timer(active_stats_ ? &active_stats_->residual_eval_time_ms
+                                       : nullptr);
         const int N = HORIZON;
         Stage* s = prob_->stages;
 
@@ -3998,27 +4412,19 @@ private:
     // ═════════════════════════════════════════════════════════════════════
 
     Status solve_kkt_lhs() {
-        // Adaptive regularization: keep minimal to preserve Newton descent.
-        // reg perturbs the Schur complement S → S + reg·I, which corrupts
-        // the descent property: error ≈ reg · ||C^Tλ|| / λ_min(S).
-        // For high cost/control ratios (e.g. 1000), even reg=1e-5 can
-        // overwhelm the true descent term.
-        // LDLT factorization stability only needs reg ≈ ε·κ(S).
+        // Apply configured dimensionless damping relative to the Riccati value
+        // Hessian and stage Schur diagonals; retain the existing retry policy.
         reg_used_ = 0.0;  // Reset each call — measure actual reg used
-        double reg_base = 1e-12;
-        if (cond_estimate_ > 1e6) {
-            reg_base = 1e-8;
-        } else if (cond_estimate_ > 1e5) {
-            reg_base = 1e-10;
-        } else if (cond_estimate_ > 1e4) {
-            reg_base = 1e-11;
-        }
-        return Ricc::backward_lhs(riccati_stages_, riccati_ws_, reg_base, reg_used_,
-                                  params_.reg_max, params_.inertia_min_pivot);
+        return Ricc::backward_lhs(
+            riccati_stages_, riccati_ws_,
+            params_.riccati_relative_regularization, reg_used_, params_.reg_max,
+            params_.inertia_min_pivot);
     }
 
     Status solve_kkt_rhs_and_forward() {
-        Status st = Ricc::backward_rhs(riccati_stages_, riccati_ws_);
+        const bool riccati_diagnostics = params_.verbosity >= 2;
+        Status st = Ricc::backward_rhs(
+            riccati_stages_, riccati_ws_, riccati_diagnostics);
         if (st != Status::SUCCESS) return st;
 
         Vec<NX> dx0;
@@ -4030,19 +4436,25 @@ private:
             prec_.scale_dx0(dx0);
         }
 
-        return Ricc::forward(riccati_stages_, riccati_ws_, dx0);
+        return Ricc::forward(
+            riccati_stages_, riccati_ws_, dx0, riccati_diagnostics);
     }
 
     // Legacy combined solve (kept for backward compat with tests)
     Status solve_kkt_via_riccati() {
-        Status st = Ricc::backward(riccati_stages_, riccati_ws_, 1e-12, reg_used_);
+        const bool riccati_diagnostics = params_.verbosity >= 2;
+        Status st = Ricc::backward(
+            riccati_stages_, riccati_ws_,
+            params_.riccati_relative_regularization, reg_used_,
+            riccati_diagnostics);
         if (st != Status::SUCCESS) return st;
 
         Vec<NX> dx0;
         for (int i = 0; i < NX; ++i)
             dx0[i] = prob_->x0[i] - prob_->stages[0].x[i];
 
-        return Ricc::forward(riccati_stages_, riccati_ws_, dx0);
+        return Ricc::forward(
+            riccati_stages_, riccati_ws_, dx0, riccati_diagnostics);
     }
 
     // ═════════════════════════════════════════════════════════════════
@@ -4577,9 +4989,6 @@ private:
         double condH = max_Hdiag / min_Hdiag_nz;
         double cost_cond = max_cost_diag / min_cost_diag;
         double bar_cond = (max_bar_diag > 1e-14) ? (max_bar_diag / min_bar_diag_nz) : 1.0;
-
-        // Store condition estimate for adaptive regularization
-        cond_estimate_ = condH;
 
         if (params_.verbosity < 1) return;
 
@@ -5165,7 +5574,13 @@ private:
 
         void bind(Solver* s) { solver_ = s; }
 
+        bool time_limit_reached() const override {
+            return solver_ && solver_->deadline_reached();
+        }
+
         bool evaluate(double alpha, double& out_theta, double& out_phi) override {
+            if (time_limit_reached()) return false;
+            if (solver_->active_stats_) ++solver_->active_stats_->line_search_evals;
             // READ-ONLY: compute trial (θ, φ) without modifying solver state.
             const auto* sv = solver_;
             const int N = HORIZON;
@@ -5176,6 +5591,7 @@ private:
 
             // Dynamics defects at trial point (using temporary values)
             for (int k = 0; k < N; ++k) {
+                if (time_limit_reached()) return false;
                 Vec<NX> xk_t   = s[k].x;
                 Vec<NU> uk_t   = s[k].u;
                 Vec<NX> xkp1_t = s[k+1].x;
@@ -5200,6 +5616,7 @@ private:
             // Constraints at trial point
             if (sv->prob_->constraints) {
                 for (int k = 0; k <= N; ++k) {
+                    if (time_limit_reached()) return false;
                     Vec<NC> d_t;
                     if (k < N) {
                         Vec<NX> xk_t = s[k].x;  Vec<NU> uk_t = s[k].u;
@@ -5355,6 +5772,7 @@ private:
         }
 
         bool compute_soc(double alpha, double& out_theta, double& out_phi) override {
+            if (time_limit_reached()) return false;
             // SOC modifies the search direction (dx, du, ds, dlambda) to correct
             // for nonlinear dynamics defects.  If SOC fails, original direction
             // is restored so backtracking can continue with the original step.
@@ -5382,6 +5800,10 @@ private:
 
             // ── Compute trial dynamics defect and constraints at (base + α·dir) ──
             for (int k = 0; k < N; ++k) {
+                if (time_limit_reached()) {
+                    reject_soc();
+                    return false;
+                }
                 Vec<NX> xk_t   = s[k].x;
                 Vec<NU> uk_t   = s[k].u;
                 Vec<NX> xkp1_t = s[k+1].x;
@@ -5425,7 +5847,9 @@ private:
                 }
             }
 
-            Status st = Ricc::backward_rhs(sv->riccati_stages_, sv->riccati_ws_);
+            const bool riccati_diagnostics = sv->params_.verbosity >= 2;
+            Status st = Ricc::backward_rhs(
+                sv->riccati_stages_, sv->riccati_ws_, riccati_diagnostics);
             if (st != Status::SUCCESS) {
                 // Restore original direction, constraint values, and dynamics defects
                 for (int k = 0; k <= N; ++k) {
@@ -5449,7 +5873,8 @@ private:
             if (sv->params_.enable_preconditioner) {
                 sv->prec_.scale_dx0(dx0_soc);
             }
-            st = Ricc::forward(sv->riccati_stages_, sv->riccati_ws_, dx0_soc);
+            st = Ricc::forward(sv->riccati_stages_, sv->riccati_ws_,
+                               dx0_soc, riccati_diagnostics);
             if (st != Status::SUCCESS) {
                 for (int k = 0; k <= N; ++k) {
                     sv->riccati_ws_.dx[k] = sv->soc_save_dx_[k];
@@ -5462,6 +5887,11 @@ private:
                 }
                 if (sv->use_primal_dual_bound())
                     sv->recover_bound_multiplier_steps(sv->sigma_, false);
+                return false;
+            }
+
+            if (time_limit_reached()) {
+                reject_soc();
                 return false;
             }
 
@@ -5479,7 +5909,10 @@ private:
             double alpha_soc = std::min(alpha, ap_soc);
 
             // Evaluate SOC trial point (read-only)
-            evaluate(alpha_soc, out_theta, out_phi);
+            if (!evaluate(alpha_soc, out_theta, out_phi)) {
+                reject_soc();
+                return false;
+            }
 
             // If SOC did not improve the rejected trial, restore the original
             // direction.  If accepted, apply_primal_dual_step uses this SOC direction.
@@ -5519,6 +5952,8 @@ private:
         }
     private:
         bool evaluate_rollout(double alpha, double& out_theta, double& out_phi) {
+            if (time_limit_reached()) return false;
+            if (solver_->active_stats_) ++solver_->active_stats_->line_search_evals;
             auto* sv = solver_;
             const int N = HORIZON;
             const auto* s = sv->prob_->stages;
@@ -5536,6 +5971,7 @@ private:
             out_theta = 0.0;
             out_phi = 0.0;
             for (int k = 0; k < N; ++k) {
+                if (time_limit_reached()) return false;
                 sv->rollout_u_[k] = s[k].u;
                 for (int i = 0; i < NU; ++i)
                     sv->rollout_u_[k][i] += alpha * sv->riccati_ws_.du[k][i];
@@ -5586,6 +6022,7 @@ private:
             if (sv->prob_->constraints) {
                 double barrier_term = 0.0;
                 for (int k = 0; k <= N; ++k) {
+                    if (time_limit_reached()) return false;
                     Vec<NC> d_t;
                     if (k < N)
                         sv->evaluate_constraints(
@@ -5702,10 +6139,34 @@ private:
     double mpcc_inf_        = 0.0;  // physical complementarity: max |a_i*b_i|
     double ineq_viol_       = 0.0;  // inequality: most-negative s_j or λ_j (≥0 = OK)
     bool   has_costates_    = false; // Riccati costates available (false until first solve)
+    bool   warm_start_ready_ = false; // a successful solve supplied reusable barrier data
     bool   stages_scaled_   = false; // true after transform_qp, false after evaluate_model
 
-    // Adaptive regularization: condition estimate from previous iteration
-    double cond_estimate_   = 1.0;
+    SolverStats* active_stats_ = nullptr;
+    Clock::time_point solve_start_{};
+    Clock::time_point deadline_{};
+    bool deadline_enabled_ = false;
+    bool timed_out_ = false;
+    int current_iteration_ = 0;
+    Stage entry_stages_[HORIZON + 1];
+    Vec<NX> entry_costates_[HORIZON + 1];
+    double entry_mu_ = 0.0;
+    bool entry_bound_pd_mode_ = false;
+    bool entry_has_costates_ = false;
+    bool entry_exact_hessian_ = false;
+    bool entry_warm_start_ready_ = false;
+    bool current_solve_warm_ = false;
+    double entry_sigma_ = 0.0;
+    double entry_alpha_lambda_ = 1.0;
+    double entry_last_alpha_p_ = 1.0;
+    int entry_low_ftb_count_ = 0;
+    bool constraint_metadata_cached_ = false;
+    bool has_complementarity_cache_ = false;
+    int base_constraints_cache_[HORIZON + 1] = {};
+    int complementarity_pairs_cache_[HORIZON + 1] = {};
+    int active_constraints_cache_[HORIZON + 1] = {};
+    int complementarity_first_cache_[HORIZON + 1][NC] = {};
+    int complementarity_second_cache_[HORIZON + 1][NC] = {};
 
     // Linear KKT solution quality (computed each iteration)
     KKTLinearResiduals linear_kkt_res_;
@@ -5756,6 +6217,9 @@ private:
     Mat<NU, NX> debug_K0_;
 
 public:
+    // These accessors expose the last captured debug snapshot. When runtime
+    // diagnostics are disabled they intentionally do not describe the latest
+    // solve; convergence and SolverStats remain current.
     const Vec<NX>* debug_scaled_dx() const { return debug_scaled_dx_; }
     const Vec<NU>* debug_scaled_du() const { return debug_scaled_du_; }
     const Vec<NX>* debug_scaled_p()  const { return debug_scaled_p_; }

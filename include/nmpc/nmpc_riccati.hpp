@@ -118,10 +118,6 @@ struct RiccatiSolver {
             // Scale-aware regularization floor
             // Use max diagonal (not max abs entry) for scale invariance:
             // max_diag(inv_Lu·S·inv_Lu) = inv_Lu^2 · max_diag(S) which scales correctly.
-            double s_max_diag = 0.0;
-            for (int i = 0; i < NU; ++i)
-                s_max_diag = std::max(s_max_diag, std::fabs(ws.S(i, i)));
-
             double min_diag = 1e100;
             for (int i = 0; i < NU; ++i)
                 if (ws.S(i, i) < min_diag) min_diag = ws.S(i, i);
@@ -139,10 +135,12 @@ struct RiccatiSolver {
 
             bool factored = false;
             bool inertia_ok = false;
+            double max_attempted_reg = 0.0;
             for (int attempt = 0; attempt < 6; ++attempt) {
                 // Hard cap: if reg already exceeds the indefinite-Hessian guard,
                 // give up. The caller's GN fallback handles this cleanly.
                 if (reg > reg_max) break;
+                max_attempted_reg = std::max(max_attempted_reg, reg);
 
                 ws.S = S_save;  // full restore before each attempt
                 // Scale-invariant regularization: reg * |S(i,i)| instead of reg * 1
@@ -177,7 +175,10 @@ struct RiccatiSolver {
                 reg = std::max(reg * 10.0, pivot_floor);
             }
 
-            if (!factored || !inertia_ok) return Status::KKT_SINGULAR;
+            if (!factored || !inertia_ok) {
+                reg_used = std::max(reg_used, max_attempted_reg);
+                return Status::KKT_SINGULAR;
+            }
             if (reg > reg_used) reg_used = reg;
 
             // Save factorized S for later RHS solves (backward_rhs uses S_fact[k])
@@ -213,7 +214,8 @@ struct RiccatiSolver {
     // Corrected version: accounts for regularization perturbation
     static inline double riccati_direct_stationarity_corr = 0.0;
 
-    static Status backward_rhs(Stage stages[], WS& ws)
+    static Status backward_rhs(Stage stages[], WS& ws,
+                               bool compute_diagnostics = true)
     {
         const int N = HORIZON;
 
@@ -223,7 +225,6 @@ struct RiccatiSolver {
         for (int k = N - 1; k >= 0; --k) {
             Stage& s = stages[k];
             const Vec<NX>& p_next = ws.p[k + 1];
-            const SymMat<NX>& P_next = ws.P[k + 1];
 
             // Load cached BtP = B_k^T · P_{k+1} from backward_lhs
             ws.BtP = ws.BtP_stages[k];
@@ -239,37 +240,39 @@ struct RiccatiSolver {
                     for (int m = 0; m < NX; ++m) btpc += ws.BtP(r, m) * s.c[m];
                     rhs_vec[r] = s.qu[r] + btp + btpc;
                 }
-                // Save rhs before solve (ldlt_solve overwrites in-place)
-                Vec<NU> rhs_save = rhs_vec;
+                Vec<NU> rhs_save;
+                if (compute_diagnostics) rhs_save = rhs_vec;
                 ws.S_fact[k].ldlt_solve(rhs_vec);
                 ws.d[k] = rhs_vec;
 
-                // Schur residual: ||S·d - rhs||
-                // S_fact[k] contains LDLT factorization, so S·d = L·D·L^T·d
-                // Step 1: y = L^T · d
-                Vec<NU> y;
-                for (int r = 0; r < NU; ++r) {
-                    double sum = ws.d[k][r];  // L^T has 1 on diagonal
-                    for (int c = r + 1; c < NU; ++c)
-                        sum += ws.S_fact[k](c, r) * ws.d[k][c];  // L^T(r,c) = L(c,r)
-                    y[r] = sum;
-                }
-                // Step 2: z = D · y  (D is diagonal, stored in S_fact(i,i))
-                Vec<NU> z;
-                for (int r = 0; r < NU; ++r)
-                    z[r] = ws.S_fact[k](r, r) * y[r];
-                // Step 3: Sd = L · z
-                Vec<NU> Sd;
-                for (int r = 0; r < NU; ++r) {
-                    double sum = z[r];  // L has 1 on diagonal
-                    for (int c = 0; c < r; ++c)
-                        sum += ws.S_fact[k](r, c) * z[c];
-                    Sd[r] = sum;
-                }
-                // Compute residual
-                for (int r = 0; r < NU; ++r) {
-                    double res = std::fabs(Sd[r] - rhs_save[r]);
-                    if (res > schur_residual) schur_residual = res;
+                if (compute_diagnostics) {
+                    // Schur residual: ||S·d - rhs||
+                    // S_fact[k] contains LDLT factorization, so S·d = L·D·L^T·d
+                    // Step 1: y = L^T · d
+                    Vec<NU> y;
+                    for (int r = 0; r < NU; ++r) {
+                        double sum = ws.d[k][r];  // L^T has 1 on diagonal
+                        for (int c = r + 1; c < NU; ++c)
+                            sum += ws.S_fact[k](c, r) * ws.d[k][c];  // L^T(r,c) = L(c,r)
+                        y[r] = sum;
+                    }
+                    // Step 2: z = D · y  (D is diagonal, stored in S_fact(i,i))
+                    Vec<NU> z;
+                    for (int r = 0; r < NU; ++r)
+                        z[r] = ws.S_fact[k](r, r) * y[r];
+                    // Step 3: Sd = L · z
+                    Vec<NU> Sd;
+                    for (int r = 0; r < NU; ++r) {
+                        double sum = z[r];  // L has 1 on diagonal
+                        for (int c = 0; c < r; ++c)
+                            sum += ws.S_fact[k](r, c) * z[c];
+                        Sd[r] = sum;
+                    }
+                    // Compute residual
+                    for (int r = 0; r < NU; ++r) {
+                        double res = std::fabs(Sd[r] - rhs_save[r]);
+                        if (res > schur_residual) schur_residual = res;
+                    }
                 }
             }
 
@@ -282,17 +285,19 @@ struct RiccatiSolver {
     // ── Combined backward (LHS + RHS) for convenience ─────────────
 
     static Status backward(Stage stages[], WS& ws,
-                            double reg_base, double& reg_used)
+                            double reg_base, double& reg_used,
+                            bool compute_diagnostics = true)
     {
         Status st = backward_lhs(stages, ws, reg_base, reg_used);
         if (st != Status::SUCCESS) return st;
-        return backward_rhs(stages, ws);
+        return backward_rhs(stages, ws, compute_diagnostics);
     }
 
     // ── Forward pass ────────────────────────────────────────────────────
 
     static Status forward(Stage stages[], WS& ws,
-                          Vec<NX>& dx0)  // dx0 = x̄ - x0 (initial state residual)
+                          Vec<NX>& dx0,  // dx0 = x̄ - x0 (initial state residual)
+                          bool compute_diagnostics = true)
     {
         const int N = HORIZON;
 
@@ -322,6 +327,8 @@ struct RiccatiSolver {
             }
 
             // ── Direct Riccati stationarity check ────────────────────
+            if (!compute_diagnostics) continue;
+
             const Vec<NX>& p_next = ws.p[k + 1];
             const SymMat<NX>& P_next = ws.P[k + 1];
 
@@ -396,15 +403,20 @@ private:
 
         Pk.copy_lower_from(s.Qxx);
 
+        Mat<NX, NX> P_times_A;
+        for (int i = 0; i < NX; ++i)
+            for (int c = 0; c < NX; ++c) {
+                double pi_row = 0.0;
+                for (int j = 0; j < NX; ++j)
+                    pi_row += P_next(i, j) * s.A(j, c);
+                P_times_A(i, c) = pi_row;
+            }
+
         for (int r = 0; r < NX; ++r) {
             for (int c = 0; c <= r; ++c) {
                 double val = 0.0;
-                for (int i = 0; i < NX; ++i) {
-                    double pi_row = 0.0;
-                    for (int j = 0; j < NX; ++j)
-                        pi_row += P_next(i, j) * s.A(j, c);
-                    val += s.A(i, r) * pi_row;
-                }
+                for (int i = 0; i < NX; ++i)
+                    val += s.A(i, r) * P_times_A(i, c);
                 Pk(r, c) += val;
             }
         }

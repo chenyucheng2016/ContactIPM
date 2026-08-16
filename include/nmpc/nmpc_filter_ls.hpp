@@ -112,6 +112,7 @@ struct Filter {
 enum class LSStatus {
     ACCEPTED,          // step accepted
     FAILED,            // line-search failed (α < α_min)
+    TIME_LIMIT,        // evaluator's wall-clock deadline was reached
     CONTINUE           // should not happen in normal flow
 };
 
@@ -160,6 +161,9 @@ public:
                                     double& out_theta, double& out_phi) {
         return candidate == 0 && evaluate(alpha, out_theta, out_phi);
     }
+
+    // Optional watchdog hook. The default keeps the legacy, unbounded search.
+    virtual bool time_limit_reached() const { return false; }
 
     // Current iterate data (for SOC computation)
     virtual double current_theta() const = 0;
@@ -254,6 +258,11 @@ public:
         result.phi0 = result.phi_trial = 0.0;
         result.Dphi = 0.0;
 
+        if (eval.time_limit_reached()) {
+            result.status = LSStatus::TIME_LIMIT;
+            return result;
+        }
+
         const int v = params_.verbosity;
 
         double theta0 = eval.current_theta();
@@ -270,18 +279,30 @@ public:
 
         // ── Phase 1 + 2: backtracking loop ─────────────────────────
         for (int l = 0; l < 50; ++l) {  // safety cap on backtrack count
+            if (eval.time_limit_reached()) {
+                result.status = LSStatus::TIME_LIMIT;
+                return result;
+            }
             double alpha = result.alpha;
 
             // Evaluate trial point
             double theta_trial, phi_trial;
             bool ok = eval.evaluate(alpha, theta_trial, phi_trial);
             if (!ok) {
+                if (eval.time_limit_reached()) {
+                    result.status = LSStatus::TIME_LIMIT;
+                    return result;
+                }
                 if (v >= 1)
                     printf("    [ls:%d] a=%.3e NaN/inf -> shrink\n", l, alpha);
                 result.alpha *= 0.5;
                 result.ls_iters++;
                 if (result.alpha < params_.alpha_min) break;
                 continue;
+            }
+            if (eval.time_limit_reached()) {
+                result.status = LSStatus::TIME_LIMIT;
+                return result;
             }
 
             // ── Compute acceptance tests ──────────────────────────
@@ -348,12 +369,24 @@ public:
             // region, barrier objective first in the optimality phase.
             for (int candidate = 1;
                  candidate < eval.trial_candidate_count(); ++candidate) {
+                if (eval.time_limit_reached()) {
+                    result.status = LSStatus::TIME_LIMIT;
+                    return result;
+                }
                 double theta_c, phi_c;
                 if (!eval.evaluate_candidate(candidate, alpha, theta_c, phi_c)) {
+                    if (eval.time_limit_reached()) {
+                        result.status = LSStatus::TIME_LIMIT;
+                        return result;
+                    }
                     if (v >= 1)
                         printf("    [ls:%d.%d] a=%.3e invalid -> skip\n",
                                l, candidate, alpha);
                     continue;
+                }
+                if (eval.time_limit_reached()) {
+                    result.status = LSStatus::TIME_LIMIT;
+                    return result;
                 }
 
                 bool in_filter_c = filter_.contains(theta_c, phi_c,
@@ -455,12 +488,27 @@ public:
                 result.soc_used = true;
                 double theta_soc_prev = theta_trial;
                 for (int p = 0; p < params_.soc_max; ++p) {
+                    if (eval.time_limit_reached()) {
+                        result.status = LSStatus::TIME_LIMIT;
+                        return result;
+                    }
                     double theta_soc, phi_soc;
                     bool soc_ok = eval.compute_soc(alpha, theta_soc, phi_soc);
                     if (!soc_ok) {
+                        if (eval.time_limit_reached()) {
+                            result.status = LSStatus::TIME_LIMIT;
+                            return result;
+                        }
                         if (v >= 2)
                             printf("    [soc:%d] compute_soc failed\n", p);
                         break;
+                    }
+                    if (eval.time_limit_reached()) {
+                        // A successful SOC owns a modified direction until it
+                        // is either accepted or explicitly rejected.
+                        eval.reject_soc();
+                        result.status = LSStatus::TIME_LIMIT;
+                        return result;
                     }
                     result.soc_iters++;
 

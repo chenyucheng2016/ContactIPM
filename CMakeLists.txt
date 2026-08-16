@@ -53,9 +53,77 @@ if(NMPC_BUILD_EXAMPLES)
 
     add_executable(centroidal_trot_nmpc examples/centroidal_trot_nmpc.cpp)
     target_link_libraries(centroidal_trot_nmpc PRIVATE nmpc_solver)
+
+    add_executable(quadruped_cito_realtime_benchmark
+        examples/quadruped_cito/quadruped_cito_realtime_benchmark.cpp)
+    target_include_directories(quadruped_cito_realtime_benchmark PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(quadruped_cito_realtime_benchmark PRIVATE
+        nmpc_solver)
+
+    add_executable(quadruped_cito_srbd_closed_loop
+        examples/quadruped_cito/quadruped_cito_srbd_closed_loop.cpp)
+    target_include_directories(quadruped_cito_srbd_closed_loop PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(quadruped_cito_srbd_closed_loop PRIVATE
+        nmpc_solver)
 endif()
 
 # ── Tests ──
+option(NMPC_BUILD_MUJOCO "Build the optional MuJoCo quadruped bridge" OFF)
+if(NMPC_BUILD_MUJOCO)
+    find_package(Threads REQUIRED)
+    set(MUJOCO_ROOT "" CACHE PATH
+        "Directory containing include/mujoco/mujoco.h and libmujoco")
+    set(MUJOCO_MENAGERIE_ROOT "" CACHE PATH
+        "MuJoCo Menagerie checkout containing unitree_go1/scene.xml")
+    find_path(MUJOCO_INCLUDE_DIR mujoco/mujoco.h
+        HINTS "${MUJOCO_ROOT}/include"
+        NO_DEFAULT_PATH)
+    find_file(MUJOCO_LIBRARY
+        NAMES libmujoco.so.3.9.0 libmujoco.so mujoco.dll
+        HINTS "${MUJOCO_ROOT}"
+        NO_DEFAULT_PATH)
+    if(NOT MUJOCO_INCLUDE_DIR OR NOT MUJOCO_LIBRARY)
+        message(FATAL_ERROR
+            "NMPC_BUILD_MUJOCO requires MUJOCO_ROOT with MuJoCo headers "
+            "and the native library")
+    endif()
+    if(NOT EXISTS "${MUJOCO_MENAGERIE_ROOT}/unitree_go1/scene.xml")
+        message(FATAL_ERROR
+            "MUJOCO_MENAGERIE_ROOT must contain unitree_go1/scene.xml")
+    endif()
+    set(MUJOCO_GO1_XML
+        "${MUJOCO_MENAGERIE_ROOT}/unitree_go1/go1.xml")
+    set(QUADRUPED_CITO_MUJOCO_SCENE
+        "${CMAKE_CURRENT_BINARY_DIR}/go1_cito_terrain_scene.xml")
+    configure_file(
+        examples/quadruped_cito/mujoco/go1_terrain_scene.xml.in
+        "${QUADRUPED_CITO_MUJOCO_SCENE}" @ONLY)
+
+    add_library(mujoco_external SHARED IMPORTED)
+    set_target_properties(mujoco_external PROPERTIES
+        IMPORTED_LOCATION "${MUJOCO_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${MUJOCO_INCLUDE_DIR}")
+    get_filename_component(MUJOCO_LIBRARY_DIR "${MUJOCO_LIBRARY}" DIRECTORY)
+
+    add_library(quadruped_cito_mujoco_adapter STATIC
+        examples/quadruped_cito/mujoco/mujoco_go1_adapter.cpp)
+    target_include_directories(quadruped_cito_mujoco_adapter PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(quadruped_cito_mujoco_adapter
+        PUBLIC nmpc_solver mujoco_external)
+
+    add_executable(quadruped_cito_mujoco
+        examples/quadruped_cito/mujoco/quadruped_cito_mujoco.cpp)
+    target_include_directories(quadruped_cito_mujoco PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(quadruped_cito_mujoco PRIVATE
+        quadruped_cito_mujoco_adapter Threads::Threads)
+    set_target_properties(quadruped_cito_mujoco PROPERTIES
+        BUILD_RPATH "${MUJOCO_LIBRARY_DIR}")
+endif()
+
 option(NMPC_BUILD_TESTS "Build unit tests" ON)
 if(NMPC_BUILD_TESTS)
     enable_testing()
@@ -64,6 +132,11 @@ if(NMPC_BUILD_TESTS)
     add_executable(test_riccati tests/test_riccati.cpp)
     target_link_libraries(test_riccati PRIVATE nmpc_solver)
     add_test(NAME RiccatiRecursion COMMAND test_riccati)
+
+    add_executable(test_riccati_equivalence
+        tests/test_riccati_equivalence.cpp)
+    target_link_libraries(test_riccati_equivalence PRIVATE nmpc_solver)
+    add_test(NAME RiccatiEquivalence COMMAND test_riccati_equivalence)
 
     # Phase A: Filter line-search tests
     add_executable(test_filter_ls tests/test_filter_ls.cpp)
@@ -99,12 +172,493 @@ if(NMPC_BUILD_TESTS)
     target_link_libraries(test_mpcc_relaxation PRIVATE nmpc_solver)
     add_test(NAME MPCCRelaxation COMMAND test_mpcc_relaxation)
 
+    add_executable(test_quadruped_cito_model
+        tests/test_quadruped_cito_model.cpp)
+    target_include_directories(test_quadruped_cito_model PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_model PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITOModel COMMAND test_quadruped_cito_model)
+
+    add_executable(test_quadruped_cito_realtime
+        tests/test_quadruped_cito_realtime.cpp)
+    target_include_directories(test_quadruped_cito_realtime PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_realtime PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITORealtimeInvariants
+        COMMAND test_quadruped_cito_realtime)
+
+    add_executable(test_quadruped_cito_realtime_execution
+        tests/test_quadruped_cito_realtime_execution.cpp)
+    target_include_directories(test_quadruped_cito_realtime_execution PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME QuadrupedCITORealtimeExecutionTiming
+        COMMAND test_quadruped_cito_realtime_execution)
+
+    add_executable(test_quadruped_cito_rolling_audit
+        tests/test_quadruped_cito_rolling_audit.cpp)
+    target_include_directories(test_quadruped_cito_rolling_audit PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_rolling_audit PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITORollingAudit
+        COMMAND test_quadruped_cito_rolling_audit)
+
+    add_executable(test_quadruped_cito_sustained_topology
+        tests/test_quadruped_cito_sustained_topology.cpp)
+    target_include_directories(test_quadruped_cito_sustained_topology PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_sustained_topology PRIVATE
+        nmpc_solver)
+    add_test(NAME QuadrupedCITOSustainedTopology
+        COMMAND test_quadruped_cito_sustained_topology)
+
+    find_package(Python3 COMPONENTS Interpreter QUIET)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME QuadrupedCITORealtimeCampaignProtocol
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_realtime_campaign_protocol.py)
+        add_test(NAME QuadrupedCITOSustainedRealtimeCampaignProtocol
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_sustained_realtime_campaign.py)
+    endif()
+
+    add_executable(test_quadruped_cito_solve
+        tests/test_quadruped_cito_solve.cpp)
+    target_include_directories(test_quadruped_cito_solve PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_solve PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITOSolve COMMAND test_quadruped_cito_solve)
+
+    function(add_quadruped_cito_transition_test target test_name horizon dt)
+        add_executable(${target} tests/test_quadruped_cito_transition.cpp)
+        target_include_directories(${target} PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR})
+        target_compile_definitions(${target} PRIVATE
+            QUADRUPED_CITO_TEST_HORIZON=${horizon}
+            QUADRUPED_CITO_TEST_TIMESTEP=${dt})
+        target_link_libraries(${target} PRIVATE nmpc_solver)
+        add_test(NAME ${test_name} COMMAND ${target})
+    endfunction()
+
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_transition QuadrupedCITOTransition20 20 0.08)
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_transition_40 QuadrupedCITOTransition40 40 0.04)
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_transition_60 QuadrupedCITOTransition60 60
+        0.0266666666666667)
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_transition_80 QuadrupedCITOTransition80 80 0.02)
+
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_terrain_smooth6 QuadrupedCITOTerrainSmooth6
+        20 0.08)
+    target_compile_definitions(test_quadruped_cito_terrain_smooth6 PRIVATE
+        QUADRUPED_CITO_TEST_TERRAIN_AMPLITUDE=0.06)
+
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_terrain_cross20 QuadrupedCITOTerrainCrossSlope20
+        20 0.08)
+    target_compile_definitions(test_quadruped_cito_terrain_cross20 PRIVATE
+        QUADRUPED_CITO_TEST_TERRAIN_AMPLITUDE=0.0
+        QUADRUPED_CITO_TEST_TERRAIN_SLOPE_Y=0.3639702342662023)
+
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_terrain_step4 QuadrupedCITOTerrainStep4
+        20 0.08)
+    target_compile_definitions(test_quadruped_cito_terrain_step4 PRIVATE
+        QUADRUPED_CITO_TEST_SMOOTH_STEP=1
+        QUADRUPED_CITO_TEST_USE_RECOVERY=1)
+
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_go1_flat QuadrupedCITOGo1Flat 20 0.08)
+    target_compile_definitions(test_quadruped_cito_go1_flat PRIVATE
+        QUADRUPED_CITO_TEST_GO1=1
+        QUADRUPED_CITO_TEST_USE_RECOVERY=1)
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_go1_smooth QuadrupedCITOGo1Smooth 20 0.08)
+    target_compile_definitions(test_quadruped_cito_go1_smooth PRIVATE
+        QUADRUPED_CITO_TEST_GO1=1
+        QUADRUPED_CITO_TEST_GO1_SMOOTH=1
+        QUADRUPED_CITO_TEST_USE_RECOVERY=1)
+    add_quadruped_cito_transition_test(
+        test_quadruped_cito_go1_slope QuadrupedCITOGo1Slope 20 0.08)
+    target_compile_definitions(test_quadruped_cito_go1_slope PRIVATE
+        QUADRUPED_CITO_TEST_GO1=1
+        QUADRUPED_CITO_TEST_GO1_SLOPE=1
+        QUADRUPED_CITO_TEST_USE_RECOVERY=1)
+
+    add_executable(test_quadruped_cito_multifoot
+        tests/test_quadruped_cito_multifoot.cpp)
+    target_include_directories(test_quadruped_cito_multifoot PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_multifoot PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITOMultifoot
+        COMMAND test_quadruped_cito_multifoot)
+
+    add_executable(test_quadruped_cito_long_horizon
+        tests/test_quadruped_cito_multifoot.cpp)
+    target_include_directories(test_quadruped_cito_long_horizon PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_compile_definitions(test_quadruped_cito_long_horizon PRIVATE
+        QUADRUPED_CITO_LONG_HORIZON=1)
+    target_link_libraries(test_quadruped_cito_long_horizon PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITOLongHorizon
+        COMMAND test_quadruped_cito_long_horizon)
+
+    add_executable(test_quadruped_cito_four_step
+        tests/test_quadruped_cito_four_step_planner.cpp)
+    target_include_directories(test_quadruped_cito_four_step PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_four_step PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITOFourStep
+        COMMAND test_quadruped_cito_four_step)
+    add_test(NAME QuadrupedCITOFourStepMultistart
+        COMMAND test_quadruped_cito_four_step --multistart)
+    add_test(NAME QuadrupedCITOFourStepRandomSmooth
+        COMMAND test_quadruped_cito_four_step --terrain random_smooth)
+
+    add_executable(test_quadruped_cito_eight_step
+        tests/test_quadruped_cito_multifoot.cpp)
+    target_include_directories(test_quadruped_cito_eight_step PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_compile_definitions(test_quadruped_cito_eight_step PRIVATE
+        QUADRUPED_CITO_LONG_HORIZON=1
+        QUADRUPED_CITO_EIGHT_STEP=1)
+    target_link_libraries(test_quadruped_cito_eight_step PRIVATE nmpc_solver)
+
+    add_executable(test_quadruped_cito_execution
+        tests/test_quadruped_cito_execution.cpp)
+    target_include_directories(test_quadruped_cito_execution PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(test_quadruped_cito_execution PRIVATE nmpc_solver)
+    add_test(NAME QuadrupedCITOExecution
+        COMMAND test_quadruped_cito_execution)
+
+    if(NMPC_BUILD_MUJOCO)
+        add_executable(test_quadruped_cito_mujoco_adapter
+            tests/test_quadruped_cito_mujoco_adapter.cpp)
+        target_include_directories(test_quadruped_cito_mujoco_adapter PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_quadruped_cito_mujoco_adapter PRIVATE
+            quadruped_cito_mujoco_adapter)
+        set_target_properties(test_quadruped_cito_mujoco_adapter PROPERTIES
+            BUILD_RPATH "${MUJOCO_LIBRARY_DIR}")
+        add_test(NAME QuadrupedCITOMujocoAdapter
+            COMMAND test_quadruped_cito_mujoco_adapter
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}")
+        add_executable(test_quadruped_cito_mujoco_snapshot
+            tests/test_quadruped_cito_mujoco_snapshot.cpp)
+        target_include_directories(test_quadruped_cito_mujoco_snapshot PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_quadruped_cito_mujoco_snapshot PRIVATE
+            quadruped_cito_mujoco_adapter)
+        set_target_properties(test_quadruped_cito_mujoco_snapshot PROPERTIES
+            BUILD_RPATH "${MUJOCO_LIBRARY_DIR}")
+        add_test(NAME QuadrupedCITOMujocoSnapshot
+            COMMAND test_quadruped_cito_mujoco_snapshot
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_snapshot.txt")
+        add_test(NAME QuadrupedCITOMujocoStanding
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --stand 60)
+        set(QUADRUPED_CITO_MUJOCO_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_transition.plan")
+        add_test(NAME QuadrupedCITOMujocoPlanExport
+            COMMAND test_quadruped_cito_go1_flat
+                    --write-plan "${QUADRUPED_CITO_MUJOCO_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoSingleFootReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat
+                    --replay-plan "${QUADRUPED_CITO_MUJOCO_PLAN}")
+
+        set(QUADRUPED_CITO_MUJOCO_SMOOTH_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_go1_smooth.plan")
+        add_test(NAME QuadrupedCITOMujocoSmoothPlanExport
+            COMMAND test_quadruped_cito_go1_smooth
+                    --write-plan "${QUADRUPED_CITO_MUJOCO_SMOOTH_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoSmoothSingleFootReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain smooth
+                    --replay-plan "${QUADRUPED_CITO_MUJOCO_SMOOTH_PLAN}")
+
+        set(QUADRUPED_CITO_MUJOCO_SLOPE_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_go1_slope.plan")
+        add_test(NAME QuadrupedCITOMujocoSlopePlanExport
+            COMMAND test_quadruped_cito_go1_slope
+                    --write-plan "${QUADRUPED_CITO_MUJOCO_SLOPE_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoSlopeSingleFootReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain slope
+                    --replay-plan "${QUADRUPED_CITO_MUJOCO_SLOPE_PLAN}")
+        set(QUADRUPED_CITO_MUJOCO_MULTIFOOT_FORWARD_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_multifoot_forward.plan")
+        set(QUADRUPED_CITO_MUJOCO_MULTIFOOT_REVERSE_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_multifoot_reverse.plan")
+        add_test(NAME QuadrupedCITOMujocoMultifootPlanExport
+            COMMAND test_quadruped_cito_multifoot
+                    --write-forward
+                    "${QUADRUPED_CITO_MUJOCO_MULTIFOOT_FORWARD_PLAN}"
+                    --write-reverse
+                    "${QUADRUPED_CITO_MUJOCO_MULTIFOOT_REVERSE_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoMultifootForwardReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat
+                    --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_MULTIFOOT_FORWARD_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoMultifootReverseReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat
+                    --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_MULTIFOOT_REVERSE_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoCombinedRobustnessReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat
+                    --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_MULTIFOOT_FORWARD_PLAN}"
+                    --mass-scale 1.10
+                    --friction-scale 0.75
+                    --push 0 20 0 0.90 0.10)
+        add_test(NAME QuadrupedCITOMujocoUniformForceBaseline
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat
+                    --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_MULTIFOOT_FORWARD_PLAN}"
+                    --force-reference uniform)
+        set(QUADRUPED_CITO_MUJOCO_LONG_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_long_horizon.plan")
+        add_test(NAME QuadrupedCITOMujocoLongPlanExport
+            COMMAND test_quadruped_cito_long_horizon
+                    --write-plan "${QUADRUPED_CITO_MUJOCO_LONG_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoLongReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat
+                    --replay-plan "${QUADRUPED_CITO_MUJOCO_LONG_PLAN}")
+        set(QUADRUPED_CITO_MUJOCO_FOUR_STEP_FLAT_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_four_step_flat.plan")
+        set(QUADRUPED_CITO_MUJOCO_FOUR_STEP_SMOOTH_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_four_step_smooth.plan")
+        add_test(NAME QuadrupedCITOMujocoFourStepFlatPlanExport
+            COMMAND test_quadruped_cito_four_step
+                    --terrain flat --write-plan
+                    "${QUADRUPED_CITO_MUJOCO_FOUR_STEP_FLAT_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoFourStepFlatReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_FOUR_STEP_FLAT_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoFourStepSmoothPlanExport
+            COMMAND test_quadruped_cito_four_step
+                    --terrain smooth --write-plan
+                    "${QUADRUPED_CITO_MUJOCO_FOUR_STEP_SMOOTH_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoFourStepSmoothReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain smooth --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_FOUR_STEP_SMOOTH_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoReplannedFlat
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat --replan-twice)
+        add_test(NAME QuadrupedCITOMujocoReplannedSmooth
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain smooth --replan-count 2
+                    --seed-policy multistart)
+        add_test(NAME QuadrupedCITOMujocoReplannedFlatFourSegment
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain flat --replan-count 4 --seed-policy multistart
+                    --allow-timing-miss)
+        add_test(NAME QuadrupedCITOMujocoReplannedRandomSmooth
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain random_smooth --terrain-seed 7
+                    --terrain-amplitude 0.02 --replan-count 2
+                    --seed-policy multistart)
+        set(QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FORWARD_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_long_smooth_forward.plan")
+        set(QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_REVERSE_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_long_smooth_reverse.plan")
+        set(QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FIXED_FORWARD_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_long_smooth_fixed_forward.plan")
+        set(QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FIXED_REVERSE_PLAN
+            "${CMAKE_CURRENT_BINARY_DIR}/quadruped_cito_long_smooth_fixed_reverse.plan")
+        add_test(NAME QuadrupedCITOMujocoLongSmoothForwardPlanExport
+            COMMAND test_quadruped_cito_long_horizon
+                    --terrain smooth
+                    --write-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FORWARD_PLAN}"
+                    --write-fixed-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FIXED_FORWARD_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoLongSmoothReversePlanExport
+            COMMAND test_quadruped_cito_long_horizon
+                    --reverse --terrain smooth
+                    --write-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_REVERSE_PLAN}"
+                    --write-fixed-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FIXED_REVERSE_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoLongSmoothForwardReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain smooth --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FORWARD_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoLongSmoothReverseReplay
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain smooth --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_REVERSE_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoLongSmoothFixedForwardBaseline
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain smooth --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FIXED_FORWARD_PLAN}")
+        add_test(NAME QuadrupedCITOMujocoLongSmoothFixedReverseBaseline
+            COMMAND quadruped_cito_mujoco
+                    "${QUADRUPED_CITO_MUJOCO_SCENE}"
+                    --terrain smooth --replay-plan
+                    "${QUADRUPED_CITO_MUJOCO_LONG_SMOOTH_FIXED_REVERSE_PLAN}")
+        set_tests_properties(
+            QuadrupedCITOMujocoAdapter QuadrupedCITOMujocoStanding
+            QuadrupedCITOMujocoPlanExport
+            QuadrupedCITOMujocoSingleFootReplay
+            QuadrupedCITOMujocoSmoothPlanExport
+            QuadrupedCITOMujocoSmoothSingleFootReplay
+            QuadrupedCITOMujocoSlopePlanExport
+            QuadrupedCITOMujocoSlopeSingleFootReplay
+            QuadrupedCITOMujocoMultifootPlanExport
+            QuadrupedCITOMujocoMultifootForwardReplay
+            QuadrupedCITOMujocoMultifootReverseReplay
+            QuadrupedCITOMujocoCombinedRobustnessReplay
+            QuadrupedCITOMujocoUniformForceBaseline
+            QuadrupedCITOMujocoLongPlanExport
+            QuadrupedCITOMujocoLongReplay
+            QuadrupedCITOMujocoFourStepFlatPlanExport
+            QuadrupedCITOMujocoFourStepFlatReplay
+            QuadrupedCITOMujocoFourStepSmoothPlanExport
+            QuadrupedCITOMujocoFourStepSmoothReplay
+            QuadrupedCITOMujocoReplannedFlat
+            QuadrupedCITOMujocoReplannedSmooth
+            QuadrupedCITOMujocoReplannedFlatFourSegment
+            QuadrupedCITOMujocoReplannedRandomSmooth
+            QuadrupedCITOMujocoLongSmoothForwardPlanExport
+            QuadrupedCITOMujocoLongSmoothReversePlanExport
+            QuadrupedCITOMujocoLongSmoothForwardReplay
+            QuadrupedCITOMujocoLongSmoothReverseReplay
+            QuadrupedCITOMujocoLongSmoothFixedForwardBaseline
+            QuadrupedCITOMujocoLongSmoothFixedReverseBaseline PROPERTIES
+            LABELS "quadruped_cito;quadruped_cito_mujoco")
+        set_tests_properties(QuadrupedCITOMujocoPlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_plan)
+        set_tests_properties(QuadrupedCITOMujocoSingleFootReplay PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_plan)
+        set_tests_properties(QuadrupedCITOMujocoSmoothPlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_smooth_plan TIMEOUT 180)
+        set_tests_properties(
+            QuadrupedCITOMujocoSmoothSingleFootReplay PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_smooth_plan)
+        set_tests_properties(QuadrupedCITOMujocoSlopePlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_slope_plan TIMEOUT 180)
+        set_tests_properties(
+            QuadrupedCITOMujocoSlopeSingleFootReplay PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_slope_plan)
+        set_tests_properties(
+            QuadrupedCITOMujocoMultifootPlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_multifoot_plan TIMEOUT 180)
+        set_tests_properties(
+            QuadrupedCITOMujocoMultifootForwardReplay
+            QuadrupedCITOMujocoMultifootReverseReplay
+            QuadrupedCITOMujocoCombinedRobustnessReplay
+            QuadrupedCITOMujocoUniformForceBaseline PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_multifoot_plan)
+        set_tests_properties(
+            QuadrupedCITOMujocoUniformForceBaseline PROPERTIES WILL_FAIL TRUE)
+        set_tests_properties(QuadrupedCITOMujocoLongPlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_long_plan TIMEOUT 240)
+        set_tests_properties(QuadrupedCITOMujocoLongReplay PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_long_plan)
+        set_tests_properties(
+            QuadrupedCITOMujocoFourStepFlatPlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_four_step_flat_plan
+            TIMEOUT 240)
+        set_tests_properties(
+            QuadrupedCITOMujocoFourStepFlatReplay PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_four_step_flat_plan)
+        set_tests_properties(
+            QuadrupedCITOMujocoFourStepSmoothPlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_four_step_smooth_plan
+            TIMEOUT 240)
+        set_tests_properties(
+            QuadrupedCITOMujocoFourStepSmoothReplay PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_four_step_smooth_plan)
+        set_tests_properties(
+            QuadrupedCITOMujocoLongSmoothForwardPlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_long_smooth_forward_plan
+            TIMEOUT 240)
+        set_tests_properties(
+            QuadrupedCITOMujocoLongSmoothReversePlanExport PROPERTIES
+            FIXTURES_SETUP quadruped_cito_mujoco_long_smooth_reverse_plan
+            TIMEOUT 240)
+        set_tests_properties(
+            QuadrupedCITOMujocoLongSmoothForwardReplay
+            QuadrupedCITOMujocoLongSmoothFixedForwardBaseline PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_long_smooth_forward_plan)
+        set_tests_properties(
+            QuadrupedCITOMujocoLongSmoothReverseReplay
+            QuadrupedCITOMujocoLongSmoothFixedReverseBaseline PROPERTIES
+            FIXTURES_REQUIRED quadruped_cito_mujoco_long_smooth_reverse_plan)
+        set_tests_properties(QuadrupedCITOMujocoStanding PROPERTIES
+            RUN_SERIAL TRUE TIMEOUT 120)
+        set_tests_properties(
+            QuadrupedCITOMujocoReplannedFlat
+            QuadrupedCITOMujocoReplannedSmooth
+            QuadrupedCITOMujocoReplannedFlatFourSegment
+            QuadrupedCITOMujocoReplannedRandomSmooth PROPERTIES
+            RUN_SERIAL TRUE TIMEOUT 300)
+        set_tests_properties(
+            QuadrupedCITOMujocoReplannedFlatFourSegment PROPERTIES
+            TIMEOUT 360)
+    endif()
+
+    set_tests_properties(
+        QuadrupedCITOModel QuadrupedCITOSolve
+        QuadrupedCITOTransition20 QuadrupedCITOTransition40
+        QuadrupedCITOTransition60 QuadrupedCITOTransition80
+        QuadrupedCITOTerrainSmooth6 QuadrupedCITOTerrainCrossSlope20
+        QuadrupedCITOTerrainStep4 QuadrupedCITOMultifoot
+        QuadrupedCITOLongHorizon QuadrupedCITOFourStep
+        QuadrupedCITOFourStepMultistart QuadrupedCITOFourStepRandomSmooth
+        QuadrupedCITOExecution
+        PROPERTIES LABELS quadruped_cito)
+    set_tests_properties(
+        QuadrupedCITOFourStepMultistart QuadrupedCITOFourStepRandomSmooth
+        PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
+    set_tests_properties(
+        QuadrupedCITOTransition80 QuadrupedCITOTerrainStep4
+        QuadrupedCITOMultifoot QuadrupedCITOLongHorizon
+        PROPERTIES LABELS "quadruped_cito;quadruped_cito_long"
+                   RUN_SERIAL TRUE TIMEOUT 240)
+
     find_package(Python3 COMPONENTS Interpreter QUIET)
     if(Python3_Interpreter_FOUND)
         add_test(NAME ContactBenchmarkProtocol
                  COMMAND ${Python3_EXECUTABLE}
                          ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/contact_ipm/test_benchmark_protocol.py
                          -v)
+        add_test(NAME QuadrupedCITOReplanningSweepParser
+                 COMMAND ${Python3_EXECUTABLE}
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_quadruped_cito_replanning_sweep.py
+                         -v)
+        set_tests_properties(QuadrupedCITOReplanningSweepParser PROPERTIES
+            LABELS quadruped_cito)
     endif()
 endif()
 

@@ -33,11 +33,19 @@ public:
 
     ContactIPM()
         : ipm_(std::make_unique<
-              PaperIPMSolver<NX, NU, NC, HORIZON>>()) {}
+              PaperIPMSolver<NX, NU, NC, HORIZON>>()),
+          shift_scratch_(std::make_unique<Problem>()) {}
 
     Status configure(const ContactIPMParams& params = ContactIPMParams{}) {
         configured_params_ = params;
         return ipm_->init(configured_params_);
+    }
+
+    // Set a per-solve wall-clock budget without resetting persistent warm
+    // state. A non-positive value disables the watchdog.
+    void set_time_limit_ms(double time_limit_ms) {
+        configured_params_.time_limit_ms = time_limit_ms;
+        ipm_->set_time_limit_ms(time_limit_ms);
     }
 
     Status solve(Problem& problem) {
@@ -45,6 +53,15 @@ public:
         if (init_status != Status::SUCCESS) return init_status;
         SolverStats stats;
         Status st = ipm_->solve(problem, stats);
+        last_stats_ = stats;
+        return st;
+    }
+
+    // Re-solve a shifted horizon without resetting the barrier state. A
+    // successful cold solve must precede this call.
+    Status solve_warm(Problem& problem) {
+        SolverStats stats;
+        Status st = ipm_->solve_warm(problem, stats);
         last_stats_ = stats;
         return st;
     }
@@ -64,7 +81,8 @@ public:
 
         int total_iterations = 0;
         Status status = solve_with(configured_params_, problem, total_iterations);
-        if (status == Status::SUCCESS || !has_complementarity(problem))
+        if (status == Status::SUCCESS || status == Status::TIME_LIMIT
+            || !has_complementarity(problem))
             return finish_recovery(status, total_iterations);
 
         const double tightening_mu = std::min(
@@ -78,14 +96,14 @@ public:
             continuation.max_iters,
             configured_params_.mpcc_recovery_max_iters);
         status = solve_with(continuation, problem, total_iterations);
-        if (status == Status::SUCCESS)
+        if (status == Status::SUCCESS || status == Status::TIME_LIMIT)
             return finish_recovery(status, total_iterations);
 
         ContactIPMParams exact_tightening = continuation;
         exact_tightening.mu_init = tightening_mu;
         exact_tightening.s_min_init = tightening_mu;
         status = solve_with(exact_tightening, problem, total_iterations);
-        if (status == Status::SUCCESS)
+        if (status == Status::SUCCESS || status == Status::TIME_LIMIT)
             return finish_recovery(status, total_iterations);
 
         for (int k = 0; k <= HORIZON; ++k) {
@@ -102,7 +120,7 @@ public:
             restoration.max_iters,
             configured_params_.mpcc_recovery_max_iters);
         status = solve_with(restoration, problem, total_iterations);
-        if (status == Status::SUCCESS)
+        if (status == Status::SUCCESS || status == Status::TIME_LIMIT)
             return finish_recovery(status, total_iterations);
 
         ContactIPMParams tightening = continuation;
@@ -161,13 +179,95 @@ public:
         u0 = prob.stages[0].u;
     }
 
-    void shift_for_warmstart(Problem& prob, const Vec<NX>& x1_actual) {
-        for (int k = 0; k < HORIZON; ++k) {
-            prob.stages[k].x = prob.stages[k + 1].x;
-            prob.stages[k].u = prob.stages[k + 1].u;
+    Status shift_for_warmstart(Problem& prob, const Vec<NX>& x1_actual) {
+        return shift_for_warmstart(prob, x1_actual, 1);
+    }
+
+    Status shift_for_warmstart(Problem& prob, const Vec<NX>& x_actual,
+                               int shift_steps) {
+        const auto additive_state_correction = [](
+            const Vec<NX>& actual, const Vec<NX>& nominal,
+            Vec<NX>& state) {
+            for (int i = 0; i < NX; ++i)
+                state[i] += actual[i] - nominal[i];
+            return Status::SUCCESS;
+        };
+        return shift_for_warmstart(prob, x_actual, shift_steps,
+                                   additive_state_correction);
+    }
+
+    template <typename StateCorrection>
+    Status shift_for_warmstart(Problem& prob, const Vec<NX>& x_actual,
+                               int shift_steps,
+                               StateCorrection correct_state) {
+        if (shift_steps <= 0 || shift_steps > HORIZON || !prob.dynamics)
+            return Status::BAD_ARGUMENT;
+
+        // Build the complete shifted trajectory off to the side. Correction
+        // callbacks and tail dynamics are user code and may fail; neither the
+        // problem nor the solver's reusable costates may change in that case.
+        Problem& shifted = *shift_scratch_;
+        shifted = prob;
+
+        // Save the last actionable control before shifting. In particular, do
+        // not copy the terminal stage's unused u into the appended path stages.
+        const Vec<NU> tail_u = shifted.stages[HORIZON - 1].u;
+
+        // Retain x/u and all positive primal-dual entries for the overlapping
+        // portion of the horizon. The copy happens in scratch storage so a
+        // later callback failure remains transactional.
+        const int retained_last = HORIZON - shift_steps;
+        if (retained_last > 0) {
+            for (int k = 0; k <= retained_last; ++k)
+                shifted.stages[k] = shifted.stages[k + shift_steps];
+        } else {
+            // With no overlap, seed the rollout directly from the measurement.
+            shifted.stages[0] = StageData<NX, NU, NC>{};
+            shifted.stages[0].x = x_actual;
+            const Status correction_status = correct_state(
+                x_actual, x_actual, shifted.stages[0].x);
+            if (correction_status != Status::SUCCESS)
+                return correction_status;
+            shifted.stages[0].u = tail_u;
         }
-        prob.stages[HORIZON].x = prob.stages[HORIZON - 1].x;
-        prob.stages[0].x = x1_actual;
+
+        // Apply the measured-state defect to every retained state, rather than
+        // introducing a large artificial dynamics defect only at stage zero.
+        // The caller may provide a manifold-aware correction (for example for
+        // quaternion states); the default overload applies an additive defect.
+        if (retained_last > 0) {
+            const Vec<NX> nominal_initial = shifted.stages[0].x;
+            for (int k = 0; k <= retained_last; ++k) {
+                const Status correction_status = correct_state(
+                    x_actual, nominal_initial, shifted.stages[k].x);
+                if (correction_status != Status::SUCCESS)
+                    return correction_status;
+            }
+        }
+        shifted.x0 = shifted.stages[0].x;
+
+        Vec<NX> tail_x = shifted.stages[retained_last].x;
+        for (int k = retained_last; k < HORIZON; ++k) {
+            // Appended path stages deliberately start with invalid (zero)
+            // slacks/duals; solve_warm initializes just these new entries.
+            if (k > 0 || retained_last > 0) {
+                shifted.stages[k] = StageData<NX, NU, NC>{};
+                shifted.stages[k].x = tail_x;
+                shifted.stages[k].u = tail_u;
+            }
+
+            Vec<NX> x_next;
+            Status st = shifted.dynamics->discrete_step(
+                tail_x, tail_u, shifted.dt, x_next, k);
+            if (st != Status::SUCCESS) return st;
+            tail_x = x_next;
+        }
+        shifted.stages[HORIZON] = StageData<NX, NU, NC>{};
+        shifted.stages[HORIZON].x = tail_x;
+
+        prob = shifted;
+        ipm_->invalidate_shifted_costates();
+        return Status::SUCCESS;
     }
 
 private:
@@ -201,6 +301,7 @@ private:
     }
 
     std::unique_ptr<PaperIPMSolver<NX, NU, NC, HORIZON>> ipm_;
+    std::unique_ptr<Problem> shift_scratch_;
     SolverStats last_stats_;
     ContactIPMParams configured_params_;
     std::string diag_csv_path_;

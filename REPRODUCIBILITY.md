@@ -288,57 +288,64 @@ physical complementarity, terminal tracking, effort, force, contact impulse,
 and contact-mode changes. A larger objective alone is not treated as evidence
 of a worse contact solution.
 
-## 8. Closed-loop Push Box validation
+## 8. Continuous SRBD closed-loop validation
 
-Build the receding-horizon executable with the same Release contact build, then
-run the fixed 50-rollout suite on one available CPU:
-
-```bash
-cmake --build build-contact -j2 --target contact_push_box_closed_loop
-taskset -c 0 ./build-contact/contact_push_box_closed_loop \
-  --mode suite --seed 2027 \
-  --output closed_loop_push_box.json \
-  --trajectory-dir closed_loop_push_box_trajectories
-```
-
-Generate the validated summary, the four-panel figure, and two representative
-GIFs:
+Configure a Release build without the optional MuJoCo dependency, then build
+the continuous runner and its focused acceptance tests:
 
 ```bash
-python3 benchmarks/contact_ipm/summarize_closed_loop.py \
-  closed_loop_push_box.json --require-suite
-python3 benchmarks/contact_ipm/plot_closed_loop.py \
-  closed_loop_push_box.json closed_loop_push_box_trajectories \
-  --output-prefix closed_loop_push_box_validation
-python3 benchmarks/contact_ipm/animate_closed_loop.py \
-  closed_loop_push_box.json closed_loop_push_box_trajectories \
-  --output-dir closed_loop_push_box_media
+cmake -S . -B build-srbd-repro \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DNMPC_BUILD_EXAMPLES=ON \
+  -DNMPC_BUILD_TESTS=ON \
+  -DNMPC_BUILD_MUJOCO=OFF
+
+cmake --build build-srbd-repro -j2 --target \
+  quadruped_cito_srbd_closed_loop \
+  test_quadruped_cito_realtime \
+  test_quadruped_cito_realtime_execution \
+  test_quadruped_cito_rolling_audit \
+  test_quadruped_cito_sustained_topology
+
+ctest --test-dir build-srbd-repro --output-on-failure \
+  -R 'QuadrupedCITO(RealtimeInvariants|RealtimeExecutionTiming|RollingAudit|SustainedTopology)$'
 ```
 
-The suite contains 5 nominal, 15 initial-pose, 10 mass/friction-mismatch,
-10 isolated state-reset diagnostics, and 10 disturbed-motion rollouts. Disturbed
-motion uses independent uniform initial x/y offsets in `[-0.075, 0.075]` m and
-yaw offset in `[-0.075, 0.075]` rad; independent uniform mass and friction
-scale factors in
-`[0.85, 1.15]`; and zero-mean Gaussian measurement noise with standard
-deviations `0.001` m in x/y and `0.001` rad in yaw. After the 1.5 s control
-update, one direct state reset adds independent uniform x/y offsets in
-`[-0.1125, 0.1125]` m and a
-yaw offset in `[-0.09, 0.09]` rad; it first appears in the recorded state at
-1.6 s. All draws use deterministic seed 2027. The suite uses zero
-initialization only for the free state/control guesses of the first MPC solve
-(stage zero is fixed to
-the measurement) and shifted solver state thereafter. Task success requires
-terminal tracking for ten consecutive steps, no unrecovered solver failure, and
-independently audited dynamics, side-feasibility, and physical-complementarity
-tolerances. The reference run is
-[`2026-07-29_closed_loop_push_box_50_summary.md`](benchmarks/contact_ipm/results/2026-07-29_closed_loop_push_box_50_summary.md).
+Run the 40 s correctness experiment on the registered 2 cm sinusoidal terrain:
 
-The source Push Box model is quasi-static and has no velocity, momentum,
-penetration, or friction-cone state. The scheduled reset is therefore a direct
-pose/yaw state change rather than an external force or inertial impulse. Deadline
-statistics are reported
-honestly and do not establish a hard real-time guarantee.
+```bash
+./build-srbd-repro/quadruped_cito_srbd_closed_loop \
+  --output-dir /tmp/contactipm_srbd_02cm \
+  --updates 200 \
+  --terrain-amplitude 0.02 \
+  --wave-number-x 4 \
+  --wave-number-y 3 \
+  --deadline-ms 0
+```
+
+The initial cold solve is followed by 200 warm updates at a 5 Hz simulated
+cadence. Between updates, an independent SRBD plant integrates four successive
+0.05 s control stages. The state is fed into the next warm solve without an
+episode reset. The task sequence contains 24 eight-centimeter transitions in
+RL--RR--FL--FR order, followed by a final four-foot-support hold.
+
+A successful run exits with status zero and reports `published=200`,
+`fallbacks=0`, `tasks=24/24`, `audit=PASS`, and
+`simulated_time=40.000 s`. It writes:
+
+- `metadata.csv` and `summary.csv`;
+- `planner_updates.csv`;
+- `executed_trajectory.csv`;
+- `accepted_plan_stages.csv`;
+- `task_ledger.csv`.
+
+The correctness run disables the solver watchdog so convergence and physical
+validity can be tested independently of operating-system scheduling. Its
+recorded wall times remain useful diagnostics, but are not a hard real-time
+guarantee. The separate `RealtimeExecutionTiming` test checks the bounded
+execution-path timing invariants. ContactIPM is positioned here as the 5 Hz
+high-level planner; articulated MuJoCo tracking through a high-rate convex
+whole-body controller remains future work.
 
 ## 9. Reproduce the acados comparison
 

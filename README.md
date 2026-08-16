@@ -88,29 +88,37 @@ for an acados run that fails convergence, feasibility, or task completion. The
 records convergence, feasibility, task success, objectives, terminal errors,
 complementarity residuals, and median/P90 timing separately.
 
-### Closed-loop contact validation
+### Continuous SRBD closed-loop validation
 
-[![ContactIPM closed-loop Push Box combined-disturbance preview](benchmarks/contact_ipm/results/2026-07-30_icra_video/contactipm_push_box_combined_disturbance_preview.gif)](benchmarks/contact_ipm/results/2026-07-30_icra_video/contactipm_push_box_combined_disturbance.mp4)
+ContactIPM is intended to operate as a 5 Hz high-level contact planner. Each
+update solves a 50-knot problem with a 0.05 s discretization (a 2.5 s horizon)
+and produces the body trajectory, footholds, contact states, contact forces,
+and swing-foot references for a downstream tracker.
 
-_Click the preview to open the full 1080p video. The dashed gray path is the
-nominal closed-loop reference; the green path is the combined-disturbance motion._
+The continuous planner-in-the-loop experiment integrates an independent
+25-state single-rigid-body dynamics (SRBD) plant for four 0.05 s stages, feeds
+the resulting state into the next warm solve, and never resets after the
+initial cold start. On the 2 cm sinusoidal terrain, the robot completes 24
+lift--swing--touchdown tasks (six RL--RR--FL--FR cycles) and advances the base
+0.480 m over 40 s.
 
-The receding-horizon Push Box suite evaluates feedback robustness under nominal
-and disturbed motion. Disturbed motion combines an initial-pose error,
-mass/friction mismatch, measurement noise at every feedback update, and one
-scheduled `[x, y, theta]` state reset.
-The first solve uses zero free-state/control guesses (with stage zero fixed to the
-measurement); subsequent solves use shifted warm starts.
+| Warm publications | Fallbacks | Contact tasks | End-to-end p99 / maximum | Maximum dynamics defect | Maximum inequality violation | Maximum MPCC residual |
+|---:|---:|---:|---:|---:|---:|---:|
+| 200/200 | 0 | 24/24 | 136.3 / 178.4 ms | 1.993e-5 | 5.729e-7 | 1.077e-5 |
 
-| Rollouts | Task success | Solver failures / fallbacks | Solve time median / P90 / P99 | Warm deadline misses | Worst physical MPCC |
-|---:|---:|---:|---:|---:|---:|
-| 50 | 50/50 | 0 / 0 | 2.08 / 11.5 / 60.8 ms | 2/1054 | 1.01e-6 |
+All observed warm-update times in the reference run are below the nominal
+200 ms planning budget. Timing is machine-dependent, and the correctness run
+does not claim hard real-time certification. The rolling audit finds no
+unexpected liftoff, touchdown, contact chatter, or task-order violation; the
+maximum foot-placement error is 3.35 mm and the maximum post-touchdown slip is
+0.0305 mm.
 
-The control period is 100 ms; the two warm-start misses mean this is not a hard real-time claim. See the [full audited summary](benchmarks/contact_ipm/results/2026-07-29_closed_loop_push_box_50_summary.md)
-and [reproduction commands](REPRODUCIBILITY.md#8-closed-loop-push-box-validation).
-
-The CRISP Push Box model is quasi-static, so this validates closed-loop
-complementarity handling rather than high-fidelity impact dynamics.
+This experiment validates continuous high-level planning in an SRBD feedback
+model; it does not claim articulated MuJoCo, whole-body-controller, or hardware
+execution. Future work will broaden the SRBD evaluation and feed ContactIPM's
+rolling plan to a high-rate convex whole-body controller in MuJoCo. See the
+[reproduction commands](REPRODUCIBILITY.md#8-continuous-srbd-closed-loop-validation)
+and the [quadruped implementation notes](examples/quadruped_cito/README.md).
 
 ## Reproducing the paper comparisons
 

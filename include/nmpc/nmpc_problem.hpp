@@ -200,9 +200,24 @@ struct ConstraintModel {
     virtual Status jacobian(const Vec<NX>& x, const Vec<NU>& u, int k,
                             Mat<NC, NX>& Cx, Mat<NC, NU>& Cu) = 0;
 
+    // Optional fused value/Jacobian path. The default preserves existing
+    // models; terrain-heavy models can override it to share sampled geometry.
+    virtual Status evaluate_with_jacobian(
+        const Vec<NX>& x, const Vec<NU>& u, int k, Vec<NC>& g,
+        Mat<NC, NX>& Cx, Mat<NC, NU>& Cu) {
+        Status st = evaluate(x, u, k, g);
+        return st == Status::SUCCESS ? jacobian(x, u, k, Cx, Cu) : st;
+    }
+
     // Jacobian of terminal constraint
     virtual Status jacobian_terminal(const Vec<NX>& x,
                                      Mat<NC, NX>& Cx) = 0;
+
+    virtual Status evaluate_terminal_with_jacobian(
+        const Vec<NX>& x, Vec<NC>& g, Mat<NC, NX>& Cx) {
+        Status st = evaluate_terminal(x, g);
+        return st == Status::SUCCESS ? jacobian_terminal(x, Cx) : st;
+    }
 
     // ── Optional: analytic adjoint (contracted) Hessian ─────────────────
     //
