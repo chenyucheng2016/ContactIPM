@@ -102,11 +102,11 @@ initial cold start. On the 2 cm sinusoidal terrain, the robot completes 24
 lift--swing--touchdown tasks (six RL--RR--FL--FR cycles) and advances the base
 0.480 m over 40 s.
 
-[![ContactIPM continuous closed-loop SRBD replanning on 2 cm sinusoidal terrain](docs/media/contactipm_continuous_srbd_02cm.png)](docs/media/contactipm_continuous_srbd_02cm.mp4)
+[![ContactIPM continuous closed-loop SRBD replanning on 2 cm sinusoidal terrain](docs/media/contactipm_continuous_srbd_02cm_preview.gif)](docs/media/contactipm_continuous_srbd_02cm.mp4)
 
-_Click the preview to watch the full video. It shows the integrated SRBD state,
-executed path, rolling 2.5 s plan, contact forces, contact sequence, and solver
-diagnostics throughout all 24 transitions._
+_The animated preview loops automatically; click it to watch the full video.
+It shows the integrated SRBD state, executed path, rolling 2.5 s plan, contact
+forces, contact sequence, and solver diagnostics throughout all 24 transitions._
 
 | Warm publications | Fallbacks | Contact tasks | End-to-end p99 / maximum | Maximum dynamics defect | Maximum inequality violation | Maximum MPCC residual |
 |---:|---:|---:|---:|---:|---:|---:|
